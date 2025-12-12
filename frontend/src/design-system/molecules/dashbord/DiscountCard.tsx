@@ -4,7 +4,8 @@ import { ReactNode } from "react";
 
 interface DiscountCardProps {
   title: string;
-  category: string[];
+  daysLeft: number;
+  remainingUsage: number;
   code: string;
   icon: ReactNode;
   bg: string;
@@ -12,7 +13,8 @@ interface DiscountCardProps {
 
 export const DiscountCard = ({
   title,
-  category,
+  daysLeft,
+  remainingUsage,
   code,
   icon,
   bg,
@@ -28,20 +30,19 @@ export const DiscountCard = ({
         <h3 className="font-semibold text-secondary-500">{title}</h3>
       </div>
       <div className="w-full flex gap-x-1">
-        {category.map((category, index) => {
-          return (
-            <span
-              key={index}
-              className="text-gray-500 text-xs border w-fit p-1 rounded-2xl"
-            >
-              {category}
-            </span>
-          );
-        })}
+        <div className="flex gap-x-2">
+          <span className="text-gray-600 text-xs bg-gray-100 px-3 py-1 rounded-full">
+            قابل استفاده تا {daysLeft} روز دیگر
+          </span>
+
+          <span className="text-gray-600 text-xs bg-gray-100 px-3 py-1 rounded-full">
+            {remainingUsage} بار استفاده
+          </span>
+        </div>
       </div>
       <div className={`flex justify-between items-center ${bg} p-1 rounded-md`}>
         <div>
-          <Input value={code} readOnly/>
+          <Input value={code} readOnly />
         </div>
         <CopyButton code={code} />
       </div>

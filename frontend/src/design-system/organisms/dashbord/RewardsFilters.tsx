@@ -3,15 +3,19 @@ import { TagFilter } from "@/design-system/atoms/TagFilter";
 import { DiscountCard } from "@/design-system/molecules/dashbord/DiscountCard";
 import { DiscountFilters } from "@/design-system/molecules/dashbord/DiscountFilters";
 import { useRewards } from "@/hooks/queries/useRewards";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { GiFlowerPot } from "react-icons/gi";
 import { IoPricetagOutline } from "react-icons/io5";
-import { LuLeaf, LuTreePine } from "react-icons/lu";
 
 const RewardsFilters = ({ categories }: { categories: any }) => {
   const { data } = useRewards();
-  const [active, setActive] = useState("همه");
-  console.log(categories)
+  const [active, setActive] = useState<string>("all");
+  const filteredRewards = useMemo(() => {
+    if (!data?.data) return [];
+    if (active === "all") return data.data;
+    //  return data?.data?.filter((item) => item.categoryCodes === active);
+  }, [active, data]);
+  console.log(data);
   return (
     <>
       <div className="px-4 py-4 space-y-4">
@@ -19,7 +23,7 @@ const RewardsFilters = ({ categories }: { categories: any }) => {
           <IoPricetagOutline className="w-6 h-6" />
           <span> تخفیف و جایزه شما</span>
         </div>
-         {/* <TagFilter
+        {/* <TagFilter
           key={item}
           label={item}
           active={active === item}
@@ -27,12 +31,19 @@ const RewardsFilters = ({ categories }: { categories: any }) => {
         /> */}
         <div className="space-y-4">
           {data?.data?.map((dis) => {
+            const end = new Date(dis.endDate);
+            const now = new Date();
+            const daysLeft = Math.ceil(
+              (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+            );
+            const remainingUsage = dis.maxUsage - dis.usageCount;
             return (
               <>
                 <DiscountCard
                   key={dis.code}
                   title={dis.description}
-                  category={categories}
+                  daysLeft={daysLeft}
+                  remainingUsage={remainingUsage}
                   code={dis.code}
                   icon={<GiFlowerPot className="text-xl" />}
                   bg="bg-pink-100 text-pink-700"
@@ -40,29 +51,6 @@ const RewardsFilters = ({ categories }: { categories: any }) => {
               </>
             );
           })}
-          <DiscountCard
-            title="۹۰ هزار تومان تخفیف اولین سفارش"
-            category={categories}
-            code="ERGO145-JUIKPHG"
-            icon={<GiFlowerPot className="text-xl" />}
-            bg="bg-pink-100 text-pink-700"
-          />
-
-          <DiscountCard
-            title="۱۲۰ هزار تومان تخفیف اولین سفارش"
-            category={categories}
-            code="ERGO145-JUIKPHG"
-            icon={<LuTreePine className="text-xl" />}
-            bg="bg-yellow-100 text-yellow-700"
-          />
-
-          <DiscountCard
-            title="۱۲۰ هزار تومان تخفیف برای دسته گل"
-            category={categories}
-            code="ERGO145-JUIKPHG"
-            icon={<LuLeaf className="text-xl" />}
-            bg="bg-green-100 text-green-700"
-          />
         </div>
       </div>
     </>
