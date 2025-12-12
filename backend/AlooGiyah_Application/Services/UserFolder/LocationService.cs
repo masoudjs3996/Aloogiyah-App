@@ -1,0 +1,274 @@
+﻿using AlooGiyah_Application.DTOs.Location;
+using AlooGiyah_Application.Interfaces.UserFolder;
+using AlooGiyah_Domain.Entities;
+using AlooGiyah_Domain.Entities.UserFolder.AddressFolder;
+using AlooGiyah_Domain.Enums;
+using AlooGiyah_Domain.Interfaces;
+using AlooGiyah_Domain.Pagination;
+using AlooGiyah_Shared.Exceptions;
+using AutoMapper;
+using LinqKit;
+using Microsoft.EntityFrameworkCore;
+using System.Data.Entity.Core.Metadata.Edm;
+
+
+
+public class LocationService : ILocationService
+{
+
+    private readonly IGenericRepository<Province> _provinceRepo;
+    private readonly IGenericRepository<County> _countyRepo;
+    private readonly IGenericRepository<City> _cityRepo;
+    private readonly IGenericRepository<Village> _villageRepo;
+    private readonly IGenericRepository<Status> _statusRepo;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+
+    public LocationService(
+        IGenericRepository<Province> provinceRepo,
+        IGenericRepository<County> countyRepo,
+        IGenericRepository<City> cityRepo,
+        IGenericRepository<Village> villageRepo,
+        IGenericRepository<Status> statusRepo,
+        IUnitOfWork unitOfWork,
+        IMapper mapper)
+    {
+        _provinceRepo = provinceRepo;
+        _countyRepo = countyRepo;
+        _cityRepo = cityRepo;
+        _villageRepo = villageRepo;
+        _statusRepo = statusRepo;
+        _unitOfWork = unitOfWork;
+        _mapper = mapper;
+    }
+
+
+
+    public async Task<PagedResult<ProvinceListDto>> GetProvincesAsync(LocationFilterDto filter)
+    {
+        var predicate = PredicateBuilder.True<Province>()
+            .And(p => !p.IsDeleted);
+
+        if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
+            predicate = predicate.And(p => p.Name.Contains(filter.SearchTerm) || p.Code.Contains(filter.SearchTerm));
+
+        if (!string.IsNullOrWhiteSpace(filter.StatusCode))
+            predicate = predicate.And(p => p.Status.EntityStatus == EntityStatus.Location &&
+                                          p.Status.Code == (filter.StatusCode));
+
+        return await _provinceRepo.GetPagedProjectedAsync(
+            filter: predicate,
+            selector: p => new ProvinceListDto
+            {
+                Code = p.Code,
+                Name = p.Name,
+                StatusCode = p.Status.Code,
+                StatusName = p.Status.Name,
+            },
+            orderBy: p => p.Name
+        );
+    }
+
+    public async Task<ProvinceDto> CreateProvinceAsync(ProvinceCreateDto dto)
+    {
+        if (await _provinceRepo.ExistsAsync(p => EF.Functions.Like(p.Name, dto.Name.Trim()) && !p.IsDeleted))
+            throw new BadRequestException("استان با این نام قبلاً ثبت شده است.");
+
+        var statusId = await _statusRepo.GetIdByCodeAsync(dto.StatusCode, p => p.StatusId)
+            ?? throw new NotFoundException("استاتوس کد اشتباه است");
+
+        var province = _mapper.Map<Province>(dto);
+        province.Name.Trim();
+        province.StatusId = statusId;
+
+
+        await _provinceRepo.AddAsync(province);
+        await _unitOfWork.SaveChangesAsync();
+        var provinceDto = _mapper.Map<ProvinceDto>(province);
+
+        return provinceDto;
+    }
+
+    public async Task<ProvinceDto> UpdateProvinceAsync(ProvinceUpdateDto dto)
+    {
+        var province = await _provinceRepo.GetByCodeAsync(dto.Code)
+                       ?? throw new NotFoundException("استان یافت نشد");
+
+        if (await _provinceRepo.ExistsAsync(p =>
+            EF.Functions.Like(p.Name, dto.Name.Trim()) && p.Code != dto.Code && !p.IsDeleted))
+            throw new BadRequestException("نام استان تکراری است.");
+
+        province.Name = dto.Name.Trim();
+        province.UpdatedAt = DateTimeOffset.UtcNow;
+
+        await _provinceRepo.UpdateAsync(province);
+        await _unitOfWork.SaveChangesAsync();
+
+        var updateProvince = await _provinceRepo.GetByIdAsync(province.ProvinceId);
+
+
+        return _mapper.Map<ProvinceDto>(updateProvince);
+    }
+
+    public async Task<PagedResult<CountyDto>> GetCountiesAsync(string? provinceCode, LocationFilterDto filter)
+    {
+        var predicate = PredicateBuilder.True<County>()
+            .And(c => !c.IsDeleted);
+
+        if (!string.IsNullOrWhiteSpace(provinceCode))
+        {
+            var provinceId = await _provinceRepo.GetIdByCodeAsync(provinceCode, p => p.ProvinceId)
+                             ?? throw new NotFoundException("استان یافت نشد");
+            predicate = predicate.And(c => c.ProvinceId == provinceId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
+            predicate = predicate.And(c => c.Name.Contains(filter.SearchTerm));
+
+        return await _countyRepo.GetPagedProjectedAsync(
+            filter: predicate,
+            selector: c => new CountyDto
+            {
+                Code = c.Code,
+                Name = c.Name,
+                ProvinceCode = c.Province.Code,
+                ProvinceName = c.Province.Name,
+                StatusCode = c.Status.Code,
+                StatusName = c.Status.Name,
+            },
+            orderBy: c => c.Name,
+            expressionIncludes: c => c.Province
+        );
+    }
+
+
+
+    public async Task<CountyDto> CreateCountyAsync(CountyCreateDto dto)
+    {
+        var provinceId = await _provinceRepo.GetIdByCodeAsync(dto.ProvinceCode, p => p.ProvinceId)
+                         ?? throw new NotFoundException("استان یافت نشد");
+
+        var statysId = await _statusRepo.GetIdByCodeAsync(dto.StatusCode, p => p.StatusId)
+                         ?? throw new NotFoundException("استاتوس کد نا معتبر");
+
+        if (await _countyRepo.ExistsAsync(c => c.Name.Trim() == dto.Name.Trim() && c.ProvinceId == provinceId && !c.IsDeleted))
+            throw new BadRequestException("شهرستان با این نام در این استان قبلاً ثبت شده است.");
+
+
+
+        var county = _mapper.Map<County>(dto);
+        county.Name.Trim();
+        county.StatusId = statysId;
+        county.ProvinceId = provinceId;
+
+        await _countyRepo.AddAsync(county);
+        await _unitOfWork.SaveChangesAsync();
+
+        var countyDto = _mapper.Map<CountyDto>(county);
+
+        return countyDto;
+    }
+
+    public async Task<CityDto> CreateCityAsync(CityCreateDto dto)
+    {
+        var countyId = await _countyRepo.GetIdByCodeAsync(dto.CountyCode, c => c.CountyId)
+                       ?? throw new NotFoundException("شهرستان یافت نشد");
+
+        var statusId = await _statusRepo.GetIdByCodeAsync(dto.StatusCode, c => c.StatusId)
+            ?? throw new NotFoundException("استاتوس کد نا معتبر است");
+
+        if (await _countyRepo.ExistsAsync(c => c.Name.Trim() == dto.Name.Trim() && c.ProvinceId == countyId && !c.IsDeleted))
+            throw new BadRequestException("شهر با این نام در این شهرستان قبلاً ثبت شده است.");
+
+        var city = _mapper.Map<City>(dto);
+        city.StatusId = statusId;
+        city.CountyId = countyId;
+        city.Name.Trim();
+
+
+
+        await _cityRepo.AddAsync(city);
+        await _unitOfWork.SaveChangesAsync();
+
+        var City = await _cityRepo.GetByIdAsync(city.CityId);
+
+        var cityDto = _mapper.Map<CityDto>(City);
+
+        return cityDto;
+    }
+
+    public async Task<VillageDto> CreateVillageAsync(VillageCreateDto dto)
+    {
+        var countyId = await _countyRepo.GetIdByCodeAsync(dto.CountyCode, c => c.CountyId)
+                       ?? throw new NotFoundException("شهرستان یافت نشد");
+
+        var statusId = await _statusRepo.GetIdByCodeAsync(dto.StatusCode, c => c.StatusId)
+            ?? throw new NotFoundException("استاتوس کد نا معتبر است");
+
+        if (await _countyRepo.ExistsAsync(c => c.Name.Trim() == dto.Name.Trim() && c.ProvinceId == countyId && !c.IsDeleted))
+            throw new BadRequestException("روستا با این نام در این شهرستان قبلاً ثبت شده است.");
+
+        var village = _mapper.Map<Village>(dto);
+        village.StatusId = statusId;
+        village.CountyId = countyId;
+        village.Name.Trim();
+
+        await _villageRepo.AddAsync(village);
+        await _unitOfWork.SaveChangesAsync();
+
+        var Village = await _villageRepo.GetByIdAsync(village.VillageId);
+
+        var villageDto = _mapper.Map<VillageDto>(Village);
+
+        return villageDto;
+    }
+
+    public async Task<List<CountyLocationItemDto>> GetCountyLocationsAsync(CountyLocationsFilterDto filterDto)
+    {
+        var countyId = await _countyRepo.GetIdByCodeAsync(filterDto.countyCode, c => c.CountyId)
+                       ?? throw new NotFoundException("شهرستان یافت نشد");
+
+        var result = new List<CountyLocationItemDto>();
+
+        // همیشه شهرها رو بیار (مگر اینکه فقط روستا بخواد)
+        if (filterDto.IncludeVillages != true)
+        {
+            var cities = await _cityRepo.GetAll()
+                .Where(c => !c.IsDeleted && c.CountyId == countyId)
+                .Select(c => new CountyLocationItemDto
+                {
+                    Code = c.Code,
+                    Name = c.Name,
+                    Type = "City",
+                    StatusCode = c.Status.Code,
+                    StatusName = c.Status.Name,
+
+                })
+                .ToListAsync();
+
+            result.AddRange(cities);
+        }
+
+        // فقط وقتی روستا بخواد یا همه
+        if (filterDto.IncludeVillages == true || filterDto.IncludeVillages == null)
+        {
+            var villages = await _villageRepo.GetAll()
+                .Where(v => !v.IsDeleted && v.CountyId == countyId)
+                .Select(v => new CountyLocationItemDto
+                {
+                    Code = v.Code,
+                    Name = v.Name,
+                    Type = "Village",
+                    Latitude = v.Latitude,
+                    Longitude = v.Longitude,
+                    StatusCode = v.Status.Code,
+                    StatusName = v.Status.Name,
+                })
+                .ToListAsync();
+
+            result.AddRange(villages);
+        }
+
+        return result.OrderBy(x => x.Name).ToList();
+    }
+}

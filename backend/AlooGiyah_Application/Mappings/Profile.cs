@@ -1,0 +1,294 @@
+﻿using AlooGiyah_Application.DTOs.Address;
+using AlooGiyah_Application.DTOs.AgriculturalOrder;
+using AlooGiyah_Application.DTOs.AgriculturalOrderItem;
+using AlooGiyah_Application.DTOs.AgriculturalProduct;
+using AlooGiyah_Application.DTOs.Auction;
+using AlooGiyah_Application.DTOs.AuctionBid;
+using AlooGiyah_Application.DTOs.Category;
+using AlooGiyah_Application.DTOs.ChatMessage;
+using AlooGiyah_Application.DTOs.Comment;
+using AlooGiyah_Application.DTOs.Discount;
+using AlooGiyah_Application.DTOs.File;
+using AlooGiyah_Application.DTOs.Farm;
+using AlooGiyah_Application.DTOs.Order;
+using AlooGiyah_Application.DTOs.OrderItem;
+using AlooGiyah_Application.DTOs.Product;
+using AlooGiyah_Application.DTOs.QualityAssessment;
+using AlooGiyah_Application.DTOs.ServiceRequest;
+using AlooGiyah_Application.DTOs.Status;
+using AlooGiyah_Application.DTOs.Users;
+using AlooGiyah_Application.DTOs.Wallet;
+using AlooGiyah_Application.DTOs.Warehouse;
+using AlooGiyah_Application.DTOs.WarehouseInventory;
+using AlooGiyah_Domain.Entities;
+using AutoMapper;
+using AlooGiyah_Domain.Entities.UserFolder;
+using AlooGiyah_Domain.Entities.Store;
+using AlooGiyah_Domain.Entities.UserFolder.AddressFolder;
+using AlooGiyah_Application.DTOs.Location;
+using AlooGiyah_Application.Utils;
+
+namespace AlooGiyah_Application.Mappings
+{
+    public class Profile : AutoMapper.Profile
+    {
+        public Profile()
+        {
+            #region User
+            CreateMap<RegisterUserDto, User>();
+            CreateMap<User, RegisterUserDto>();
+            CreateMap<User, UserDto>()
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.RoleId));
+            CreateMap<UserDto, User>()
+                .ForMember(dest => dest.RoleId, opt => opt.MapFrom(src => src.Role));
+            CreateMap<UpdateProfileDto, User>();
+            CreateMap<ChangePasswordDto, User>();
+            CreateMap<User, ChangePasswordDto>();
+            CreateMap<ChangeUsernameDto, User>();
+            CreateMap<UpdateProfileDto, User>();
+            CreateMap<VerifyEmailDto, User>();
+            #endregion
+
+            #region File
+            CreateMap<FileUploadDto, Files>()
+                .ForMember(dest => dest.FileTypeId, opt => opt.Ignore())
+                .ForMember(dest => dest.UserId, opt => opt.Ignore())
+                .ForMember(dest => dest.Url, opt => opt.Ignore());
+            CreateMap<Files, FileDto>()
+                .ForMember(dest => dest.FileCode, opt => opt.MapFrom(src => src.Code))
+                .ForMember(dest => dest.FileTypeCode, opt => opt.MapFrom(src => src.FileType.Code))
+                .ForMember(dest => dest.UserCode, opt => opt.MapFrom(src => src.User.Code));
+            #endregion
+
+            #region ServiceRequest
+            CreateMap<ServiceRequest, ServiceRequestDto>().ReverseMap();
+            CreateMap<ServiceRequestCreateDto, ServiceRequest>().ReverseMap();
+            CreateMap<ServiceRequestUpdateDto, ServiceRequest>().ReverseMap();
+            #endregion
+
+            #region Category
+            CreateMap<Category, CategoryDto>();
+            CreateMap<CategoryCreateDto, Category>();
+            CreateMap<CategoryUpdateDto, Category>();
+            #endregion
+
+            #region Address
+            CreateMap<AddressCreateDto, Address>();
+            CreateMap<Address, AddressDto>();
+            CreateMap<AddressUpdateDto, Address>();
+            #endregion
+
+            #region Product
+            CreateMap<Product, ProductDto>()
+                .ForMember(dest => dest.CategoryCodes, opt => opt.Ignore());
+            CreateMap<ProductCreateDto, Product>();
+            CreateMap<ProductUpdateDto, Product>();
+            #endregion
+
+            #region Order
+            CreateMap<Order, OrderDto>()
+                .ForMember(dest => dest.UserCode, opt => opt.Ignore())
+                .ForMember(dest => dest.StatusCode, opt => opt.Ignore())
+                .ForMember(dest => dest.AddressCode, opt => opt.Ignore())
+                .ForMember(dest => dest.DiscountCode, opt => opt.Ignore())
+                .ForMember(dest => dest.Items, opt => opt.Ignore());
+            CreateMap<OrderCreateDto, Order>();
+            CreateMap<OrderUpdateDto, Order>();
+            #endregion
+
+            #region OrderItem
+            CreateMap<OrderItemCreateDto, OrderItem>();
+            CreateMap<OrderItemUpdateDto, OrderItem>();
+            CreateMap<OrderItem, OrderItemDto>()
+                .ForMember(dest => dest.ProductCode, opt => opt.Ignore());
+            #endregion
+
+            #region Discount
+            CreateMap<Discount, DiscountDto>()
+     .ForMember(dest => dest.Entity, opt => opt.MapFrom(src => src))
+     .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.GetDiscountDescription()))
+     .ForMember(dest => dest.UserCodes, opt => opt.MapFrom(src =>
+         src.Users != null ? src.Users.Select(u => u.Code).ToList() : new List<string>()))
+     .ForMember(dest => dest.ProductCodes, opt => opt.MapFrom(src =>
+         src.Products != null ? src.Products.Select(p => p.Code).ToList() : new List<string>()))
+     .ForMember(dest => dest.CategoryCodes, opt => opt.MapFrom(src =>
+         src.Categories != null ? src.Categories.Select(c => c.Code).ToList() : new List<string>()))
+     .ForMember(dest => dest.FarmCode, opt => opt.MapFrom(src =>
+         src.Farm != null ? src.Farm.Code : null)); 
+            CreateMap<DiscountCreateDto, Discount>();
+            CreateMap<DiscountUpdateDto, Discount>();
+            #endregion
+
+            #region Comment
+            CreateMap<Comment, CommentDto>()
+                .ForMember(dest => dest.UserCode, opt => opt.Ignore())
+                .ForMember(dest => dest.EntityComment, opt => opt.MapFrom(src => src.EntityComment.ToString()));
+            CreateMap<CommentCreateDto, Comment>()
+                .ForMember(dest => dest.EntityComment, opt => opt.Ignore());
+            CreateMap<CommentUpdateDto, Comment>();
+            #endregion
+
+            #region QualityAssessment
+            CreateMap<QualityAssessment, QualityAssessmentDto>()
+                .ForMember(dest => dest.AgriculturalProductCode, opt => opt.Ignore())
+                .ForMember(dest => dest.ExpertCode, opt => opt.Ignore());
+            CreateMap<QualityAssessmentCreateDto, QualityAssessment>();
+            CreateMap<QualityAssessmentUpdateDto, QualityAssessment>();
+            #endregion
+
+            #region ChatMessage
+            CreateMap<ChatMessage, ChatMessageDto>()
+                .ForMember(dest => dest.SenderCode, opt => opt.Ignore())
+                .ForMember(dest => dest.ReceiverCode, opt => opt.Ignore());
+            CreateMap<ChatMessageCreateDto, ChatMessage>();
+            CreateMap<ChatMessageUpdateDto, ChatMessage>();
+            #endregion
+
+            #region AgriculturalProduct
+            CreateMap<AgriculturalProduct, AgriculturalProductDto>()
+                .ForMember(dest => dest.GreenhouseCode, opt => opt.Ignore())
+                .ForMember(dest => dest.StatusCode, opt => opt.Ignore())
+                .ForMember(dest => dest.CategoryCodes, opt => opt.MapFrom(src => src.Categories.Select(c => c.Code).ToList()));
+            CreateMap<AgriculturalProductCreateDto, AgriculturalProduct>()
+                .ForMember(dest => dest.Categories, opt => opt.Ignore());
+            CreateMap<AgriculturalProductUpdateDto, AgriculturalProduct>()
+                .ForMember(dest => dest.Categories, opt => opt.Ignore());
+            #endregion
+
+            #region AgriculturalOrder
+            CreateMap<AgriculturalOrder, AgriculturalOrderDto>()
+                .ForMember(dest => dest.StatusCode, opt => opt.Ignore())
+                .ForMember(dest => dest.OrderItems, opt => opt.Ignore())
+                .ForMember(dest => dest.TotalPrice, opt => opt.Ignore());
+            CreateMap<AgriculturalOrderCreateDto, AgriculturalOrder>()
+                .ForMember(dest => dest.AgriculturalOrderItems, opt => opt.Ignore());
+            CreateMap<AgriculturalOrderUpdateDto, AgriculturalOrder>()
+                .ForMember(dest => dest.AgriculturalOrderItems, opt => opt.Ignore());
+            #endregion
+
+            #region AgriculturalOrderItem
+            CreateMap<AgriculturalOrderItem, AgriculturalOrderItemDto>()
+                .ForMember(dest => dest.AgriculturalProductCode, opt => opt.Ignore());
+            CreateMap<AgriculturalOrderItemCreateDto, AgriculturalOrderItem>();
+            CreateMap<AgriculturalOrderItemUpdateDto, AgriculturalOrderItem>();
+            #endregion
+
+            #region Auction
+            CreateMap<Auction, AuctionDto>()
+                .ForMember(dest => dest.AgriculturalProductCode, opt => opt.Ignore())
+                .ForMember(dest => dest.StatusCode, opt => opt.Ignore())
+                .ForMember(dest => dest.WinnerCode, opt => opt.Ignore())
+                .ForMember(dest => dest.Bids, opt => opt.Ignore());
+            CreateMap<AuctionCreateDto, Auction>();
+            CreateMap<AuctionUpdateDto, Auction>()
+                .ForMember(dest => dest.WinnerId, opt => opt.Ignore());
+            #endregion
+
+            #region AuctionBid
+            CreateMap<AuctionBid, AuctionBidDto>();
+            CreateMap<AuctionBidCreateDto, AuctionBid>();
+            CreateMap<AuctionBidUpdateDto, AuctionBid>();
+            #endregion
+
+            #region Status
+            CreateMap<Status, StatusDto>();
+            CreateMap<StatusCreateDto, Status>();
+            CreateMap<StatusUpdateDto, Status>();
+            #endregion
+
+            #region Warehouse
+            CreateMap<Warehouse, WarehouseDto>()
+                .ForMember(dest => dest.FarmerCode, opt => opt.Ignore());
+            CreateMap<WarehouseCreateDto, Warehouse>()
+                .ForMember(dest => dest.FarmerId, opt => opt.Ignore());
+            CreateMap<WarehouseUpdateDto, Warehouse>()
+                .ForMember(dest => dest.FarmerId, opt => opt.Ignore());
+            #endregion
+
+            #region WarehouseInventory
+            CreateMap<WarehouseInventory, WarehouseInventoryDto>()
+                .ForMember(dest => dest.WarehouseCode, opt => opt.Ignore())
+                .ForMember(dest => dest.EntityCode, opt => opt.Ignore());
+            CreateMap<WarehouseInventoryCreateDto, WarehouseInventory>()
+                .ForMember(dest => dest.WarehouseId, opt => opt.Ignore())
+                .ForMember(dest => dest.EntityId, opt => opt.Ignore());
+            CreateMap<WarehouseInventoryUpdateDto, WarehouseInventory>();
+            #endregion
+
+            #region Wallet
+
+            CreateMap<Wallet, WalletDto>();
+            CreateMap<DepositResultDto, Wallet>();
+            CreateMap<DepositWalletDto, Wallet>();
+
+
+            #endregion
+
+            #region Farm
+            CreateMap<Farm, FarmDto>()
+                .ForMember(dest => dest.OwnerCode, opt => opt.MapFrom(src => src.Owner.Code))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address != null ? new AddressDto
+                {
+                    Code = src.Address.Code,
+                    Street = src.Address.Street,
+                    PostalCode = src.Address.PostalCode,
+                    Latitude = src.Address.Latitude,
+                    Longitude = src.Address.Longitude,
+                    IsDefault = src.Address.IsDefault
+                } : null))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
+
+            CreateMap<FarmCreateDto, Farm>()
+                .ForMember(dest => dest.OwnerId, opt => opt.Ignore())
+                .ForMember(dest => dest.AddressId, opt => opt.Ignore())
+                .ForMember(dest => dest.Capacity, opt => opt.MapFrom(src => src.Capacity));
+
+            CreateMap<FarmUpdateDto, Farm>()
+                .ForMember(dest => dest.Code, opt => opt.MapFrom(src => src.Code))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
+                .ForMember(dest => dest.Capacity, opt => opt.MapFrom(src => src.Capacity))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address != null ? new Address
+                {
+                    Street = src.Address.Street,
+                    PostalCode = src.Address.PostalCode,
+                    Latitude = src.Address.Latitude,
+                    Longitude = src.Address.Longitude,
+                    IsDefault = src.Address.IsDefault
+                } : null));
+            #endregion
+
+            #region Location
+            // ================= Province =================
+            CreateMap<Province, ProvinceDto>();
+
+            CreateMap<ProvinceCreateDto, Province>()
+                .ForMember(dest => dest.Status, opt => opt.Ignore())
+                .ForMember(dest => dest.Counties, opt => opt.Ignore());
+
+            // ================= County =================
+            CreateMap<County, CountyDto>();
+
+            CreateMap<CountyCreateDto, County>()
+                .ForMember(dest => dest.Status, opt => opt.Ignore())
+                .ForMember(dest => dest.Province, opt => opt.Ignore());
+
+            // ================= City =================
+            CreateMap<City, CityDto>();
+
+            CreateMap<CityCreateDto, City>()
+                .ForMember(dest => dest.Status, opt => opt.Ignore())
+                .ForMember(dest => dest.County, opt => opt.Ignore());
+
+            // ================= Village =================
+            CreateMap<Village, VillageDto>();
+
+            CreateMap<VillageCreateDto, Village>()
+                .ForMember(dest => dest.Status, opt => opt.Ignore())
+                .ForMember(dest => dest.County, opt => opt.Ignore());
+
+            #endregion
+
+        }
+    }
+}

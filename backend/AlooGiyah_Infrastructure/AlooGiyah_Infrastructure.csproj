@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AlooGiyah_Application\AlooGiyah_Application.csproj" />
+    <ProjectReference Include="..\AlooGiyah_Domain\AlooGiyah_Domain.csproj" />
+    <ProjectReference Include="..\AlooGiyah_Shared\AlooGiyah_Shared.csproj" />
+	<FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+</Project>
