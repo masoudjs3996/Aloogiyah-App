@@ -1,6 +1,7 @@
 ﻿using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.AgriculturalProduct;
 using AlooGiyah_Application.Interfaces.Store;
+using AlooGiyah_Application.Services.Store;
 using AlooGiyah_Shared.Constants;
 using AlooGiyah_Shared.Exceptions;
 using Microsoft.AspNetCore.Authorization;
@@ -112,6 +113,77 @@ public class AgriculturalProductController : ControllerBase
             IsSuccess = true,
             Message = "محصول کشاورزی با موفقیت حذف شد",
             Data = code
+        });
+    }
+    #endregion
+
+    #region Add Images to Product
+    [Authorize(Roles = "Admin,Farmer")]
+    [HttpPost("AddImages")]
+    public async Task<IActionResult> AddImages([FromQuery] string productCode, [FromForm] List<IFormFile> files)
+    {
+        if (files == null || !files.Any())
+            return BadRequest(new ApiResponse<string>
+            {
+                IsSuccess = false,
+                Message = "حداقل یک عکس باید ارسال شود",
+                Data = null
+            });
+
+        var dto = new AddProductImagesDto
+        {
+            ProductCode = productCode,
+            Files = files
+        };
+
+        var uploadedUrls = await _agriculturalProductService.AddProductImagesAsync(dto);
+
+        return Ok(new ApiResponse<object>
+        {
+            IsSuccess = true,
+            Message = $"{uploadedUrls.Count} عکس با موفقیت به محصول اضافه شد",
+            Data = new
+            {
+                UploadedImageUrls = uploadedUrls,
+                Note = uploadedUrls.Count > 0 && uploadedUrls.Count == files.Count
+                       ? "در صورت عدم وجود عکس قبلی، اولین عکس به عنوان عکس اصلی تنظیم شد"
+                       : ""
+            }
+        });
+    }
+    #endregion
+
+    #region Set Primary Image
+    [Authorize(Roles = "Admin,Farmer")]
+    [HttpPatch("SetPrimaryImage")]
+    public async Task<IActionResult> SetPrimaryImage([FromQuery]string productCode, [FromBody] SetPrimaryProductImageDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var primaryUrl = await _agriculturalProductService.SetPrimaryProductImageAsync(productCode, dto.FileCode);
+
+        return Ok(new ApiResponse<object>
+        {
+            IsSuccess = true,
+            Message = "عکس اصلی محصول با موفقیت تغییر کرد",
+            Data = new { PrimaryImageUrl = primaryUrl }
+        });
+    }
+    #endregion
+
+    #region Remove Image
+    [Authorize(Roles = "Admin,Farmer")]
+    [HttpDelete("RemoveImage")]
+    public async Task<IActionResult> RemoveImage([FromQuery] string productCode, string fileCode)
+    {
+        await _agriculturalProductService.RemoveProductImageAsync(productCode, fileCode);
+
+        return Ok(new ApiResponse<object>
+        {
+            IsSuccess = true,
+            Message = "عکس با موفقیت حذف شد",
+            Data = null
         });
     }
     #endregion

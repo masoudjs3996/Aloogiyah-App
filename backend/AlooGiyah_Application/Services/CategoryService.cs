@@ -298,9 +298,7 @@ public class CategoryService : ICategoryService
 
         var category = await _categoryRepository.FirstOrDefaultAsync(c => c.Code == dto.Code && !c.IsDeleted)
                        ?? throw new NotFoundException("دسته‌بندی یافت نشد");
-               
-        var oldFile = await _fileRepo.FirstOrDefaultAsync(f => f.EntityCode == dto.Code && f.EntityFile == EntityFile.Category);
-              
+
         var uploadDto = new FileUploadDto
         {
             File = dto.File,
@@ -311,12 +309,8 @@ public class CategoryService : ICategoryService
 
         var newFile = await _fileService.UploadFileAsync(uploadDto);
 
-        if (oldFile != null)
-        {
-            await _fileService.DeleteFileByCodeAsync(oldFile.Code);
-            await _fileRepo.DeleteAsync(oldFile);                
-        }
-
+        // حذف عکس قبلی + ست کردن جدید به عنوان Primary
+        await _fileService.RemovePrimaryFileAsync(EntityFile.Category, dto.Code);
         await _fileService.AttachFileAsPrimaryAsync(newFile.FileCode, EntityFile.Category, dto.Code);
 
         category.UpdatedAt = DateTimeOffset.UtcNow;

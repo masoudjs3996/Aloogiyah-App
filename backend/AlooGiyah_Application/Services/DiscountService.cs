@@ -3,7 +3,6 @@ using AlooGiyah_Application.Interfaces;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Entities.UserFolder;
-using AlooGiyah_Domain.Enums;
 using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Domain.Pagination;
 using AlooGiyah_Shared.Commons;
@@ -189,6 +188,10 @@ public class DiscountService : IDiscountService
 
         if (!string.IsNullOrEmpty(filter.SearchTerm))
             predicate = predicate.And(d => d.Code.Contains(filter.SearchTerm));
+
+        if (filter.CategoryCodes?.Any() ?? false)
+            predicate = predicate.And(p => p.Categories.Any(c => filter.CategoryCodes.Contains(c.Code)));
+
 
         if (filter.DiscountType.HasValue)
             predicate = predicate.And(d => d.DiscountType == filter.DiscountType);

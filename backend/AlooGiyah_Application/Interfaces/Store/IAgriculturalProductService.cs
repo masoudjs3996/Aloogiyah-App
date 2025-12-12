@@ -8,6 +8,9 @@ public interface IAgriculturalProductService
     Task<AgriculturalProductDto> CreateAsync(AgriculturalProductCreateDto dto);
     Task<bool> UpdateAsync(AgriculturalProductUpdateDto dto);
     Task<bool> DeleteAsync(string code);
-    Task<AgriculturalProductDto?> GetByCodeAsync(string code);
-    Task<PagedResult<AgriculturalProductDto>> GetByFilterAsync(AgriculturalProductFilterDto filter);
+    Task<AgriculturalProductDetailDto?> GetByCodeAsync(string code);
+    Task<PagedResult<AgriculturalProductListItemDto>> GetByFilterAsync(AgriculturalProductFilterDto filter);
+    Task<List<string>> AddProductImagesAsync(AddProductImagesDto dto);
+    Task<string> SetPrimaryProductImageAsync(string productCode, string fileCode);
+    Task RemoveProductImageAsync(string productCode, string fileCode);
 }

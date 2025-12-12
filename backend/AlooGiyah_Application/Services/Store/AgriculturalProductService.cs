@@ -1,8 +1,11 @@
 ﻿using AlooGiyah_Application.DTOs.AgriculturalProduct;
+using AlooGiyah_Application.DTOs.File;
+using AlooGiyah_Application.Interfaces;
 using AlooGiyah_Application.Interfaces.Store;
 using AlooGiyah_Application.Interfaces.UserFolder;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.Store;
+using AlooGiyah_Domain.Enums;
 using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Domain.Pagination;
 using AlooGiyah_Shared.Commons;
@@ -20,7 +23,9 @@ public class AgriculturalProductService : IAgriculturalProductService
     private readonly IGenericRepository<Farm> _greenhouseRepository;
     private readonly IGenericRepository<Status> _statusRepository;
     private readonly IGenericRepository<Category> _categoryRepository;
+    private readonly IGenericRepository<Files> _fileRepo;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IFileService _fileService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
@@ -29,6 +34,7 @@ public class AgriculturalProductService : IAgriculturalProductService
         IGenericRepository<Farm> greenhouseRepository,
         IGenericRepository<Status> statusRepository,
         IGenericRepository<Category> categoryRepository,
+        IFileService fileService,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
         IMapper mapper)
@@ -37,6 +43,7 @@ public class AgriculturalProductService : IAgriculturalProductService
         _greenhouseRepository = greenhouseRepository;
         _statusRepository = statusRepository;
         _categoryRepository = categoryRepository;
+        _fileService = fileService;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
@@ -221,7 +228,7 @@ public class AgriculturalProductService : IAgriculturalProductService
     #endregion
 
     #region Get By Code
-    public async Task<AgriculturalProductDto?> GetByCodeAsync(string code)
+    public async Task<AgriculturalProductDetailDto?> GetByCodeAsync(string code)
     {
 
         if (string.IsNullOrEmpty(_currentUserService.UserId))
@@ -240,19 +247,35 @@ public class AgriculturalProductService : IAgriculturalProductService
         if (entity == null)
             return null;
 
-        var productDto = _mapper.Map<AgriculturalProductDto>(entity);
+        var productDto = _mapper.Map<AgriculturalProductDetailDto>(entity);
         productDto.RetailPrice = entity.RetailPrice;
         productDto.WholesalePrice = Role == "User" ? null : entity.WholesalePrice;
         productDto.GreenhouseCode = entity.Farm?.Code ?? string.Empty;
         productDto.StatusCode = await _statusRepository.GetCodeByIdAsync(entity.StatusId) ?? string.Empty;
         productDto.CategoryCodes = entity.Categories?.Select(c => c.Code).ToList() ?? new List<string>();
 
+        var primaryFile = await _fileRepo.FirstOrDefaultAsync(f =>
+    f.EntityCode == code &&
+    f.EntityFile == EntityFile.AgriculturalProduct &&
+    f.IsPrimary);
+
+        productDto.PrimaryImageUrl = primaryFile?.Url ?? "/images/default-product.jpg";
+
+        // همه عکس‌ها
+        var allFilesResult = await _fileRepo.GetPagedAsync(
+            filter: f => f.EntityCode == code && f.EntityFile == EntityFile.AgriculturalProduct,
+            pageNumber: 1,
+            pageSize: 50 // یا هر تعداد حداکثری که می‌خوای
+        );
+
+        productDto.ImageUrls = allFilesResult.Items.Select(f => f.Url).ToList();
+
         return productDto;
     }
     #endregion
 
     #region Get By Filter
-    public async Task<PagedResult<AgriculturalProductDto>> GetByFilterAsync(AgriculturalProductFilterDto filter)
+    public async Task<PagedResult<AgriculturalProductListItemDto>> GetByFilterAsync(AgriculturalProductFilterDto filter)
     {
         if (string.IsNullOrEmpty(_currentUserService.UserId))
             throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
@@ -298,30 +321,174 @@ public class AgriculturalProductService : IAgriculturalProductService
         if (filter.CategoryCodes?.Any() ?? false)
             predicate = predicate.And(p => p.Categories.Any(c => filter.CategoryCodes.Contains(c.Code)));
 
-        return await _agriculturalProductRepository.GetPagedProjectedAsync(
+        var pagedProducts = await _agriculturalProductRepository.GetPagedProjectedAsync(
             filter: predicate,
-            selector: p => new AgriculturalProductDto
+            selector: p => new AgriculturalProductListItemDto
             {
                 Code = p.Code,
                 Name = p.Name,
                 Description = p.Description,
                 Stock = p.Stock,
                 Slug = p.Slug,
-                MetaTitle = p.MetaTitle,
-                MetaDescription = p.MetaDescription,
-                MetaKeywords = p.MetaKeywords,
-                DailyProductionCapacity = p.DailyProductionCapacity,
                 StatusCode = p.Status.Code,
-                CategoryCodes = p.Categories.Select(c => c.Code).ToList(),
                 CreatedAt = p.CreatedAt,
                 RetailPrice = p.RetailPrice,
-                WholesalePrice = role == "User" ? null : p.WholesalePrice
+                WholesalePrice = role == "User" ? null : p.WholesalePrice,
+                PrimaryImageUrl = "" // موقتاً خالی — بعداً پر میشه
             },
             pageNumber: filter.PageNumber,
             pageSize: filter.PageSize,
             orderBy: p => p.CreatedAt
         );
+        if (!pagedProducts.Items.Any())
+            return pagedProducts;
+
+        // قدم ۲: جمع‌آوری کدهای محصول در این صفحه
+        var productCodes = pagedProducts.Items.Select(x => x.Code).ToList();
+
+        // قدم ۳: استفاده از GetPagedAsync روی Files — فقط عکس‌های اصلی محصولات این صفحه
+        var primaryFilesResult = await _fileRepo.GetPagedAsync(
+            filter: f => productCodes.Contains(f.EntityCode!) &&
+                         f.EntityFile == EntityFile.AgriculturalProduct &&
+                         f.IsPrimary,
+            pageNumber: 1,
+            pageSize: productCodes.Count // حداکثر به تعداد محصولات این صفحه
+        );
+
+        // قدم ۴: ساخت دیکشنری برای دسترسی سریع
+        var primaryImageDict = primaryFilesResult.Items
+            .ToDictionary(
+                f => f.EntityCode!,
+                f => f.Url ?? "/images/default-product.jpg"
+            );
+
+        // قدم ۵: پر کردن PrimaryImageUrl هر محصول
+        foreach (var item in pagedProducts.Items)
+        {
+            item.PrimaryImageUrl = primaryImageDict.GetValueOrDefault(item.Code, "/images/default-product.jpg");
+        }
+
+        return pagedProducts;
+
     }
     #endregion
 
+    #region اضافه کردن چند عکس به محصول
+    public async Task<List<string>> AddProductImagesAsync(AddProductImagesDto dto)
+    {
+        var product = await _agriculturalProductRepository.FirstOrDefaultAsync(p => p.Code == dto.ProductCode && !p.IsDeleted)
+                      ?? throw new NotFoundException("محصول یافت نشد");
+
+        var uploadedUrls = new List<string>();
+
+        // چک کنیم آیا قبلاً عکس اصلی داشته یا نه
+        var hasPrimary = await _fileRepo.ExistsAsync(f =>
+            f.EntityCode == dto.ProductCode &&
+            f.EntityFile == EntityFile.AgriculturalProduct &&
+            f.IsPrimary);
+
+        foreach (var file in dto.Files)
+        {
+            if (file == null || file.Length == 0) continue;
+
+            if (!file.ContentType.StartsWith("image/"))
+                throw new BadRequestException($"فایل {file.FileName} یک تصویر معتبر نیست");
+
+            if (file.Length > 15 * 1024 * 1024)
+                throw new BadRequestException($"حجم فایل {file.FileName} بیش از ۱۵ مگابایت است");
+
+            // آپلود فایل از طریق FileService
+            var uploadDto = new FileUploadDto
+            {
+                File = file,
+                EntityCode = dto.ProductCode,
+                EntityFile = EntityFile.AgriculturalProduct,
+                FileTypeCode = "CD5A1A3870" // کد نوع عکس محصول
+            };
+
+            var uploadedFile = await _fileService.UploadFileAsync(uploadDto);
+            uploadedUrls.Add(uploadedFile.Url); // فرض می‌کنیم FileDto.Url داره
+
+            // اگر اولین عکس بود (هیچ عکسی قبلاً اصلی نبود)، آن را اصلی کن
+            if (!hasPrimary && uploadedUrls.Count == 1)
+            {
+                await _fileService.AttachFileAsPrimaryAsync(
+                    uploadedFile.FileCode,
+                    EntityFile.AgriculturalProduct,
+                    dto.ProductCode);
+                hasPrimary = true; // برای جلوگیری از تکرار در لوپ
+            }
+        }
+
+        product.UpdatedAt = DateTimeOffset.UtcNow;
+        await _unitOfWork.SaveChangesAsync();
+
+        return uploadedUrls;
+    }
+    #endregion
+
+    #region تنظیم عکس اصلی محصول
+    public async Task<string> SetPrimaryProductImageAsync(string productCode, string fileCode)
+    {
+        // چک کنیم فایل متعلق به این محصول باشد
+        var fileExists = await _fileRepo.ExistsAsync(f =>
+            f.Code == fileCode &&
+            f.EntityCode == productCode &&
+            f.EntityFile == EntityFile.AgriculturalProduct);
+
+        if (!fileExists)
+            throw new NotFoundException("عکس انتخاب‌شده متعلق به این محصول نیست");
+
+        // اول همه را از حالت اصلی خارج کن
+        await _fileService.RemovePrimaryFileAsync(EntityFile.AgriculturalProduct, productCode);
+
+        // سپس این فایل را اصلی کن
+        await _fileService.AttachFileAsPrimaryAsync(fileCode, EntityFile.AgriculturalProduct, productCode);
+
+        // آپدیت زمان محصول
+        var product = await _agriculturalProductRepository.FirstOrDefaultAsync(p => p.Code == productCode);
+        if (product != null)
+            product.UpdatedAt = DateTimeOffset.UtcNow;
+
+        await _unitOfWork.SaveChangesAsync();
+
+        // URL عکس اصلی جدید را برگردان
+        return await _fileService.GetPrimaryFileUrlAsync(EntityFile.AgriculturalProduct, productCode)
+               ?? throw new NotFoundException("عکس اصلی یافت نشد");
+    }
+    #endregion
+
+    #region حذف یک عکس از محصول
+    public async Task RemoveProductImageAsync(string productCode, string fileCode)
+    {
+        var file = await _fileRepo.FirstOrDefaultAsync(f =>
+            f.Code == fileCode &&
+            f.EntityCode == productCode &&
+            f.EntityFile == EntityFile.AgriculturalProduct)
+            ?? throw new NotFoundException("عکس یافت نشد یا متعلق به این محصول نیست");
+
+        bool wasPrimary = file.IsPrimary;
+
+        // حذف فیزیکی و دیتابیس از طریق FileService
+        await _fileService.DeleteFileByCodeAsync(fileCode);
+
+        // اگر عکس اصلی حذف شد → اولین عکس باقی‌مانده را اصلی کن
+        if (wasPrimary)
+        {
+            var remainingFile = await _fileRepo.FirstOrDefaultAsync(f =>
+                f.EntityCode == productCode &&
+                f.EntityFile == EntityFile.AgriculturalProduct);
+
+            if (remainingFile != null)
+            {
+                await _fileService.AttachFileAsPrimaryAsync(
+                    remainingFile.Code,
+                    EntityFile.AgriculturalProduct,
+                    productCode);
+            }
+        }
+
+        await _unitOfWork.SaveChangesAsync();
+    }
+    #endregion
 }
