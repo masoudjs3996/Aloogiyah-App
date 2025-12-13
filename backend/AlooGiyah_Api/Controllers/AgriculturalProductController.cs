@@ -118,7 +118,7 @@ public class AgriculturalProductController : ControllerBase
     #endregion
 
     #region Add Images to Product
-    [Authorize(Roles = "Admin,Farmer")]
+    [Authorize(Roles = "Admin,Farmer,Manager")]
     [HttpPost("AddImages")]
     public async Task<IActionResult> AddImages([FromQuery] string productCode, [FromForm] List<IFormFile> files)
     {
@@ -154,7 +154,7 @@ public class AgriculturalProductController : ControllerBase
     #endregion
 
     #region Set Primary Image
-    [Authorize(Roles = "Admin,Farmer")]
+    [Authorize(Roles = "Admin,Farmer,Manager")]
     [HttpPatch("SetPrimaryImage")]
     public async Task<IActionResult> SetPrimaryImage([FromQuery]string productCode, [FromBody] SetPrimaryProductImageDto dto)
     {
@@ -173,7 +173,7 @@ public class AgriculturalProductController : ControllerBase
     #endregion
 
     #region Remove Image
-    [Authorize(Roles = "Admin,Farmer")]
+    [Authorize(Roles = "Admin,Farmer,Manager")]
     [HttpDelete("RemoveImage")]
     public async Task<IActionResult> RemoveImage([FromQuery] string productCode, string fileCode)
     {

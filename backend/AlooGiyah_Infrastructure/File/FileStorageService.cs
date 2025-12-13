@@ -15,23 +15,16 @@ public class FileStorageService : IFileStorageService
 
     public FileStorageService(IWebHostEnvironment env, IConfiguration config)
     {
-        _env = env;
-        _config = config;
+        _baseUploadPath = config.GetValue<string>("FileStorage:UploadPath")
+            ?? Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                "AlooGiyah",
+                "Uploads"
+            );
 
-        // مسیر اصلی از appsettings.json
-        _baseUploadPath = _config["FileStorage:UploadPath"]
-                          ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "AlooGiyah", "Uploads");
-
-        // فقط در Development می‌تونی به wwwroot منتقل کنی (اختیاری)
-        if (_env.IsDevelopment())
-        {
-            _baseUploadPath = Path.Combine(_env.WebRootPath, "uploads");
-        }
-
-        // ایجاد پوشه اگر وجود نداشته باشه
-        if (!Directory.Exists(_baseUploadPath))
-            Directory.CreateDirectory(_baseUploadPath);
+        Directory.CreateDirectory(_baseUploadPath);
     }
+
 
     public async Task<string> SaveFileAsync(
         IFormFile file,
@@ -99,6 +92,7 @@ public class FileStorageService : IFileStorageService
         EntityFile.Profile => "profiles",
         EntityFile.ServiceRequest => "service-requests",
         EntityFile.AgriculturalProduct => "agricultural-products",
+        EntityFile.Farm => "Farm",
         _ => "others"
     };
 }

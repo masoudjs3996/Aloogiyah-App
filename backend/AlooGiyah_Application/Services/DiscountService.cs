@@ -102,6 +102,7 @@ public class DiscountService : IDiscountService
         discountDto.ProductCodes = agroProducts.Select(x => x.Code).ToList();
         discountDto.CategoryCodes = categories.Select(x => x.Code).ToList();
 
+
         return discountDto;
     }
     #endregion
@@ -215,8 +216,6 @@ public class DiscountService : IDiscountService
         );
     }
     #endregion
-
-   
 }
 
 

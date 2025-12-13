@@ -259,7 +259,8 @@ public class FileService : IFileService
             { EntityFile.ServiceRequest, async (code) => await _repositoryFactory.GetFileRepository<ServiceRequest>(entityType).ExistsAsync(e => e.Code == code) },
             { EntityFile.Auction, async (code) => await _repositoryFactory.GetFileRepository<Auction>(entityType).ExistsAsync(e => e.Code == code) },
             { EntityFile.Category, async (code) => await _repositoryFactory.GetFileRepository<Category>(entityType).ExistsAsync(e => e.Code == code) },
-            { EntityFile.Profile, async (code) => await _repositoryFactory.GetFileRepository<User>(entityType).ExistsAsync(e => e.Code == code) }
+            { EntityFile.Profile, async (code) => await _repositoryFactory.GetFileRepository<User>(entityType).ExistsAsync(e => e.Code == code) },
+            { EntityFile.Farm, async (code) => await _repositoryFactory.GetFileRepository<Farm>(entityType).ExistsAsync(e => e.Code == code) }
         };
 
         if (!repositoryMap.ContainsKey(entityType))
@@ -280,6 +281,7 @@ public class FileService : IFileService
         EntityFile.Category => false,         // دسته‌بندی: فایل کم
         EntityFile.Article => false,          // مقاله: فایل کم
         EntityFile.Profile => false,          // پروفایل: فایل کم
+        EntityFile.Farm => false,
         _ => false
     };
 

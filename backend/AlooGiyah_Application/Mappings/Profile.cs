@@ -114,7 +114,23 @@ namespace AlooGiyah_Application.Mappings
      .ForMember(dest => dest.CategoryCodes, opt => opt.MapFrom(src =>
          src.Categories != null ? src.Categories.Select(c => c.Code).ToList() : new List<string>()))
      .ForMember(dest => dest.FarmCode, opt => opt.MapFrom(src =>
-         src.Farm != null ? src.Farm.Code : null)); 
+         src.Farm != null ? src.Farm.Code : null))
+     .ForMember(dest => dest.RootCategoryCodes, opt => opt.MapFrom(src =>
+        src.Categories != null && src.Categories.Any()
+            ? string.Join(",", src.Categories
+                .Select(c => c.GetRootParent())
+                .DistinctBy(rc => rc.CategoryId)
+                .OrderBy(rc => rc.SortOrder)
+                .Select(rc => rc.Code))
+            : null))
+    .ForMember(dest => dest.RootCategoryNames, opt => opt.MapFrom(src =>
+        src.Categories != null && src.Categories.Any()
+            ? string.Join("، ", src.Categories
+                .Select(c => c.GetRootParent())
+                .DistinctBy(rc => rc.CategoryId)
+                .OrderBy(rc => rc.SortOrder)
+                .Select(rc => rc.Name))
+            : null));
             CreateMap<DiscountCreateDto, Discount>();
             CreateMap<DiscountUpdateDto, Discount>();
             #endregion

@@ -145,9 +145,9 @@ public class CategoryService : ICategoryService
     {
         int statusId = type switch
         {
-            CategoryFetchType.Home => 9,
-            CategoryFetchType.Menu => 8,
-            CategoryFetchType.Featured => 10,
+            CategoryFetchType.Home => 53,
+            CategoryFetchType.Menu => 54,
+            CategoryFetchType.Featured => 55,
             _ => 0
         };
 

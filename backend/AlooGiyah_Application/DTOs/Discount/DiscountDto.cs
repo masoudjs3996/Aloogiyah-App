@@ -18,12 +18,13 @@ public class DiscountDto
     public decimal? MaxDiscountAmount { get; set; }
     public List<string>? UserCodes { get; set; } 
     public List<string>? ProductCodes { get; set; } 
-    public List<string>? CategoryCodes { get; set; } 
+    public List<string>? CategoryCodes { get; set; }
+    public string? RootCategoryCodes { get; set; }
+    public string? RootCategoryNames { get; set; }
     public string? FarmCode { get; set; } 
 
     [JsonIgnore] 
     public AlooGiyah_Domain.Entities.Discount? Entity { get; set; } 
-
 
     public string Description => Entity?.GetDiscountDescription() ?? "تخفیف نامشخص";
 }

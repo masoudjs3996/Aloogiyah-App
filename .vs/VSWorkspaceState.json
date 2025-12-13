@@ -1,9 +1,7 @@
 {
   "ExpandedNodes": [
     "",
-    "\\backend",
-    "\\frontend"
+    "\\backend"
   ],
-  "SelectedNode": "\\frontend\\package.json",
-  "PreviewInSolutionExplorer": false
+  "PreviewInSolutionExplorer": true
 }
