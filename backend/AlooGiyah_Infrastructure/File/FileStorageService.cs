@@ -55,7 +55,10 @@ public class FileStorageService : IFileStorageService
 
         // URL نهایی که در دیتابیس ذخیره می‌شه و مرورگر می‌تونه ببینه
         // مثال خروجی: /uploads/products/2025-11-19/abc123.jpg
-        string relativeUrl = $"/uploads/{finalFolder.Replace("\\", "/")}/{uniqueFileName}";
+        string relativeUrl = "/uploads/" + finalFolder.Replace("\\", "/") + "/" + uniqueFileName;
+
+        if (!relativeUrl.StartsWith("/uploads/"))
+            relativeUrl = "/uploads/" + relativeUrl;
 
         return relativeUrl; // نیازی به / اول اضافی نیست چون RequestPath خودش /uploads داره
     }

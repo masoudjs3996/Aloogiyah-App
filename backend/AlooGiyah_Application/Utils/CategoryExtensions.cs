@@ -11,7 +11,7 @@ namespace AlooGiyah_Application.Utils
         {
             if (category == null) throw new ArgumentNullException(nameof(category));
 
-            var current = category;
+            Category current = category;
             while (current.ParentCategory != null)
             {
                 current = current.ParentCategory;

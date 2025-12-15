@@ -42,6 +42,36 @@ public class AgriculturalProductController : ControllerBase
     }
     #endregion
 
+    [Authorize(Roles = "Admin,Farmer")]
+    [HttpPost("CreateWithImages")]
+    public async Task<IActionResult> CreateWithImages([FromForm] AgriculturalProductCreateDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        try
+        {
+            var result = await _agriculturalProductService.CreateWithImagesAsync(dto);
+
+            return Ok(new ApiResponse<object>
+            {
+                IsSuccess = true,
+                Message = "محصول همراه با عکس‌ها با موفقیت ایجاد شد",
+                Data = result
+            });
+        }
+        catch (Exception ex)
+        {
+            // اینجا می‌تونی لاگ کنی
+            return BadRequest(new ApiResponse<string>
+            {
+                IsSuccess = false,
+                Message = "خطا در ایجاد محصول: " + ex.Message,
+                Data = null
+            });
+        }
+    }
+
     #region GetByFilter
     [AllowAnonymous]
     [HttpGet("GetByFilter")]

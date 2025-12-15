@@ -10,4 +10,5 @@ public enum EntityStatus
     ChangeLogStatus = 4,   
     Category = 5,
     Location = 6,
+    AgriculturalProduct = 7,
 }

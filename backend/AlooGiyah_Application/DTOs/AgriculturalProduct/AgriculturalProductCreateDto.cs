@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
 namespace AlooGiyah_Application.DTOs.AgriculturalProduct;
 
@@ -12,7 +13,7 @@ public class AgriculturalProductCreateDto
     public string Description { get; set; } = string.Empty;
     
     [MaxLength(10)]
-    public string GreenhouseCode { get; set; } = string.Empty;
+    public string FarmCode { get; set; } = string.Empty;
 
     [Required]
     public decimal RetailPrice { get; set; }
@@ -39,4 +40,6 @@ public class AgriculturalProductCreateDto
     public string? MetaKeywords { get; set; }
 
     public List<string> CategoryCodes { get; set; } = new();
+
+    public List<IFormFile>? Images { get; set; } = new();
 }

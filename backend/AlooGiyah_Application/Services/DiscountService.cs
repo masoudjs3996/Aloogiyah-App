@@ -170,7 +170,7 @@ public class DiscountService : IDiscountService
          code,
          "Users",
          "Products",
-         "Categories",
+         "Categories.ParentCategory",
          "Farm"
      );
 
@@ -207,7 +207,7 @@ public class DiscountService : IDiscountService
         {
             "Users",
             "Products",
-            "Categories",
+            "Categories.ParentCategory",
             "Farm"
         },
             pageNumber: filter.PageNumber,

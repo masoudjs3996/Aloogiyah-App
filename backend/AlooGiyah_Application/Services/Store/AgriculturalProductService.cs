@@ -5,6 +5,7 @@ using AlooGiyah_Application.Interfaces.Store;
 using AlooGiyah_Application.Interfaces.UserFolder;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.Store;
+using AlooGiyah_Domain.Entities.UserFolder;
 using AlooGiyah_Domain.Enums;
 using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Domain.Pagination;
@@ -65,9 +66,9 @@ public class AgriculturalProductService : IAgriculturalProductService
             throw new InvalidOperationException("موجودی نمی‌تواند منفی باشد");
 
         // گرفتن گلخانه
-        var greenhouseId = await _greenhouseRepository.GetIdByCodeAsync(dto.GreenhouseCode, g => g.FarmId);
+        var greenhouseId = await _greenhouseRepository.GetIdByCodeAsync(dto.FarmCode, g => g.FarmId);
         if (greenhouseId == null)
-            throw new NotFoundException($"گلخانه با کد {dto.GreenhouseCode} پیدا نشد");
+            throw new NotFoundException($"گلخانه با کد {dto.FarmCode} پیدا نشد");
 
         // گرفتن وضعیت
         var statusId = await _statusRepository.GetIdByCodeAsync(dto.StatusCode, s => s.StatusId);
@@ -118,13 +119,129 @@ public class AgriculturalProductService : IAgriculturalProductService
         await _unitOfWork.SaveChangesAsync();
 
         var productDto = _mapper.Map<AgriculturalProductDto>(entity);
-        productDto.GreenhouseCode = dto.GreenhouseCode; // به‌جای FarmerCode
+        productDto.GreenhouseCode = dto.FarmCode; // به‌جای FarmerCode
         productDto.StatusCode = dto.StatusCode;
         productDto.CategoryCodes = categories.Select(c => c.Code).ToList();
 
         return productDto;
     }
     #endregion
+
+    public async Task<AgriculturalProductDetailDto> CreateWithImagesAsync(AgriculturalProductCreateDto dto)
+    {
+        if (dto == null)
+            throw new BadRequestException("داده‌های ورودی خالی است");
+
+        ITransaction? transaction = null;
+
+        try
+        {
+            transaction = await _unitOfWork.BeginTransactionAsync();
+
+            // اعتبارسنجی قیمت
+            var priceErrors = new Dictionary<string, string[]>();
+            if (dto.RetailPrice < 0)
+                priceErrors.Add("RetailPrice", new[] { "قیمت خرده‌فروشی نمی‌تواند منفی باشد" });
+
+            if (dto.WholesalePrice.HasValue && dto.WholesalePrice < 0)
+                priceErrors.Add("WholesalePrice", new[] { "قیمت عمده‌فروشی نمی‌تواند منفی باشد" });
+
+            if (priceErrors.Any())
+                throw new ValidationException("اعتبارسنجی قیمت‌ها شکست خورد", priceErrors);
+
+            // اعتبارسنجی موجودی
+            if (dto.Stock < 0)
+                throw new ValidationException("موجودی نمی‌تواند منفی باشد", new Dictionary<string, string[]>
+            {
+                { "Stock", new[] { "موجودی نمی‌تواند منفی باشد" } }
+            });
+
+            // گرفتن FarmId و StatusId
+            var farmId = await _greenhouseRepository.GetIdByCodeAsync(dto.FarmCode, g => g.FarmId)
+                         ?? throw new NotFoundException($"گلخانه با کد {dto.FarmCode} پیدا نشد");
+
+            var statusId = await _statusRepository.GetIdByCodeAsync(dto.StatusCode, s => s.StatusId)
+                           ?? throw new NotFoundException($"وضعیت با کد {dto.StatusCode} پیدا نشد");
+
+            // گرفتن دسته‌بندی‌ها
+            var categories = new List<Category>();
+            if (dto.CategoryCodes?.Any() ?? false)
+            {
+                foreach (var categoryCode in dto.CategoryCodes.Distinct())
+                {
+                    var category = await _categoryRepository.GetByCodeAsync(categoryCode)
+                                   ?? throw new NotFoundException($"دسته‌بندی با کد {categoryCode} پیدا نشد");
+                    categories.Add(category);
+                }
+            }
+
+            // ساخت entity محصول
+            var entity = _mapper.Map<AgriculturalProduct>(dto);
+            entity.FarmId = farmId;
+            entity.StatusId = statusId;
+            entity.Categories = categories;
+
+            // SEO
+            entity.MetaTitle = dto.MetaTitle ?? SeoHelper.GenerateMetaTitle(dto.Name);
+            entity.MetaDescription = dto.MetaDescription ?? SeoHelper.GenerateMetaDescription(dto.Name);
+            entity.MetaKeywords = dto.MetaKeywords ?? SeoHelper.GenerateMetaKeywords(dto.Name);
+
+            // Slug یکتا
+            var greenhouse = await _greenhouseRepository.GetByIdAsync(farmId);
+            string greenhouseName = greenhouse?.Name ?? "";
+            string baseSlug = SeoHelper.GenerateSlug($"{entity.Name}-{greenhouseName}");
+            string slug = baseSlug;
+            int counter = 1;
+            while (await _agriculturalProductRepository.ExistsAsync(p => p.Slug == slug))
+            {
+                slug = $"{baseSlug}-{counter++}";
+            }
+            entity.Slug = slug;
+
+            await _agriculturalProductRepository.AddAsync(entity);
+            await _unitOfWork.SaveChangesAsync(); // تولید Code
+
+            // آپلود عکس‌ها
+            if (dto.Images != null && dto.Images.Any(f => f.Length > 0))
+            {
+                var validImages = dto.Images
+                    .Where(f => f.Length > 0 && f.ContentType.StartsWith("image/"))
+                    .ToList();
+
+                if (validImages.Any())
+                {
+                    var uploadDto = new AddProductImagesDto
+                    {
+                        ProductCode = entity.Code,
+                        Files = validImages
+                    };
+
+                    var uploadedUrls = await AddProductImagesAsync(uploadDto);
+
+                    if (uploadedUrls.Count == 0)
+                        throw new Exception("هیچ عکسی با موفقیت آپلود نشد");
+                }
+            }
+
+            // کامیت تراکنش
+            await transaction.CommitAsync();
+
+            // برگرداندن محصول کامل
+            return await GetByCodeAsync(entity.Code);
+        }
+        catch (Exception)
+        {
+            if (transaction != null)
+                await transaction.RollbackAsync();
+
+            throw;
+        }
+        finally
+        {
+            if (transaction != null)
+                await transaction.DisposeAsync();
+        }
+    }
 
     #region Update
     public async Task<bool> UpdateAsync(AgriculturalProductUpdateDto dto)
@@ -228,47 +345,76 @@ public class AgriculturalProductService : IAgriculturalProductService
     #endregion
 
     #region Get By Code
-    public async Task<AgriculturalProductDetailDto?> GetByCodeAsync(string code)
+    public async Task<AgriculturalProductDetailDto> GetByCodeAsync(string code)
     {
+        if (string.IsNullOrEmpty(code))
+            throw new ArgumentNullException(nameof(code));
 
         if (string.IsNullOrEmpty(_currentUserService.UserId))
             throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
 
         var Role = _currentUserService.Roles.FirstOrDefault();
 
-        if (string.IsNullOrEmpty(code))
-            throw new ArgumentNullException(nameof(code));
-
         var entity = await _agriculturalProductRepository.GetByCodeWithIncludeAsync(
             code: code,
-            includes: new Expression<Func<AgriculturalProduct, object>>[] { p => p.Categories, p => p.Farm }
+            includes: new Expression<Func<AgriculturalProduct, object>>[] { p => p.Categories! }
         );
 
         if (entity == null)
-            return null;
+            throw new NotFoundException("محصول یافت نشد");
 
         var productDto = _mapper.Map<AgriculturalProductDetailDto>(entity);
+
+        // مقادیر اضافی که ممکنه مپ نشن
         productDto.RetailPrice = entity.RetailPrice;
         productDto.WholesalePrice = Role == "User" ? null : entity.WholesalePrice;
-        productDto.GreenhouseCode = entity.Farm?.Code ?? string.Empty;
-        productDto.StatusCode = await _statusRepository.GetCodeByIdAsync(entity.StatusId) ?? string.Empty;
+        productDto.GreenhouseCode = entity.Farm?.Code ?? ""; // یا هر فیلدی که داری
+        productDto.StatusCode = await _statusRepository.GetCodeByIdAsync(entity.StatusId) ?? "";
         productDto.CategoryCodes = entity.Categories?.Select(c => c.Code).ToList() ?? new List<string>();
 
-        var primaryFile = await _fileRepo.FirstOrDefaultAsync(f =>
-    f.EntityCode == code &&
-    f.EntityFile == EntityFile.AgriculturalProduct &&
-    f.IsPrimary);
+        // ==== بخش عکس‌ها — کاملاً ایمن ====
+        productDto.ImageUrls = new List<string>();
+        productDto.PrimaryImageUrl = "/images/default-product.jpg"; // پیش‌فرض
 
-        productDto.PrimaryImageUrl = primaryFile?.Url ?? "/images/default-product.jpg";
+        if (_fileRepo != null)
+        {
+            try
+            {
+                // عکس اصلی
+                var primaryFile = await _fileRepo.FirstOrDefaultAsync(f =>
+                    f.EntityCode == code &&
+                    f.EntityFile == EntityFile.AgriculturalProduct &&
+                    f.IsPrimary);
 
-        // همه عکس‌ها
-        var allFilesResult = await _fileRepo.GetPagedAsync(
-            filter: f => f.EntityCode == code && f.EntityFile == EntityFile.AgriculturalProduct,
-            pageNumber: 1,
-            pageSize: 50 // یا هر تعداد حداکثری که می‌خوای
-        );
+                if (primaryFile != null && !string.IsNullOrEmpty(primaryFile.Url))
+                {
+                    productDto.PrimaryImageUrl = primaryFile.Url;
+                }
 
-        productDto.ImageUrls = allFilesResult.Items.Select(f => f.Url).ToList();
+                // همه عکس‌ها
+                var allFilesResult = await _fileRepo.GetPagedAsync(
+                    filter: f => f.EntityCode == code && f.EntityFile == EntityFile.AgriculturalProduct,
+                    pageNumber: 1,
+                    pageSize: 50
+                );
+
+                productDto.ImageUrls = allFilesResult.Items
+                    .Where(f => !string.IsNullOrEmpty(f.Url))
+                    .Select(f => f.Url!)
+                    .ToList();
+
+                // اگر اصلی نبود، اولین عکس رو اصلی در نظر بگیر
+                if (string.IsNullOrEmpty(productDto.PrimaryImageUrl) && productDto.ImageUrls.Any())
+                {
+                    productDto.PrimaryImageUrl = productDto.ImageUrls.First();
+                }
+            }
+            catch (Exception ex)
+            {
+                // لاگ کن ولی کرش نکن
+                // _logger.LogWarning(ex, "خطا در بارگذاری عکس‌های محصول {Code}", code);
+            }
+        }
 
         return productDto;
     }
@@ -380,16 +526,20 @@ public class AgriculturalProductService : IAgriculturalProductService
                       ?? throw new NotFoundException("محصول یافت نشد");
 
         var uploadedUrls = new List<string>();
-
-        // چک کنیم آیا قبلاً عکس اصلی داشته یا نه
-        var hasPrimary = await _fileRepo.ExistsAsync(f =>
+        bool hasPrimary = await _fileRepo.ExistsAsync(f =>
             f.EntityCode == dto.ProductCode &&
             f.EntityFile == EntityFile.AgriculturalProduct &&
             f.IsPrimary);
 
+        int successfulUploads = 0;
+
         foreach (var file in dto.Files)
         {
-            if (file == null || file.Length == 0) continue;
+            if (file == null || file.Length == 0)
+            {
+                // _logger.LogWarning("فایل خالی یا null ارسال شده: {FileName}", file?.FileName);
+                continue;
+            }
 
             if (!file.ContentType.StartsWith("image/"))
                 throw new BadRequestException($"فایل {file.FileName} یک تصویر معتبر نیست");
@@ -397,28 +547,56 @@ public class AgriculturalProductService : IAgriculturalProductService
             if (file.Length > 15 * 1024 * 1024)
                 throw new BadRequestException($"حجم فایل {file.FileName} بیش از ۱۵ مگابایت است");
 
-            // آپلود فایل از طریق FileService
             var uploadDto = new FileUploadDto
             {
                 File = file,
                 EntityCode = dto.ProductCode,
                 EntityFile = EntityFile.AgriculturalProduct,
-                FileTypeCode = "CD5A1A3870" // کد نوع عکس محصول
+                FileTypeCode = "CD5A1A3870"
             };
 
-            var uploadedFile = await _fileService.UploadFileAsync(uploadDto);
-            uploadedUrls.Add(uploadedFile.Url); // فرض می‌کنیم FileDto.Url داره
-
-            // اگر اولین عکس بود (هیچ عکسی قبلاً اصلی نبود)، آن را اصلی کن
-            if (!hasPrimary && uploadedUrls.Count == 1)
+            FileDto? uploadedFile = null;
+            try
             {
-                await _fileService.AttachFileAsPrimaryAsync(
-                    uploadedFile.FileCode,
-                    EntityFile.AgriculturalProduct,
-                    dto.ProductCode);
-                hasPrimary = true; // برای جلوگیری از تکرار در لوپ
+                uploadedFile = await _fileService.UploadFileAsync(uploadDto);
+            }
+            catch (Exception ex)
+            {
+                // _logger.LogError(ex, "خطا در آپلود فایل {FileName}", file.FileName);
+                throw new InvalidOperationException($"آپلود فایل {file.FileName} شکست خورد", ex);
+            }
+
+            // چک‌های ضروری
+            if (uploadedFile == null)
+                throw new InvalidOperationException($"آپلود فایل {file.FileName} شکست خورد: شیء برگشتی null است");
+
+            if (string.IsNullOrEmpty(uploadedFile.Url))
+                throw new InvalidOperationException($"آپلود فایل {file.FileName} شکست خورد: URL تولید نشد");
+
+            if (string.IsNullOrEmpty(uploadedFile.FileCode))
+                throw new InvalidOperationException($"آپلود فایل {file.FileName} شکست خورد: کد فایل تولید نشد");
+
+            uploadedUrls.Add(uploadedFile.Url);
+            successfulUploads++;
+
+            // تنظیم عکس اصلی
+            if (!hasPrimary)
+            {
+                try
+                {
+                    await _fileService.AttachFileAsPrimaryAsync(uploadedFile.FileCode, EntityFile.AgriculturalProduct, dto.ProductCode);
+                    hasPrimary = true;
+                }
+                catch (Exception ex)
+                {
+                    // _logger.LogError(ex, "خطا در تنظیم عکس اصلی برای فایل {FileCode}", uploadedFile.Code);
+                    // ادامه بده — اصلی نبودن مهم نیست
+                }
             }
         }
+
+        if (successfulUploads == 0)
+            throw new BadRequestException("هیچ عکسی با موفقیت آپلود نشد. عملیات متوقف شد.");
 
         product.UpdatedAt = DateTimeOffset.UtcNow;
         await _unitOfWork.SaveChangesAsync();

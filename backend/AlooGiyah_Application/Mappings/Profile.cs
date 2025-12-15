@@ -161,6 +161,14 @@ namespace AlooGiyah_Application.Mappings
             #endregion
 
             #region AgriculturalProduct
+            CreateMap<AgriculturalProduct, AgriculturalProductDetailDto>()
+            .ForMember(dest => dest.PrimaryImageUrl, opt => opt.Ignore()) // چون دستی پر می‌کنیم
+            .ForMember(dest => dest.ImageUrls, opt => opt.Ignore());      // چون دستی پر می‌کنیم
+
+            // اگر AgriculturalProductListItemDto داری:
+            CreateMap<AgriculturalProduct, AgriculturalProductListItemDto>()
+                .ForMember(dest => dest.PrimaryImageUrl, opt => opt.Ignore());
+
             CreateMap<AgriculturalProduct, AgriculturalProductDto>()
                 .ForMember(dest => dest.GreenhouseCode, opt => opt.Ignore())
                 .ForMember(dest => dest.StatusCode, opt => opt.Ignore())
