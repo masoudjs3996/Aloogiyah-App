@@ -1,10 +1,10 @@
 ﻿using AlooGiyah_Application.DTOs.Address;
 using AlooGiyah_Application.DTOs.Farm;
 using AlooGiyah_Application.DTOs.File;
-using Microsoft.EntityFrameworkCore;
 using AlooGiyah_Application.Interfaces;
 using AlooGiyah_Application.Interfaces.Store;
 using AlooGiyah_Application.Interfaces.UserFolder;
+using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Entities.UserFolder;
 using AlooGiyah_Domain.Entities.UserFolder.AddressFolder;
@@ -14,6 +14,7 @@ using AlooGiyah_Domain.Pagination;
 using AlooGiyah_Shared.Exceptions;
 using AutoMapper;
 using LinqKit;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace AlooGiyah_Application.Services.Store;
@@ -27,6 +28,7 @@ public class FarmService : IFarmService
     private readonly IGenericRepository<County> _countyRepo;
     private readonly IGenericRepository<City> _cityRepo;
     private readonly IGenericRepository<Village> _villageRepo;
+    private readonly IGenericRepository<Files> _fileRepo;
     private readonly IFileService _fileService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
@@ -40,7 +42,8 @@ public class FarmService : IFarmService
         IGenericRepository<County> countyRepo,
         IGenericRepository<City> cityRepo,
         IGenericRepository<Village> villageRepo,
-        IFileService fileService,
+        IGenericRepository<Files> fileRepo,
+    IFileService fileService,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
         IMapper mapper)
@@ -52,6 +55,7 @@ public class FarmService : IFarmService
         _countyRepo = countyRepo;
         _cityRepo = cityRepo;
         _villageRepo = villageRepo;
+        _fileRepo = fileRepo;
         _fileService = fileService;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
@@ -60,113 +64,133 @@ public class FarmService : IFarmService
 
     private int CurrentUserId => int.Parse(_currentUserService.UserId ?? throw new UnauthorizedException("کاربر لاگین نکرده"));
 
-    #region Create
-    public async Task<FarmDto> CreateAsync(FarmCreateDto dto)
+    #region ایجاد مزرعه همراه با عکس (در یک تراکنش)
+    public async Task<FarmDto> CreateWithImageAsync(FarmCreateDto dto)
     {
-        await using var transaction = await _unitOfWork.BeginTransactionAsync();
+        ITransaction? transaction = null;
+
         try
         {
-            Address? addressEntity = null;
+            transaction = await _unitOfWork.BeginTransactionAsync();
 
+            // مرحله ۱: اعتبارسنجی پایه
+            if (string.IsNullOrWhiteSpace(dto.Name))
+                throw new BadRequestException("نام مزرعه الزامی است");
+
+            if (dto.MinPurchase < 0)
+                throw new BadRequestException("حداقل خرید نمی‌تواند منفی باشد");
+
+            int currentUserId = int.Parse(_currentUserService.UserId ?? throw new UnauthorizedException("کاربر لاگین نیست"));
+
+            // گرفتن صاحب مزرعه (فرض می‌کنیم صاحب = کاربر فعلی)
+            var owner = await _userRepository.GetByIdAsync(currentUserId)
+                        ?? throw new NotFoundException("کاربر یافت نشد");
+
+            // مرحله ۲: ساخت آدرس (اگر فرستاده شده)
+            Address? addressEntity = null;
             if (dto.Address != null)
             {
+                // Province — الزامی
                 var provinceId = await _provinceRepo.GetIdByCodeAsync(dto.Address.ProvinceCode, p => p.ProvinceId)
-                                 ?? throw new NotFoundException("استان یافت نشد");
+                                 ?? throw new BadRequestException("کد استان معتبر نیست");
 
-                var countyId = await _countyRepo.GetIdByCodeAsync(dto.Address.CountyCode, c => c.CountyId)
-                               ?? throw new NotFoundException("شهرستان یافت نشد");
+                // County — اختیاری
+                int? countyId = null;
+                if (!string.IsNullOrEmpty(dto.Address.CountyCode))
+                {
+                    countyId = await _countyRepo.GetIdByCodeAsync(dto.Address.CountyCode, c => c.CountyId)
+                               ?? throw new BadRequestException("کد شهرستان معتبر نیست");
+                }
 
+                // City — اختیاری
                 int? cityId = null;
                 if (!string.IsNullOrEmpty(dto.Address.CityCode))
-                    cityId = await _cityRepo.GetIdByCodeAsync(dto.Address.CityCode, c => c.CityId);
+                {
+                    cityId = await _cityRepo.GetIdByCodeAsync(dto.Address.CityCode, c => c.CityId)
+                             ?? throw new BadRequestException("کد شهر معتبر نیست");
+                }
 
+                // Village — اختیاری
                 int? villageId = null;
                 if (!string.IsNullOrEmpty(dto.Address.VillageCode))
-                    villageId = await _villageRepo.GetIdByCodeAsync(dto.Address.VillageCode, v => v.VillageId);
+                {
+                    villageId = await _villageRepo.GetIdByCodeAsync(dto.Address.VillageCode, v => v.VillageId)
+                                ?? throw new BadRequestException("کد روستا معتبر نیست");
+                }
 
                 addressEntity = new Address
                 {
-                    UserId = CurrentUserId,
-                    Street = dto.Address.Street,
-                    PostalCode = dto.Address.PostalCode,
-                    Latitude = dto.Address.Latitude,
-                    Longitude = dto.Address.Longitude,
-                    IsDefault = dto.Address.IsDefault,
+                    Street = dto.Address.Street ?? string.Empty,
+                    PostalCode = dto.Address.PostalCode ?? string.Empty,
+                    IsDefault = false,
                     ProvinceId = provinceId,
-                    CountyId = countyId,
+                    CountyId = countyId.Value,     // null اگر نفرستاده شده
                     CityId = cityId,
-                    VillageId = villageId
+                    VillageId = villageId,
+                    UserId = currentUserId,
+                    CreatedAt = DateTimeOffset.UtcNow,
+                    UpdatedAt = DateTimeOffset.UtcNow
                 };
 
                 await _addressRepository.AddAsync(addressEntity);
+                await _unitOfWork.SaveChangesAsync();
             }
 
-            // ------------------------------
-            // 2. ساخت فارم
-            // ------------------------------
+            // مرحله ۳: ساخت مزرعه
             var farmEntity = _mapper.Map<Farm>(dto);
-            farmEntity.OwnerId = CurrentUserId;
-            farmEntity.Address = addressEntity;
+            farmEntity.OwnerId = currentUserId; // یا owner.UserId
+            farmEntity.AddressId = addressEntity?.AddressId;
 
             await _farmRepository.AddAsync(farmEntity);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(); // تولید Code
 
-            // ------------------------------
-            // Commit تراکنش
-            // ------------------------------
-            await transaction.CommitAsync();
-
-            // ------------------------------
-            // 3. بعد از Commit: دوباره لود کردن اطلاعات کامل
-            // ------------------------------
-            var fullFarm = await _farmRepository
-    .GetAll()
-    .Include(f => f.Address)
-        .ThenInclude(a => a.Province)
-    .Include(f => f.Address)
-        .ThenInclude(a => a.County)
-    .Include(f => f.Address)
-        .ThenInclude(a => a.City)
-    .Include(f => f.Address)
-        .ThenInclude(a => a.Village)
-    .FirstOrDefaultAsync(f => f.FarmId == farmEntity.FarmId);
-
-            if (fullFarm == null)
-                throw new Exception("Farm loading failed after creation!");
-
-            // ------------------------------
-            // 4. ساخت DTO نهایی
-            // ------------------------------
-            var owner = await _userRepository.GetByIdAsync(CurrentUserId);
-
-            var result = _mapper.Map<FarmDto>(fullFarm);
-            result.OwnerCode = owner?.Code;
-
-            if (result.Address != null)
+            // مرحله ۴: آپلود عکس (اگر فرستاده شده)
+            if (dto.Image != null && dto.Image.Length > 0)
             {
-                result.Address.UserCode = owner?.Code;
-                result.Address.ProvinceCode = fullFarm.Address.Province.Code;
-                result.Address.ProvinceName = fullFarm.Address.Province.Name;
-                result.Address.CountyCode = fullFarm.Address.County.Code;
-                result.Address.CountyName = fullFarm.Address.County.Name;
-                result.Address.CityCode = fullFarm.Address.City?.Code;
-                result.Address.CityName = fullFarm.Address.City?.Name;
-                result.Address.VillageCode = fullFarm.Address.Village?.Code;
-                result.Address.VillageName = fullFarm.Address.Village?.Name;
+                if (!dto.Image.ContentType.StartsWith("image/"))
+                    throw new BadRequestException("فایل ارسالی تصویر معتبر نیست");
+
+                if (dto.Image.Length > 15 * 1024 * 1024)
+                    throw new BadRequestException("حجم عکس بیش از ۱۵ مگابایت است");
+
+                var uploadDto = new FileUploadDto
+                {
+                    File = dto.Image,
+                    EntityCode = farmEntity.Code,
+                    EntityFile = EntityFile.Farm,
+                    FileTypeCode = "CD5A1A3870",
+                    Description = "عکس اصلی مزرعه",
+                    IsPrimary = true  // ← چون فقط یک عکس داریم، اصلی باشه
+                };
+
+                var uploadedFile = await _fileService.UploadFileAsync(uploadDto);
+
+                if (string.IsNullOrEmpty(uploadedFile.Url))
+                    throw new InvalidOperationException("آپلود عکس مزرعه شکست خورد");
             }
 
-            result.ImageUrl = await _fileService.GetPrimaryFileUrlAsync(EntityFile.Farm, fullFarm.Code);
+            await transaction.CommitAsync();
+
+            // برگرداندن نتیجه
+            var result = _mapper.Map<FarmDto>(farmEntity);
+            result.OwnerCode = owner.Code;
+            result.ImageUrl = await _fileService.GetPrimaryFileUrlAsync(EntityFile.Farm, farmEntity.Code)
+                              ?? "/images/default-farm.jpg";
 
             return result;
         }
         catch (Exception)
         {
-            try { await transaction.RollbackAsync(); } catch { }
+            if (transaction != null)
+                await transaction.RollbackAsync();
             throw;
         }
+        finally
+        {
+            if (transaction != null)
+                await transaction.DisposeAsync();
+        }
     }
-
-
     #endregion
 
     #region Update
@@ -275,31 +299,73 @@ public class FarmService : IFarmService
     }
     #endregion
 
-    #region ChangeFarmImage
-    public async Task<string> ChangeFarmImageAsync(UploadFarmImageDto upload)
+    #region تغییر عکس مزرعه — عکس قبلی پاک میشه
+    public async Task<string> ChangeFarmImageAsync(UploadFarmImageDto dto)
     {
-        if (upload.File == null || upload.File.Length == 0)
-            throw new BadRequestException("فایل انتخاب نشده");
-
-        var farm = await _farmRepository.GetByCodeAsync(upload.Code)
+        var farm = await _farmRepository.FirstOrDefaultAsync(f => f.Code == dto.Code && !f.IsDeleted)
                    ?? throw new NotFoundException("مزرعه یافت نشد");
 
-        var uploadDto = new FileUploadDto
+        if (dto.File == null || dto.File.Length == 0)
+            throw new BadRequestException("فایل عکس الزامی است");
+
+        if (!dto.File.ContentType.StartsWith("image/"))
+            throw new BadRequestException("فایل ارسالی تصویر معتبر نیست");
+
+        if (dto.File.Length > 15 * 1024 * 1024)
+            throw new BadRequestException("حجم عکس بیش از ۱۵ مگابایت است");
+
+        ITransaction? transaction = null;
+
+        try
         {
-            File = upload.File,
-            EntityFile = EntityFile.Farm,
-            EntityCode = upload.Code,
-            FileTypeCode = "CD5A1A3870"
-        };
+            transaction = await _unitOfWork.BeginTransactionAsync();
 
-        var uploaded = await _fileService.UploadFileAsync(uploadDto);
-        await _fileService.RemovePrimaryFileAsync(EntityFile.Farm, upload.Code);
-        await _fileService.AttachFileAsPrimaryAsync(uploaded.FileCode, EntityFile.Farm, farm.Code);
+            // گرفتن عکس قبلی
+            var oldFile = await _fileRepo.FirstOrDefaultAsync(f =>
+                f.EntityCode == dto.Code &&
+                f.EntityFile == EntityFile.Farm &&
+                f.IsPrimary);
 
-        farm.UpdatedAt = DateTimeOffset.UtcNow;
-        await _unitOfWork.SaveChangesAsync();
+            // آپلود عکس جدید
+            var uploadDto = new FileUploadDto
+            {
+                File = dto.File,
+                EntityCode = dto.Code,
+                EntityFile = EntityFile.Farm,
+                FileTypeCode = "CD5A1A3870",
+                Description = "عکس اصلی مزرعه",
+                IsPrimary = true
+            };
 
-        return await _fileService.GetPrimaryFileUrlAsync(EntityFile.Farm, farm.Code);
+            var newFile = await _fileService.UploadFileAsync(uploadDto);
+
+            if (string.IsNullOrEmpty(newFile.Url))
+                throw new InvalidOperationException("آپلود عکس جدید شکست خورد");
+
+            // حذف عکس قبلی اگر وجود داشت
+            if (oldFile != null)
+            {
+                await _fileService.DeleteFileByCodeAsync(oldFile.Code);
+            }
+
+            farm.UpdatedAt = DateTimeOffset.UtcNow;
+            await _unitOfWork.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            return newFile.Url;
+        }
+        catch (Exception)
+        {
+            if (transaction != null)
+                await transaction.RollbackAsync();
+            throw;
+        }
+        finally
+        {
+            if (transaction != null)
+                await transaction.DisposeAsync();
+        }
     }
     #endregion
 
@@ -371,7 +437,7 @@ public class FarmService : IFarmService
             {
                 Code = f.Code,
                 Name = f.Name,
-                Description = f.Description,            
+                Description = f.Description,
             },
             pageNumber: filter.PageNumber,
             pageSize: filter.PageSize,

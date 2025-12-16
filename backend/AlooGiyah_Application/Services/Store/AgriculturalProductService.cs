@@ -35,7 +35,8 @@ public class AgriculturalProductService : IAgriculturalProductService
         IGenericRepository<Farm> greenhouseRepository,
         IGenericRepository<Status> statusRepository,
         IGenericRepository<Category> categoryRepository,
-        IFileService fileService,
+        IGenericRepository<Files> fileRepo,
+    IFileService fileService,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
         IMapper mapper)
@@ -44,6 +45,7 @@ public class AgriculturalProductService : IAgriculturalProductService
         _greenhouseRepository = greenhouseRepository;
         _statusRepository = statusRepository;
         _categoryRepository = categoryRepository;
+        _fileRepo = fileRepo;
         _fileService = fileService;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
@@ -127,7 +129,8 @@ public class AgriculturalProductService : IAgriculturalProductService
     }
     #endregion
 
-    public async Task<AgriculturalProductDetailDto> CreateWithImagesAsync(AgriculturalProductCreateDto dto)
+    #region ایجاد کالا همراه با عکس‌ها در یک تراکنش
+    public async Task<AgriculturalProductDetailDto> CreateWithImageAsync(AgriculturalProductCreateDto dto)
     {
         if (dto == null)
             throw new BadRequestException("داده‌های ورودی خالی است");
@@ -138,32 +141,27 @@ public class AgriculturalProductService : IAgriculturalProductService
         {
             transaction = await _unitOfWork.BeginTransactionAsync();
 
-            // اعتبارسنجی قیمت
+            // مرحله ۱: اعتبارسنجی و ساخت کالا
             var priceErrors = new Dictionary<string, string[]>();
             if (dto.RetailPrice < 0)
                 priceErrors.Add("RetailPrice", new[] { "قیمت خرده‌فروشی نمی‌تواند منفی باشد" });
-
             if (dto.WholesalePrice.HasValue && dto.WholesalePrice < 0)
                 priceErrors.Add("WholesalePrice", new[] { "قیمت عمده‌فروشی نمی‌تواند منفی باشد" });
-
             if (priceErrors.Any())
                 throw new ValidationException("اعتبارسنجی قیمت‌ها شکست خورد", priceErrors);
 
-            // اعتبارسنجی موجودی
             if (dto.Stock < 0)
                 throw new ValidationException("موجودی نمی‌تواند منفی باشد", new Dictionary<string, string[]>
             {
                 { "Stock", new[] { "موجودی نمی‌تواند منفی باشد" } }
             });
 
-            // گرفتن FarmId و StatusId
             var farmId = await _greenhouseRepository.GetIdByCodeAsync(dto.FarmCode, g => g.FarmId)
                          ?? throw new NotFoundException($"گلخانه با کد {dto.FarmCode} پیدا نشد");
 
             var statusId = await _statusRepository.GetIdByCodeAsync(dto.StatusCode, s => s.StatusId)
                            ?? throw new NotFoundException($"وضعیت با کد {dto.StatusCode} پیدا نشد");
 
-            // گرفتن دسته‌بندی‌ها
             var categories = new List<Category>();
             if (dto.CategoryCodes?.Any() ?? false)
             {
@@ -175,7 +173,6 @@ public class AgriculturalProductService : IAgriculturalProductService
                 }
             }
 
-            // ساخت entity محصول
             var entity = _mapper.Map<AgriculturalProduct>(dto);
             entity.FarmId = farmId;
             entity.StatusId = statusId;
@@ -201,7 +198,7 @@ public class AgriculturalProductService : IAgriculturalProductService
             await _agriculturalProductRepository.AddAsync(entity);
             await _unitOfWork.SaveChangesAsync(); // تولید Code
 
-            // آپلود عکس‌ها
+            // مرحله ۲: آپلود عکس‌ها
             if (dto.Images != null && dto.Images.Any(f => f.Length > 0))
             {
                 var validImages = dto.Images
@@ -210,30 +207,27 @@ public class AgriculturalProductService : IAgriculturalProductService
 
                 if (validImages.Any())
                 {
-                    var uploadDto = new AddProductImagesDto
+                    var imageUploadDto = new AddProductImagesDto
                     {
                         ProductCode = entity.Code,
                         Files = validImages
                     };
 
-                    var uploadedUrls = await AddProductImagesAsync(uploadDto);
+                    var uploadedUrls = await AddProductImagesAsync(imageUploadDto);
 
                     if (uploadedUrls.Count == 0)
-                        throw new Exception("هیچ عکسی با موفقیت آپلود نشد");
+                        throw new BadRequestException("هیچ عکسی با موفقیت آپلود نشد");
                 }
             }
 
-            // کامیت تراکنش
             await transaction.CommitAsync();
 
-            // برگرداندن محصول کامل
             return await GetByCodeAsync(entity.Code);
         }
         catch (Exception)
         {
             if (transaction != null)
                 await transaction.RollbackAsync();
-
             throw;
         }
         finally
@@ -242,6 +236,7 @@ public class AgriculturalProductService : IAgriculturalProductService
                 await transaction.DisposeAsync();
         }
     }
+    #endregion
 
     #region Update
     public async Task<bool> UpdateAsync(AgriculturalProductUpdateDto dto)
@@ -519,27 +514,24 @@ public class AgriculturalProductService : IAgriculturalProductService
     }
     #endregion
 
-    #region اضافه کردن چند عکس به محصول
+    #region اضافه کردن چند عکس به محصول (برای کالای موجود)
     public async Task<List<string>> AddProductImagesAsync(AddProductImagesDto dto)
     {
         var product = await _agriculturalProductRepository.FirstOrDefaultAsync(p => p.Code == dto.ProductCode && !p.IsDeleted)
                       ?? throw new NotFoundException("محصول یافت نشد");
 
         var uploadedUrls = new List<string>();
+        int successfulUploads = 0;
+
         bool hasPrimary = await _fileRepo.ExistsAsync(f =>
             f.EntityCode == dto.ProductCode &&
             f.EntityFile == EntityFile.AgriculturalProduct &&
             f.IsPrimary);
 
-        int successfulUploads = 0;
-
         foreach (var file in dto.Files)
         {
             if (file == null || file.Length == 0)
-            {
-                // _logger.LogWarning("فایل خالی یا null ارسال شده: {FileName}", file?.FileName);
                 continue;
-            }
 
             if (!file.ContentType.StartsWith("image/"))
                 throw new BadRequestException($"فایل {file.FileName} یک تصویر معتبر نیست");
@@ -552,51 +544,33 @@ public class AgriculturalProductService : IAgriculturalProductService
                 File = file,
                 EntityCode = dto.ProductCode,
                 EntityFile = EntityFile.AgriculturalProduct,
-                FileTypeCode = "CD5A1A3870"
+                FileTypeCode = "CD5A1A3870",
+                Description = null,
+                IsPrimary = !hasPrimary  // اگر هنوز اصلی نداشت، این یکی اصلی باشه
             };
 
-            FileDto? uploadedFile = null;
+            FileDto uploadedFile;
             try
             {
                 uploadedFile = await _fileService.UploadFileAsync(uploadDto);
             }
             catch (Exception ex)
             {
-                // _logger.LogError(ex, "خطا در آپلود فایل {FileName}", file.FileName);
                 throw new InvalidOperationException($"آپلود فایل {file.FileName} شکست خورد", ex);
             }
 
-            // چک‌های ضروری
-            if (uploadedFile == null)
-                throw new InvalidOperationException($"آپلود فایل {file.FileName} شکست خورد: شیء برگشتی null است");
-
-            if (string.IsNullOrEmpty(uploadedFile.Url))
+            if (uploadedFile == null || string.IsNullOrEmpty(uploadedFile.Url))
                 throw new InvalidOperationException($"آپلود فایل {file.FileName} شکست خورد: URL تولید نشد");
-
-            if (string.IsNullOrEmpty(uploadedFile.FileCode))
-                throw new InvalidOperationException($"آپلود فایل {file.FileName} شکست خورد: کد فایل تولید نشد");
 
             uploadedUrls.Add(uploadedFile.Url);
             successfulUploads++;
 
-            // تنظیم عکس اصلی
             if (!hasPrimary)
-            {
-                try
-                {
-                    await _fileService.AttachFileAsPrimaryAsync(uploadedFile.FileCode, EntityFile.AgriculturalProduct, dto.ProductCode);
-                    hasPrimary = true;
-                }
-                catch (Exception ex)
-                {
-                    // _logger.LogError(ex, "خطا در تنظیم عکس اصلی برای فایل {FileCode}", uploadedFile.Code);
-                    // ادامه بده — اصلی نبودن مهم نیست
-                }
-            }
+                hasPrimary = true; // فقط اولین عکس اصلی میشه
         }
 
         if (successfulUploads == 0)
-            throw new BadRequestException("هیچ عکسی با موفقیت آپلود نشد. عملیات متوقف شد.");
+            throw new BadRequestException("هیچ عکسی با موفقیت آپلود نشد");
 
         product.UpdatedAt = DateTimeOffset.UtcNow;
         await _unitOfWork.SaveChangesAsync();

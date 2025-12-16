@@ -1,5 +1,4 @@
-﻿
-namespace AlooGiyah_Domain.Pagination;
+﻿namespace AlooGiyah_Domain.Pagination;
 
 public class PagedResult<T>
 {

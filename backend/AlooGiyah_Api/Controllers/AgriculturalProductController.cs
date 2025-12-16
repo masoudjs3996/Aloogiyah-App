@@ -51,7 +51,7 @@ public class AgriculturalProductController : ControllerBase
 
         try
         {
-            var result = await _agriculturalProductService.CreateWithImagesAsync(dto);
+            var result = await _agriculturalProductService.CreateWithImageAsync(dto);
 
             return Ok(new ApiResponse<object>
             {

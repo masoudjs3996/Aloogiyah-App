@@ -5,7 +5,7 @@ namespace AlooGiyah_Application.Interfaces.Store;
 
 public interface IFarmService
 {
-    Task<FarmDto> CreateAsync(FarmCreateDto dto);
+    Task<FarmDto> CreateWithImageAsync(FarmCreateDto dto);
     Task<FarmDto?> UpdateAsync(FarmUpdateDto dto);
     Task<bool> DeleteAsync(string code);
     Task<FarmDto?> GetByCodeAsync(string code);

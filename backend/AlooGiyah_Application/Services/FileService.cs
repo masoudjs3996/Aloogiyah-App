@@ -7,6 +7,7 @@ using AlooGiyah_Domain.Entities.UserFolder;
 using AlooGiyah_Domain.Enums;
 using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Domain.Pagination;
+using AlooGiyah_Domain.ValueObjects;
 using AlooGiyah_Shared.Commons;
 using AlooGiyah_Shared.Exceptions;
 using AutoMapper;
@@ -54,52 +55,64 @@ public class FileService : IFileService
     public async Task<FileDto> UploadFileAsync(FileUploadDto dto)
     {
         if (string.IsNullOrEmpty(_currentUserService.UserId))
-            throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
+            throw new UnauthorizedException("کاربر لاگین نیست");
 
-        int user = int.Parse(_currentUserService.UserId);
+        var fileType = await _genericFileRepository.GetByCodeAsync(dto.FileTypeCode)
+                       ?? throw new AppException("نوع فایل یافت نشد");
 
-        var fileType = await _genericFileRepository.GetByCodeAsync(dto.FileTypeCode);
-        if (fileType == null)
-            throw new AppException("FileType not found");
-
-        if (!string.IsNullOrEmpty(dto.EntityCode))
+        // چک اعتبار EntityCode فقط برای موجودیت‌های موجود (نه ایجاد جدید)
+        if (!string.IsNullOrEmpty(dto.EntityCode) &&
+            dto.EntityFile != EntityFile.AgriculturalProduct &&  // ایجاد جدید کالا
+            dto.EntityFile != EntityFile.Category &&             // ایجاد جدید کتگوری
+            dto.EntityFile != EntityFile.Farm)                   // ایجاد جدید مزرعه
         {
-            var isValidEntity = await ValidateEntityCodeAsync(dto.EntityFile, dto.EntityCode);
-            if (!isValidEntity)
-                throw new AppException($"Entity with code {dto.EntityCode} not found for EntityFile {dto.EntityFile}");
+            var isValid = await ValidateEntityCodeAsync(dto.EntityFile, dto.EntityCode);
+            if (!isValid)
+                throw new AppException($"موجودیت با کد {dto.EntityCode} برای نوع {dto.EntityFile} یافت نشد");
         }
 
         if (dto.File == null || dto.File.Length == 0)
-            throw new AppException("File is empty");
+            throw new AppException("فایل خالی است");
 
-        // تصمیم‌گیری خودکار: آیا از پوشه تاریخ استفاده کنیم؟
         bool useDateFolder = ShouldUseDateFolder(dto.EntityFile);
 
-        // ذخیره در storage
-        string relativePath = await _fileStorageService.SaveFileAsync(
-            file: dto.File,
-            entityFile: dto.EntityFile,
-            entityCode: dto.EntityCode,
-            useDateFolder: useDateFolder
-            );
-    
+        StoredFile storedFile = null!;
 
-            var fileEntity = _mapper.Map<Files>(dto);
-        fileEntity.FileTypeId = fileType.FileTypeId;
-        fileEntity.UserId = user;
-        fileEntity.Url = relativePath;
-        fileEntity.EntityFile = dto.EntityFile;
-        fileEntity.EntityCode = dto.EntityCode;
-        fileEntity.FileType = fileType;
+        try
+        {
+            storedFile = await _fileStorageService.SaveFileInternalAsync(
+                dto.File,
+                dto.EntityFile,
+                useDateFolder);
 
-        await _fileRepository.AddAsync(fileEntity);
-        await _unitOfWork.SaveChangesAsync();
+            var fileEntity = new Files
+            {
+                // Code توسط BaseEntity constructor تولید میشه — دستی ست نکن!
+                Url = storedFile.RelativePath,        // ← درست: RelativePath
+                Description = dto.Description,
+                EntityFile = dto.EntityFile,
+                EntityCode = dto.EntityCode,
+                FileTypeId = fileType.FileTypeId,
+                UserId = int.Parse(_currentUserService.UserId),
+                IsPrimary = dto.IsPrimary               // از DTO بگیر
+            };
 
+            await _fileRepository.AddAsync(fileEntity);
+            await _unitOfWork.SaveChangesAsync();
 
-        var resultDto = _mapper.Map<FileDto>(fileEntity);
-        return resultDto;
+            return _mapper.Map<FileDto>(fileEntity);
+        }
+        catch (Exception)
+        {
+            // اگر فایل فیزیکی ذخیره شده بود، پاک کن
+            if (storedFile != null && System.IO.File.Exists(storedFile.PhysicalPath))
+            {
+                try { System.IO.File.Delete(storedFile.PhysicalPath); }
+                catch { /* لاگ کن */ }
+            }
+            throw;
+        }
     }
-
     #endregion
 
     #region Delete 

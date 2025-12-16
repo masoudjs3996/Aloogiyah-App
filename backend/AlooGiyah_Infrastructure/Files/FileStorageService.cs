@@ -1,9 +1,10 @@
 ﻿using AlooGiyah_Domain.Enums;
 using AlooGiyah_Domain.Interfaces;
+using AlooGiyah_Domain.ValueObjects;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
+
 
 namespace AlooGiyah_Infrastructure.Files;
 
@@ -62,6 +63,32 @@ public class FileStorageService : IFileStorageService
 
         return relativeUrl; // نیازی به / اول اضافی نیست چون RequestPath خودش /uploads داره
     }
+
+    public async Task<StoredFile> SaveFileInternalAsync(
+    IFormFile file,
+    EntityFile entityFile,
+    bool useDateFolder)
+    {
+        string baseFolder = GetBaseFolder(entityFile);
+        string finalFolder = baseFolder;
+
+        if (useDateFolder)
+            finalFolder = Path.Combine(baseFolder, DateTime.Now.ToString("yyyy-MM-dd"));
+
+        string fullFolderPath = Path.Combine(_baseUploadPath, finalFolder);
+        Directory.CreateDirectory(fullFolderPath);
+
+        string fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+        string physicalPath = Path.Combine(fullFolderPath, fileName);
+
+        using var stream = new FileStream(physicalPath, FileMode.Create);
+        await file.CopyToAsync(stream);
+
+        string relativeUrl = "/uploads/" + finalFolder.Replace("\\", "/") + "/" + fileName;
+
+        return new StoredFile(relativeUrl, physicalPath);
+    }
+
 
     public Task DeleteFileAsync(string relativeUrl)
     {

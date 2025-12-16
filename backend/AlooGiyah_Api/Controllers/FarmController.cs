@@ -30,7 +30,7 @@ namespace AlooGiyah_Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _greenhouseService.CreateAsync(createDto);
+            var result = await _greenhouseService.CreateWithImageAsync(createDto);
 
             return Ok(new ApiResponse<object>
             {

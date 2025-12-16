@@ -6,7 +6,7 @@ namespace AlooGiyah_Application.Interfaces.Store;
 public interface IAgriculturalProductService
 {
     Task<AgriculturalProductDto> CreateAsync(AgriculturalProductCreateDto dto);
-    Task<AgriculturalProductDetailDto> CreateWithImagesAsync(AgriculturalProductCreateDto dto);
+    Task<AgriculturalProductDetailDto> CreateWithImageAsync(AgriculturalProductCreateDto dto);
     Task<bool> UpdateAsync(AgriculturalProductUpdateDto dto);
     Task<bool> DeleteAsync(string code);
     Task<AgriculturalProductDetailDto?> GetByCodeAsync(string code);
