@@ -28,13 +28,13 @@ public class AgriculturalProductCreateDto
     public string StatusCode { get; set; } = string.Empty;
 
     [MaxLength(255)]
-    public string Slug { get; set; } = string.Empty;
+    public string? Slug { get; set; } = string.Empty;
 
     [MaxLength(255)]
-    public string MetaTitle { get; set; } = string.Empty;
+    public string? MetaTitle { get; set; } = string.Empty;
 
     [MaxLength(500)]
-    public string MetaDescription { get; set; } = string.Empty;
+    public string? MetaDescription { get; set; } = string.Empty;
 
     [MaxLength(255)]
     public string? MetaKeywords { get; set; }

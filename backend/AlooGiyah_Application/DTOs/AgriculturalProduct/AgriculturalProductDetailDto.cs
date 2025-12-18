@@ -11,6 +11,6 @@ namespace AlooGiyah_Application.DTOs.AgriculturalProduct
         public string StatusCode { get; set; } = string.Empty;
         public List<string> CategoryCodes { get; set; } = new();
 
-        public List<string> ImageUrls { get; set; } = new();
+        public List<string>? ImageUrls { get; set; } 
     }
 }

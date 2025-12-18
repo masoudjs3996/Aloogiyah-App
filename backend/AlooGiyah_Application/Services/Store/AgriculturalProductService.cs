@@ -352,7 +352,7 @@ public class AgriculturalProductService : IAgriculturalProductService
 
         var entity = await _agriculturalProductRepository.GetByCodeWithIncludeAsync(
             code: code,
-            includes: new Expression<Func<AgriculturalProduct, object>>[] { p => p.Categories! }
+            includes: new Expression<Func<AgriculturalProduct, object>>[] { p => p.Categories!,f => f.Farm }
         );
 
         if (entity == null)
@@ -363,13 +363,13 @@ public class AgriculturalProductService : IAgriculturalProductService
         // مقادیر اضافی که ممکنه مپ نشن
         productDto.RetailPrice = entity.RetailPrice;
         productDto.WholesalePrice = Role == "User" ? null : entity.WholesalePrice;
-        productDto.GreenhouseCode = entity.Farm?.Code ?? ""; // یا هر فیلدی که داری
+        productDto.FarmCode = entity.Farm?.Code ?? ""; 
         productDto.StatusCode = await _statusRepository.GetCodeByIdAsync(entity.StatusId) ?? "";
         productDto.CategoryCodes = entity.Categories?.Select(c => c.Code).ToList() ?? new List<string>();
 
-        // ==== بخش عکس‌ها — کاملاً ایمن ====
+        //  بخش عکس‌ها — کاملاً ایمن 
         productDto.ImageUrls = new List<string>();
-        productDto.PrimaryImageUrl = "/images/default-product.jpg"; // پیش‌فرض
+        productDto.PrimaryImageUrl = null; // پیش‌فرض
 
         if (_fileRepo != null)
         {
