@@ -24,8 +24,8 @@ namespace AlooGiyah_Api.Controllers
 
         #region CreateFarm
         [Authorize]
-        [HttpPost("Create")]
-        public async Task<IActionResult> CreateGreenhouse(FarmCreateDto createDto)
+        [HttpPost("Create")]    
+        public async Task<IActionResult> CreateGreenhouse([FromForm] FarmCreateDto createDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

@@ -9,13 +9,12 @@ using AlooGiyah_Shared.Exceptions;
 using AutoMapper;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
-using System.Data.Entity.Core.Metadata.Edm;
 
-
+namespace AlooGiyah_Application.Services.UserFolder;
 
 public class LocationService : ILocationService
 {
-
+    #region Constructor
     private readonly IGenericRepository<Province> _provinceRepo;
     private readonly IGenericRepository<County> _countyRepo;
     private readonly IGenericRepository<City> _cityRepo;
@@ -41,9 +40,10 @@ public class LocationService : ILocationService
         _unitOfWork = unitOfWork;
         _mapper = mapper;
     }
+    #endregion
 
 
-
+    #region GetProvincesAsync
     public async Task<PagedResult<ProvinceListDto>> GetProvincesAsync(LocationFilterDto filter)
     {
         var predicate = PredicateBuilder.True<Province>()
@@ -68,7 +68,9 @@ public class LocationService : ILocationService
             orderBy: p => p.Name
         );
     }
+    #endregion
 
+    #region CreateProvinceAsync
     public async Task<ProvinceDto> CreateProvinceAsync(ProvinceCreateDto dto)
     {
         if (await _provinceRepo.ExistsAsync(p => EF.Functions.Like(p.Name, dto.Name.Trim()) && !p.IsDeleted))
@@ -88,7 +90,9 @@ public class LocationService : ILocationService
 
         return provinceDto;
     }
+    #endregion
 
+    #region UpdateProvinceAsync
     public async Task<ProvinceDto> UpdateProvinceAsync(ProvinceUpdateDto dto)
     {
         var province = await _provinceRepo.GetByCodeAsync(dto.Code)
@@ -109,7 +113,9 @@ public class LocationService : ILocationService
 
         return _mapper.Map<ProvinceDto>(updateProvince);
     }
+    #endregion
 
+    #region GetCountiesAsync
     public async Task<PagedResult<CountyDto>> GetCountiesAsync(string? provinceCode, LocationFilterDto filter)
     {
         var predicate = PredicateBuilder.True<County>()
@@ -140,9 +146,9 @@ public class LocationService : ILocationService
             expressionIncludes: c => c.Province
         );
     }
+    #endregion
 
-
-
+    #region CreateCountyAsync
     public async Task<CountyDto> CreateCountyAsync(CountyCreateDto dto)
     {
         var provinceId = await _provinceRepo.GetIdByCodeAsync(dto.ProvinceCode, p => p.ProvinceId)
@@ -168,7 +174,9 @@ public class LocationService : ILocationService
 
         return countyDto;
     }
+    #endregion
 
+    #region CreateCityAsync
     public async Task<CityDto> CreateCityAsync(CityCreateDto dto)
     {
         var countyId = await _countyRepo.GetIdByCodeAsync(dto.CountyCode, c => c.CountyId)
@@ -196,7 +204,9 @@ public class LocationService : ILocationService
 
         return cityDto;
     }
+    #endregion
 
+    #region CreateVillageAsync
     public async Task<VillageDto> CreateVillageAsync(VillageCreateDto dto)
     {
         var countyId = await _countyRepo.GetIdByCodeAsync(dto.CountyCode, c => c.CountyId)
@@ -222,7 +232,9 @@ public class LocationService : ILocationService
 
         return villageDto;
     }
+    #endregion
 
+    #region GetCountyLocationsAsync
     public async Task<List<CountyLocationItemDto>> GetCountyLocationsAsync(CountyLocationsFilterDto filterDto)
     {
         var countyId = await _countyRepo.GetIdByCodeAsync(filterDto.countyCode, c => c.CountyId)
@@ -271,4 +283,5 @@ public class LocationService : ILocationService
 
         return result.OrderBy(x => x.Name).ToList();
     }
+    #endregion
 }

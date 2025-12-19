@@ -73,9 +73,17 @@ namespace AlooGiyah_Application.Mappings
             #endregion
 
             #region Address
-            CreateMap<AddressCreateDto, Address>();
+            CreateMap<AddressCreateDto, Address>()
+                .ForMember(d => d.ProvinceId, opt => opt.Ignore())
+                .ForMember(d => d.CountyId, opt => opt.Ignore())
+                .ForMember(d => d.CityId, opt => opt.Ignore());
+
+            CreateMap<AddressUpdateDto, Address>()
+                .ForMember(d => d.ProvinceId, opt => opt.Ignore())
+                .ForMember(d => d.CountyId, opt => opt.Ignore())
+                .ForMember(d => d.CityId, opt => opt.Ignore());
+
             CreateMap<Address, AddressDto>();
-            CreateMap<AddressUpdateDto, Address>();
             #endregion
 
             #region Product

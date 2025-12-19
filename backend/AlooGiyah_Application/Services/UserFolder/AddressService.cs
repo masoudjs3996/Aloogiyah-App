@@ -14,6 +14,7 @@ namespace AlooGiyah_Application.Services.UserFolder;
 
 public class AddressService : IAddressService
 {
+    #region Constructor
     private readonly IGenericRepository<Address> _addressRepo;
     private readonly IGenericRepository<Province> _provinceRepo;
     private readonly IGenericRepository<County> _countyRepo;
@@ -42,6 +43,7 @@ public class AddressService : IAddressService
         _unitOfWork = unitOfWork;
         _mapper = mapper;
     }
+    #endregion
 
     private int CurrentUserId => int.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException("کاربر احراز هویت نشده"));
     private bool IsManager => _currentUser.Roles?.Contains("Manager") == true;
@@ -58,7 +60,7 @@ public class AddressService : IAddressService
         int? cityId = null;
         if (!string.IsNullOrEmpty(dto.CityCode))
         {
-            cityId = await _cityRepo.GetIdByCodeAsync(dto.CityCode, c => c.CityId)
+            cityId = await _cityRepo.GetIdByCodeAsync(dto.CityCode,c => c.CityId )
                      ?? throw new NotFoundException("شهر یافت نشد");
         }
 
@@ -184,11 +186,11 @@ public async Task<AddressDto?> GetByCodeAsync(string code)
                            ?? throw new NotFoundException("شهرستان یافت نشد");
 
         address.CityId = !string.IsNullOrEmpty(dto.CityCode)
-            ? await _cityRepo.GetIdByCodeAsync(dto.CityCode, c => c.CityId)
+            ? await _cityRepo.GetIdByCodeAsync(dto.CityCode, c=> c.CityId)
             : null;
 
         address.VillageId = !string.IsNullOrEmpty(dto.VillageCode)
-            ? await _villageRepo.GetIdByCodeAsync(dto.VillageCode, v => v.VillageId)
+            ? await _villageRepo.GetIdByCodeAsync(dto.VillageCode, p => p.VillageId)
             : null;
 
         _mapper.Map(dto, address);

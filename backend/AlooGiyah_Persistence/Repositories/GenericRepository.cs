@@ -225,14 +225,21 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     #endregion
 
     #region گرقتن ایدی بر اساس کد
-    public async Task<int?> GetIdByCodeAsync(string code, Expression<Func<T, int>> keySelector)
+    public async Task<int?> GetIdByCodeAsync(
+        string code,
+        Expression<Func<T, int>> keySelector)
     {
-        return await _dbSet
-            .Where(e => e.Code == code)
-            .Select(keySelector)
-            .Cast<int?>()
-            .FirstOrDefaultAsync();
+        var entity = await _dbSet
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.Code == code);
+
+        if (entity == null)
+            return null;
+
+        return keySelector.Compile()(entity);
     }
+
+
     #endregion
 
     #region گرفتن کد بر اساس ایدی

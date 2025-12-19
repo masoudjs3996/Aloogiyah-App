@@ -17,5 +17,5 @@ public class Province : BaseEntity
     [ForeignKey(nameof(StatusId))]
     public Status Status { get; set; } = null!;
 
-    public List<County> Counties { get; set; } = new();
+    public List<County> Counties { get; set; } = null!;
 }

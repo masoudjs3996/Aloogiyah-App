@@ -21,6 +21,6 @@ public class County : BaseEntity
     [ForeignKey(nameof(ProvinceId))]
     public Province Province { get; set; } = null!;
 
-    public List<City> Cities { get; set; } = new();
-    public List<Village> Villages { get; set; } = new();
+    public List<City> Cities { get; set; } = null!;
+    public List<Village> Villages { get; set; } = null!;
 }
