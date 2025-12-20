@@ -2,6 +2,7 @@
 
 import Button from "@/design-system/atoms/Button";
 import { useMyFarm } from "@/hooks/queries/useFarm";
+import { getImageUrl } from "@/shared/utils/getImageUrl";
 import Link from "next/link";
 
 interface FarmInfoProps {
@@ -23,7 +24,7 @@ const FarmInfo = ({ fermCode }: FarmInfoProps) => {
       <div className="w-full h-48 mb-4 rounded-md overflow-hidden bg-gray-200 flex items-center justify-center">
         {imageUrl ? (
           <img
-            src={imageUrl}
+            src={getImageUrl(imageUrl)}
             alt={name}
             className="w-full h-full object-cover"
           />
@@ -56,7 +57,7 @@ const FarmInfo = ({ fermCode }: FarmInfoProps) => {
           {address.postalCode && <p>کد پستی: {address.postalCode}</p>}
         </div>
       )}
-      <div className="w-full py-4 flex justify-center items-center bg-red-500">
+      <div className="w-full py-4 flex justify-center items-center ">
         <Link href={`/dashboard/farm/myFarms/${fermCode}/farmProducts`}>
           <Button variant="success">لیست محصولات </Button>
         </Link>

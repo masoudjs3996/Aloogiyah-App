@@ -1,5 +1,6 @@
+import { FarmInfo } from "@/design-system/organisms/dashbord";
 import { PageParams } from "@/shared/types/general";
-import FarmInfo from "./farminfo";
+
 
 type DetailFarmParams = PageParams<"fermCode">;
 

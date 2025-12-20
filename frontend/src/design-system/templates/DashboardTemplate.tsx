@@ -12,7 +12,7 @@ const DashboardTemolate = ({ children }: DashboardTemolateProps) => {
       <div className="fixed top-0 w-full z-10">
         <ProfileHeader />
       </div>
-      <main className="p-4 mt-10">{children}</main>
+      <main className="p-4 mt-10 pb-20">{children}</main>
       <DashboardBottomNavigation />
     </>
   );

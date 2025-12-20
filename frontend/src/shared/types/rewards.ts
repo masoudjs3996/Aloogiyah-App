@@ -7,15 +7,18 @@ export interface DiscountModel {
   code: string;
   description: string;
   discountType: DiscountType;
-  endDate: string;    
+  endDate: string;
   farmCode: string | null;
   isActive: boolean;
   maxDiscountAmount: number;
   maxUsage: number;
   productCodes: string[];
-  startDate: string;  
+  startDate: string;
   usageCount: number;
   userCodes: string[];
   value: number;
+  rootCategoryCodes: string;
+  rootCategoryNames: string;
 }
+
 export type GetRewardsResponse = IApiResponse<DiscountModel[]>;

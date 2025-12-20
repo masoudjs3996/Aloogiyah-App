@@ -6,9 +6,7 @@ import { IoStorefrontSharp } from "react-icons/io5";
 
 const AllFarm = () => {
   const { farms } = useMyFarm();
-
   const myFarms = farms?.data ?? [];
-
   return (
     <div className="w-full h-full p-5 ">
       {myFarms.map((farm) => (

@@ -5,6 +5,7 @@ import { BannerSlider } from "@/design-system/organisms/Home";
 export default async function Home() {
   const res = await getFeaturedCategories();
   const categories = res?.data;
+  console.log(res)
   if (!categories || categories.length === 0) {
     return <p>دسته‌بندی یافت نشد</p>;
   }

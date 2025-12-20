@@ -3,19 +3,26 @@ import { TagFilter } from "@/design-system/atoms/TagFilter";
 import { DiscountCard } from "@/design-system/molecules/dashbord/DiscountCard";
 import { DiscountFilters } from "@/design-system/molecules/dashbord/DiscountFilters";
 import { useRewards } from "@/hooks/queries/useRewards";
+import { ICategoryFeatured } from "@/shared/types/categories";
 import { useMemo, useState } from "react";
 import { GiFlowerPot } from "react-icons/gi";
 import { IoPricetagOutline } from "react-icons/io5";
 
-const RewardsFilters = ({ categories }: { categories: any }) => {
+const RewardsFilters = ({
+  categories,
+}: {
+  categories: ICategoryFeatured[];
+}) => {
+
   const { data } = useRewards();
   const [active, setActive] = useState<string>("all");
   const filteredRewards = useMemo(() => {
-    if (!data?.data) return [];
-    if (active === "all") return data.data;
-    //  return data?.data?.filter((item) => item.categoryCodes === active);
+    if (!categories) return [];
+    if (active === "all") return data?.data;
+    return data?.data?.filter((item) => item.rootCategoryCodes === active);
   }, [active, data]);
-  console.log(data);
+
+
   return (
     <>
       <div className="px-4 py-4 space-y-4">
@@ -23,14 +30,25 @@ const RewardsFilters = ({ categories }: { categories: any }) => {
           <IoPricetagOutline className="w-6 h-6" />
           <span> تخفیف و جایزه شما</span>
         </div>
-        {/* <TagFilter
-          key={item}
-          label={item}
-          active={active === item}
-          onClick={() => setActive(item)}
-        /> */}
+        <div className="flex gap-2 flex-wrap">
+          <TagFilter
+            label="همه"
+            active={active === "all"}
+            onClick={() => setActive("all")}
+          />
+
+          {categories.map((cat) => (
+            <TagFilter
+              key={cat.code}
+              label={cat.name}
+              active={active === cat.code}
+              onClick={() => setActive(cat.code)}
+            />
+          ))}
+        </div>
+
         <div className="space-y-4">
-          {data?.data?.map((dis) => {
+          {filteredRewards?.map((dis) => {
             const end = new Date(dis.endDate);
             const now = new Date();
             const daysLeft = Math.ceil(
