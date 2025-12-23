@@ -2,6 +2,7 @@ import axiosInstance from "@/shared/lib/config/axions";
 import {
   CreateFarmResponse,
   DetailFarmResponse,
+  GetFarmByFilterResponse,
   GetMyFarmResponse,
 } from "@/shared/types/farm";
 
@@ -45,3 +46,15 @@ export async function GetMyFarmDetail(
     return null;
   }
 }
+export async function GetFarmsByFilter(): Promise<GetFarmByFilterResponse | null> {
+  try {
+    const { data } = await axiosInstance.get<GetFarmByFilterResponse>(
+      "/Farm/GetByFilter"
+    );
+    return data ?? null;
+  } catch (error) {
+    console.error("Error fetching MyFarm:", error);
+    return null;
+  }
+}
+

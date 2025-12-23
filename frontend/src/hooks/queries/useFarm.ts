@@ -1,4 +1,7 @@
-import { GetMyFarm, GetMyFarmDetail } from "@/lib/actions/farm";
+import {
+  GetMyFarm,
+  GetMyFarmDetail,
+} from "@/lib/actions/farm";
 import { useQuery } from "@tanstack/react-query";
 
 export const useMyFarm = (code?: string) => {
@@ -13,6 +16,7 @@ export const useMyFarm = (code?: string) => {
     enabled: !!code,
     staleTime: 1000 * 60 * 2,
   });
+
   return {
     farms: myFarmsQuery.data,
     farmsError: myFarmsQuery.error,

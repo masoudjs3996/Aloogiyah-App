@@ -4,22 +4,32 @@ import {
   IAgriculturalProduct,
   IPaginatedResult,
 } from "@/shared/types/product";
-import axios from "axios";
 
 export async function getProducts(
-  payload?: any
+  payload?: string | null
 ): Promise<IPaginatedResult<IAgriculturalProduct> | null> {
   try {
-    const { data } = await axiosInstance.get<GetProductResponse>(
-      `/AgriculturalProduct/GetByFilter?FarmCode=${payload}`
-    );
-    return data?.data ?? null;
-  } catch (error) {
-    console.error("Error fetching provinces:", error);
+    const url = payload
+      ? `/AgriculturalProduct/GetByFilter?FarmCode=${encodeURIComponent(payload)}`
+      : `/AgriculturalProduct/GetByFilter`;
+
+    const { data } = await axiosInstance.get<GetProductResponse>(url);
+    if (!data?.isSuccess) {
+      console.warn("API returned unsuccessful response:", data?.message);
+      return null;
+    }
+
+    return data.data ?? null;
+  } catch (error: any) {
+    console.error("Error fetching products:", error.message || error);
+    if (error.response) {
+      console.error("Status:", error.response.status);
+      console.error("Response data:", error.response.data);
+    }
+
     return null;
   }
 }
-
 export async function AddProduct(payload: FormData) {
   console.log("FormData payload:");
   for (const [key, value] of payload.entries()) {
@@ -40,11 +50,11 @@ export async function AddProduct(payload: FormData) {
 
 export async function GetDetailProduct(payload: string) {
   try {
-    const {data} = await axiosInstance.get(
+    const { data } = await axiosInstance.get(
       "/AgriculturalProduct/GetByCode?code=7A52D575F8"
     );
-    
-    return data
+
+    return data;
   } catch (error) {
     console.error("Error creating product:", error);
     throw error;

@@ -40,3 +40,4 @@ export interface CreateProductPayload {
 export type GetProductResponse = IApiResponse<
   IPaginatedResult<IAgriculturalProduct>
 >;
+

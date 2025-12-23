@@ -6,6 +6,8 @@ import { getImageUrl } from "@/shared/utils/getImageUrl";
 import Link from "next/link";
 const FarmProducts = ({ fermCode }: { fermCode: string }) => {
   const { products, isLoading } = useProducts(fermCode);
+  
+  
   return (
     <div className="flex flex-col justify-between h-full ">
       <div className="flex flex-col gap-4 mt-4">

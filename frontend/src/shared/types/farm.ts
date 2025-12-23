@@ -30,9 +30,12 @@ export interface ICreateFarmResponse {
   imageUrl: string | null;
 }
 
+
 export interface IGetMyFarm
   extends Pick<ICreateFarmResponse, "name" | "code" | "description"> {}
 export type GetMyFarmResponse = IApiResponse<IGetMyFarm[]>;
 
 export type CreateFarmResponse = IApiResponse<ICreateFarmResponse>;
+export type GetFarmByFilterResponse = IApiResponse<ICreateFarmResponse[]>;
+
 export type DetailFarmResponse = CreateFarmResponse;
