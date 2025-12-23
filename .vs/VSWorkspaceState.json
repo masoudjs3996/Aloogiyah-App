@@ -1,7 +1,10 @@
 {
   "ExpandedNodes": [
     "",
-    "\\backend"
+    "\\frontend",
+    "\\frontend\\src",
+    "\\frontend\\src\\lib",
+    "\\frontend\\src\\lib\\actions"
   ],
-  "PreviewInSolutionExplorer": true
+  "PreviewInSolutionExplorer": false
 }

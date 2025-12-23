@@ -345,10 +345,9 @@ public class AgriculturalProductService : IAgriculturalProductService
         if (string.IsNullOrEmpty(code))
             throw new ArgumentNullException(nameof(code));
 
-        if (string.IsNullOrEmpty(_currentUserService.UserId))
-            throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
+       
 
-        var Role = _currentUserService.Roles.FirstOrDefault();
+        var Role = _currentUserService.Roles.FirstOrDefault() ?? "User";
 
         var entity = await _agriculturalProductRepository.GetByCodeWithIncludeAsync(
             code: code,
@@ -418,12 +417,10 @@ public class AgriculturalProductService : IAgriculturalProductService
     #region Get By Filter
     public async Task<PagedResult<AgriculturalProductListItemDto>> GetByFilterAsync(AgriculturalProductFilterDto filter)
     {
-        if (string.IsNullOrEmpty(_currentUserService.UserId))
-            throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
 
         Expression<Func<AgriculturalProduct, bool>> predicate = p => !p.IsDeleted;
 
-        var role = _currentUserService.Roles.FirstOrDefault();
+        var role = _currentUserService.Roles.FirstOrDefault()?? "User" ;
 
         if (!string.IsNullOrEmpty(filter.Name))
             predicate = predicate.And(p => p.Name.Contains(filter.Name));
