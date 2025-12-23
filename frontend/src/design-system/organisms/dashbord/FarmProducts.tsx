@@ -10,16 +10,23 @@ const FarmProducts = ({ fermCode }: { fermCode: string }) => {
     <div className="flex flex-col justify-between h-full ">
       <div className="flex flex-col gap-4 mt-4">
         {products.map((product) => (
-          <ProductCard
+          <Link
+            href={`/dashboard/farm/myFarms/${fermCode}/farmProducts/${product?.code}`}
             key={product.code}
-            name={product?.name}
-            img={getImageUrl(product?.primaryImageUrl)}
-            price={product?.retailPrice}
-          />
+          >
+            <ProductCard
+              key={product.code}
+              name={product?.name}
+              img={getImageUrl(product?.primaryImageUrl)}
+              price={product?.retailPrice}
+            />
+          </Link>
         ))}
       </div>
 
-      <Link href={`/dashboard/farm/myFarms/${fermCode}/farmProducts/addFarmProducts`}>
+      <Link
+        href={`/dashboard/farm/myFarms/${fermCode}/farmProducts/addFarmProducts`}
+      >
         <Button variant="success">+ ثبت محصول جدید</Button>
       </Link>
     </div>

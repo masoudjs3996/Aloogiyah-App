@@ -1,11 +1,12 @@
 import { getFeaturedCategories } from "@/lib/actions/categories";
 import { CategoryCard } from "@/design-system/molecules/public";
 import { BannerSlider } from "@/design-system/organisms/Home";
+import StoreCardList from "./test";
 
 export default async function Home() {
   const res = await getFeaturedCategories();
   const categories = res?.data;
-  console.log(res)
+  console.log(res);
   if (!categories || categories.length === 0) {
     return <p>دسته‌بندی یافت نشد</p>;
   }
@@ -21,6 +22,7 @@ export default async function Home() {
             imageUrl={categories[i % categories.length]?.imageUrl}
           />
         ))}
+        <StoreCardList />
       </div>
     </>
   );
