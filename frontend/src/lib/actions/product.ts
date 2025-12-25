@@ -10,7 +10,9 @@ export async function getProducts(
 ): Promise<IPaginatedResult<IAgriculturalProduct> | null> {
   try {
     const url = payload
-      ? `/AgriculturalProduct/GetByFilter?FarmCode=${encodeURIComponent(payload)}`
+      ? `/AgriculturalProduct/GetByFilter?FarmCode=${encodeURIComponent(
+          payload
+        )}`
       : `/AgriculturalProduct/GetByFilter`;
 
     const { data } = await axiosInstance.get<GetProductResponse>(url);
@@ -48,10 +50,10 @@ export async function AddProduct(payload: FormData) {
   }
 }
 
-export async function GetDetailProduct(payload: string) {
+export async function GetDetailProduct(payload?: string) {
   try {
     const { data } = await axiosInstance.get(
-      "/AgriculturalProduct/GetByCode?code=7A52D575F8"
+      `/AgriculturalProduct/GetByCode?code=${payload}`
     );
 
     return data;

@@ -32,7 +32,7 @@ export default async function Home() {
   return (
     <>
       <BannerSlider />
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-4  my-10">
+      <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-10 lg:grid-cols-12 gap-4 p-4  my-10">
         {Array.from({ length: 10 }).map((_, i) => (
           <CategoryCard
             key={i}
