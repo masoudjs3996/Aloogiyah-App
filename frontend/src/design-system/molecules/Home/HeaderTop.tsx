@@ -5,10 +5,11 @@ import { IoMdMenu } from "react-icons/io";
 import { TiShoppingCart } from "react-icons/ti";
 import Link from "next/link";
 import { IoCloseOutline } from "react-icons/io5";
+import { useRouter } from "next/navigation";
 
 const HeaderTop: FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const router = useRouter();
   const links = [
     { href: "/dashboard", label: "داشبورد" },
     { href: "/profile", label: "پروفایل" },
@@ -32,7 +33,10 @@ const HeaderTop: FC = () => {
 
         <p className="font-bold text-lg">LOGO</p>
 
-        <IconButton icon={<TiShoppingCart className="w-6 h-6" />} />
+        <IconButton
+          onClick={() => router.push("/checkout/card")}
+          icon={<TiShoppingCart className="w-6 h-6 " />}
+        />
       </div>
       <div
         className={`absolute top-full left-0 w-full bg-white shadow-md flex flex-col p-4 space-y-2 z-50 overflow-hidden transition-all duration-300 ${

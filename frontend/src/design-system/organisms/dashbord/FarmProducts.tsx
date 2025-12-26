@@ -5,9 +5,8 @@ import { useProducts } from "@/hooks/queries/useProduct";
 import { getImageUrl } from "@/shared/utils/getImageUrl";
 import Link from "next/link";
 const FarmProducts = ({ fermCode }: { fermCode: string }) => {
-  const { products, isLoading } = useProducts(fermCode);
-  
-  
+  const { products, isLoading } = useProducts({ farmCode: fermCode });
+
   return (
     <div className="flex flex-col justify-between h-full ">
       <div className="flex flex-col gap-4 mt-4">

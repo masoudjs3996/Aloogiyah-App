@@ -36,8 +36,19 @@ export interface CreateProductPayload {
   StatusCode?: string;
   Images?: File[];
 }
+export interface ProductFilter {
+  name?: string;
+  statusCode?: string;
+  farmCode?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minStock?: number;
+  maxStock?: number;
+  categoryCodes?: string[];
+  pageNumber?: number;
+  pageSize?: number;
+}
 
 export type GetProductResponse = IApiResponse<
   IPaginatedResult<IAgriculturalProduct>
 >;
-

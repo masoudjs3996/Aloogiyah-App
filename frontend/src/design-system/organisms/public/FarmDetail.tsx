@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import Image from "next/image";
 import { BookmarkIcon, StarIcon } from "@heroicons/react/24/outline";
 import { BiSearch } from "react-icons/bi";
@@ -7,6 +7,9 @@ import { useMyFarm } from "@/hooks/queries/useFarm";
 import { getImageUrl } from "@/shared/utils/getImageUrl";
 import { useProducts } from "@/hooks/queries/useProduct";
 import { truncateText } from "@/shared/utils/truncateText";
+import SearchInput from "@/design-system/atoms/SearchInput";
+import useDebounce from "@/shared/hooks/useDebounce";
+import AnimatedSearchInput from "@/design-system/atoms/AnimatedSearchInput";
 type Product = {
   id: number;
   name: string;
@@ -14,26 +17,45 @@ type Product = {
   price: number;
   image?: string;
 };
-
-const products: Product[] = [
-  {
-    id: 1,
-    name: "نارگیل",
-    weight: "۷۰۰ گرم",
-    price: 56000,
-    image: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Coconut.jpg",
-  },
-  {
-    id: 2,
-    name: "توت فرنگی",
-    weight: "۵۰۰ گرم",
-    price: 45000,
-  },
-];
-
+const TABS = ["همه", "بالاترین قیمت", "بیشترین موجودی", "کمترین موجودی"];
 const FarmDetail = ({ farmId }: { farmId: string }) => {
   const { farmDetail, farmDetailLoading } = useMyFarm(farmId);
-  const { products, isLoading } = useProducts(farmId);
+  const [activeTab, setActiveTab] = useState("همه");
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 500);
+  const [openSearch, setOpenSearch] = useState(false);
+  const productFilters = useMemo(() => {
+    const baseFilter: any = {
+      farmCode: farmId,
+      ...(debouncedSearch && { name: debouncedSearch }),
+    };
+
+    if (activeTab === "بالاترین قیمت") {
+      return {
+        ...baseFilter,
+        minPrice: 1,
+      };
+    }
+
+    if (activeTab === "بیشترین موجودی") {
+      return {
+        ...baseFilter,
+        minStock: 1,
+      };
+    }
+
+    if (activeTab === "کمترین موجودی") {
+      return {
+        ...baseFilter,
+        maxStock: 1,
+      };
+    }
+
+    return baseFilter;
+  }, [activeTab, farmId, debouncedSearch]);
+
+  const { products, isLoading } = useProducts(productFilters);
+
   const FarmDetail = farmDetail?.data;
   const { name, description, capacity, minPurchase, imageUrl, address } =
     FarmDetail || {};
@@ -61,21 +83,20 @@ const FarmDetail = ({ farmId }: { farmId: string }) => {
         </div>
       </div>
       <div className="px-4 flex items-center gap-3">
-        <div className="flex items-center gap-1 text-sm">
+        <div className="flex items-center gap-1 text-sm ">
           <StarIcon className="text-black w-4 h-4" />
           <span>۴.۸</span>
           <span className="text-gray-400">(۳۸۸)</span>
         </div>
-        <div className="ml-auto">
-          <BiSearch className="text-gray-500" />
-        </div>
+        <AnimatedSearchInput value={search} onChange={setSearch} />
       </div>
       <div className="flex px-4 mt-4 gap-6 text-sm border-b">
-        {["میوه فصل", "میوه خاص", "صیفی جات", "سبزیجات"].map((tab, i) => (
+        {TABS.map((tab) => (
           <button
-            key={i}
+            key={tab}
+            onClick={() => setActiveTab(tab)}
             className={`pb-2 ${
-              tab === "میوه فصل"
+              activeTab === tab
                 ? "border-b-2 border-black font-medium"
                 : "text-gray-400"
             }`}
