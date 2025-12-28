@@ -50,7 +50,8 @@ public class AgriculturalProduct : BaseEntity
 
     public List<Category> Categories { get; set; } = null!;
     public List<AgriculturalOrderItem> AgriculturalOrderItems { get; set; } = null!;
-    public List<Discount> Discounts { get; set; } = new();
+    public List<CartItem> CartItems { get; set; } = null!;
+    public List<Discount> Discounts { get; set; } = null!;
     public List<WarehouseInventory> WarehouseInventories { get; set; } = null!;
     public List<QualityAssessment> QualityAssessments { get; set; } = null!;
     public List<Auction> Auctions { get; set; } = null!;

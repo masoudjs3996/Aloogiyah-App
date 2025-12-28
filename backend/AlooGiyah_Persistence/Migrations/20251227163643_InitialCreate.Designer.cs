@@ -3,6 +3,7 @@ using System;
 using AlooGiyah_Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AlooGiyah_Persistence.Migrations
 {
     [DbContext(typeof(AlooGiyahDbContext))]
-    partial class AlooGiyahDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251227163643_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -767,7 +770,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AgriculturalOrderId"));
 
-                    b.Property<int>("AddressId")
+                    b.Property<int?>("AddressId")
                         .HasColumnType("integer");
 
                     b.Property<int>("BuyerId")
@@ -956,7 +959,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("AgriculturalProducts", (string)null);
+                    b.ToTable("AgriculturalProducts");
                 });
 
             modelBuilder.Entity("AlooGiyah_Domain.Entities.Store.Auction", b =>
@@ -1073,85 +1076,6 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("AuctionBids");
-                });
-
-            modelBuilder.Entity("AlooGiyah_Domain.Entities.Store.Cart", b =>
-                {
-                    b.Property<Guid>("CartId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("CartId");
-
-                    b.HasIndex("CartId")
-                        .IsUnique();
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Carts", (string)null);
-                });
-
-            modelBuilder.Entity("AlooGiyah_Domain.Entities.Store.CartItem", b =>
-                {
-                    b.Property<int>("CartItemId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CartItemId"));
-
-                    b.Property<int>("AgriculturalProductId")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("CartId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<decimal>("Price")
-                        .HasPrecision(20, 2)
-                        .HasColumnType("numeric(20,2)");
-
-                    b.Property<int>("Quantity")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(1);
-
-                    b.Property<DateTimeOffset?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("CartItemId");
-
-                    b.HasIndex("AgriculturalProductId");
-
-                    b.HasIndex("CartId");
-
-                    b.ToTable("CartItems", (string)null);
                 });
 
             modelBuilder.Entity("AlooGiyah_Domain.Entities.Store.Farm", b =>
@@ -2198,8 +2122,7 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasOne("AlooGiyah_Domain.Entities.UserFolder.AddressFolder.Address", "Address")
                         .WithMany("AgriculturalOrders")
                         .HasForeignKey("AddressId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("AlooGiyah_Domain.Entities.UserFolder.User", "Buyer")
                         .WithMany("AgriculturalOrders")
@@ -2312,35 +2235,6 @@ namespace AlooGiyah_Persistence.Migrations
                     b.Navigation("Auction");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("AlooGiyah_Domain.Entities.Store.Cart", b =>
-                {
-                    b.HasOne("AlooGiyah_Domain.Entities.UserFolder.User", "User")
-                        .WithMany("Carts")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("AlooGiyah_Domain.Entities.Store.CartItem", b =>
-                {
-                    b.HasOne("AlooGiyah_Domain.Entities.Store.AgriculturalProduct", "AgriculturalProduct")
-                        .WithMany("CartItems")
-                        .HasForeignKey("AgriculturalProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("AlooGiyah_Domain.Entities.Store.Cart", "Cart")
-                        .WithMany("CartItems")
-                        .HasForeignKey("CartId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AgriculturalProduct");
-
-                    b.Navigation("Cart");
                 });
 
             modelBuilder.Entity("AlooGiyah_Domain.Entities.Store.Farm", b =>
@@ -2688,8 +2582,6 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.Navigation("Auctions");
 
-                    b.Navigation("CartItems");
-
                     b.Navigation("QualityAssessments");
 
                     b.Navigation("WarehouseInventories");
@@ -2698,11 +2590,6 @@ namespace AlooGiyah_Persistence.Migrations
             modelBuilder.Entity("AlooGiyah_Domain.Entities.Store.Auction", b =>
                 {
                     b.Navigation("Bids");
-                });
-
-            modelBuilder.Entity("AlooGiyah_Domain.Entities.Store.Cart", b =>
-                {
-                    b.Navigation("CartItems");
                 });
 
             modelBuilder.Entity("AlooGiyah_Domain.Entities.Store.Farm", b =>
@@ -2759,8 +2646,6 @@ namespace AlooGiyah_Persistence.Migrations
                     b.Navigation("Articles");
 
                     b.Navigation("AuctionBids");
-
-                    b.Navigation("Carts");
 
                     b.Navigation("Comments");
 

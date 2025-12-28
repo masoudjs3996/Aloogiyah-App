@@ -27,6 +27,7 @@ public class AgriculturalOrderService : IAgriculturalOrderService
     private readonly IGenericRepository<Address> _addressRepository;
     private readonly IGenericRepository<Discount> _discountRepository;
     private readonly IGenericRepository<User> _userRepository;
+    private readonly ICartService _cartService;
     private readonly IDiscountService _discountService;
     private readonly IPaymentGatewayService _paymentGatewayService;
     private readonly IWalletService _walletService;
@@ -43,6 +44,7 @@ public class AgriculturalOrderService : IAgriculturalOrderService
         IGenericRepository<Address> addressRepository,
         IGenericRepository<Discount> discountRepository,
         IGenericRepository<User> userRepository,
+        ICartService cartService,
     IDiscountService discountService,
         IPaymentGatewayService paymentGatewayService,
         IWalletService walletService,
@@ -58,6 +60,7 @@ public class AgriculturalOrderService : IAgriculturalOrderService
         _addressRepository = addressRepository;
         _discountRepository = discountRepository;
         _userRepository = userRepository;
+        _cartService = cartService;
         _discountService = discountService;
         _paymentGatewayService = paymentGatewayService;
         _walletService = walletService;
@@ -69,20 +72,25 @@ public class AgriculturalOrderService : IAgriculturalOrderService
     #endregion
 
 
-    #region Create 
+    #region Create
     public async Task<AgriculturalOrderDto> CreateAsync(AgriculturalOrderCreateDto dto)
     {
         var buyerId = int.Parse(_currentUserService.UserId);
         var userRole = _currentUserService.Roles.FirstOrDefault() ?? "User";
 
-        var address = await _addressRepository.GetByCodeAsync(dto.AddressCode)
-                      ?? throw new NotFoundException("آدرس پیدا نشد");
+        if (string.IsNullOrEmpty(dto.AddressCode))
+            throw new InvalidOperationException("انتخاب آدرس تحویل برای ثبت سفارش الزامی است.");
 
-        var pendingStatus = await _statusRepository.FirstOrDefaultAsync(s =>
-            s.Code == "3EFC703625") ?? throw new NotFoundException("pending پیدا نشد");
+        var address = await _addressRepository.GetByCodeAsync(dto.AddressCode)
+                      ?? throw new NotFoundException("آدرس یافت نشد");
+
+        // چک مالکیت آدرس
+        if ( address.UserId != buyerId)
+            throw new UnauthorizedException("آدرس انتخاب شده متعلق به شما نیست");
+        var pendingStatus = await _statusRepository.FirstOrDefaultAsync(s => s.Code == "3EFC703625")
+                            ?? throw new NotFoundException("pending پیدا نشد");
 
         var orderItems = new List<AgriculturalOrderItem>();
-
         foreach (var itemDto in dto.OrderItems)
         {
             var product = await _agriculturalProductRepository.GetByCodeAsync(itemDto.AgriculturalProductCode)
@@ -98,21 +106,20 @@ public class AgriculturalOrderService : IAgriculturalOrderService
                 AgriculturalProductId = product.AgriculturalProductId,
                 Quantity = itemDto.Quantity,
                 Price = price,
-                AgriculturalProduct = product // مهم برای چک تخفیف
+                AgriculturalProduct = product
             });
         }
 
         var order = new AgriculturalOrder
         {
             BuyerId = buyerId,
-            AddressId = address.AddressId,
+            AddressId = address.AddressId,  // ممکنه null باشه
             StatusId = pendingStatus.StatusId,
             AgriculturalOrderItems = orderItems,
             IsPaid = false
         };
 
         await using var tx = await _unitOfWork.BeginTransactionAsync();
-
         try
         {
             if (!string.IsNullOrEmpty(dto.DiscountCode))
@@ -133,7 +140,6 @@ public class AgriculturalOrderService : IAgriculturalOrderService
                                 break;
                             }
                         }
-
                         if (eligible)
                         {
                             order.DiscountId = discount.DiscountId;
@@ -145,7 +151,6 @@ public class AgriculturalOrderService : IAgriculturalOrderService
                 }
             }
 
-            
             order.TotalPrice = await _priceCalculatorService.CalculateAgriculturalOrder(order, userRole);
 
             await _agriculturalOrderRepository.AddAsync(order);
@@ -160,7 +165,6 @@ public class AgriculturalOrderService : IAgriculturalOrderService
                 "Discount",
                 "AgriculturalOrderItems.AgriculturalProduct");
 
-
             return _mapper.Map<AgriculturalOrderDto>(freshOrder);
         }
         catch
@@ -169,8 +173,72 @@ public class AgriculturalOrderService : IAgriculturalOrderService
             throw;
         }
     }
-
     #endregion
+
+    public async Task<AgriculturalOrderDto> CreateFromCartAsync(CheckoutFromCartDto dto)
+    {
+        var userId = int.Parse(_currentUserService.UserId); // کاربر باید لاگین باشه
+
+        // گرفتن سبد خرید کاربر
+        var cart = await _cartService.GetCartAsync(null, userId);
+        if (cart.ItemCount == 0)
+            throw new InvalidOperationException("سبد خرید خالی است");
+
+        // گرفتن و چک آدرس
+        var address = await _addressRepository.GetByCodeAsync(dto.AddressCode)
+                      ?? throw new NotFoundException("آدرس یافت نشد");
+
+        if (address.UserId != userId)
+            throw new UnauthorizedException("آدرس متعلق به شما نیست");
+
+        var pendingStatus = await _statusRepository.FirstOrDefaultAsync(s => s.Code == "3EFC703625")
+                            ?? throw new NotFoundException("وضعیت pending یافت نشد");
+
+        var order = new AgriculturalOrder
+        {
+            BuyerId = userId,
+            AddressId = address.AddressId,
+            StatusId = pendingStatus.StatusId,
+            IsPaid = false,
+            AgriculturalOrderItems = new List<AgriculturalOrderItem>()
+        };
+
+        // تبدیل آیتم‌های سبد به سفارش
+        foreach (var item in cart.CartItems)
+        {
+            var product = await _agriculturalProductRepository.GetByCodeAsync(item.ProductCode)
+                          ?? throw new InvalidOperationException($"محصول با کد {item.ProductCode} یافت نشد");
+
+            if (product.Stock < item.Quantity)
+                throw new InvalidOperationException($"موجودی محصول {item.ProductName} کافی نیست");
+
+            product.Stock -= item.Quantity;
+            await _agriculturalProductRepository.UpdateAsync(product);
+
+            order.AgriculturalOrderItems.Add(new AgriculturalOrderItem
+            {
+                AgriculturalProductId = product.AgriculturalProductId,
+                Quantity = item.Quantity,
+                Price = item.UnitPrice
+            });
+        }
+
+        // اعمال تخفیف اگر داشت
+        if (!string.IsNullOrEmpty(dto.DiscountCode))
+        {
+            // منطق تخفیف...
+        }
+
+        order.TotalPrice = cart.TotalPrice;
+
+        await _agriculturalOrderRepository.AddAsync(order);
+        await _unitOfWork.SaveChangesAsync();
+
+        // پاک کردن سبد خرید
+        await _cartService.ClearCartAsync(cart.CartId);
+
+        return _mapper.Map<AgriculturalOrderDto>(order);
+    }
 
     #region Update 
     public async Task<bool> UpdateAsync(AgriculturalOrderUpdateDto dto)
@@ -183,7 +251,8 @@ public class AgriculturalOrderService : IAgriculturalOrderService
             "AgriculturalOrderItems.AgriculturalProduct",
             "Discount",
             "Buyer",
-            "Status"
+            "Status",
+            "Address"   
         );
 
         if (entity == null)
@@ -195,19 +264,25 @@ public class AgriculturalOrderService : IAgriculturalOrderService
             bool discountChanged = false;
             int? previousDiscountId = entity.DiscountId;
 
-            // تغییر وضعیت
             if (!string.IsNullOrEmpty(dto.StatusCode))
             {
-                var statusId = await _statusRepository.GetIdByCodeAsync(dto.StatusCode, s => s.StatusId)
+                var newStatus = await _statusRepository.FirstOrDefaultAsync(s => s.Code == dto.StatusCode);
+
+                var statusId = newStatus?.StatusId
                                ?? throw new NotFoundException($"وضعیت با کد {dto.StatusCode} پیدا نشد");
                 entity.StatusId = statusId;
             }
 
-            // تغییر آدرس
+            // تغییر آدرس (اختیاری)
             if (!string.IsNullOrEmpty(dto.AddressCode))
             {
                 var address = await _addressRepository.GetByCodeAsync(dto.AddressCode)
                               ?? throw new NotFoundException($"آدرس با کد {dto.AddressCode} پیدا نشد");
+
+                // چک مالکیت آدرس
+                if (address.UserId != entity.BuyerId)
+                    throw new UnauthorizedException("آدرس انتخاب شده متعلق به شما نیست.");
+
                 entity.AddressId = address.AddressId;
             }
 
@@ -476,11 +551,16 @@ public class AgriculturalOrderService : IAgriculturalOrderService
         try
         {
             var order = await _agriculturalOrderRepository.GetByCodeWithIncludeAsync(
-                orderCode, o => o.Buyer, o => o.AgriculturalOrderItems);
+                orderCode,
+                o => o.Buyer,
+                o => o.AgriculturalOrderItems,
+                o => o.Address,  // اضافه شد
+                o => o.Status
+            );
 
             if (order == null)
                 throw new NotFoundException("سفارش پیدا نشد");
-
+                        
             switch (action)
             {
                 case OrderAction.Approve:
@@ -491,10 +571,11 @@ public class AgriculturalOrderService : IAgriculturalOrderService
                     {
                         await _walletService.DeductAmountAsync(order.HeldAmount);
                         order.IsHeld = false;
+                        order.HeldAmount = 0;
                     }
 
                     order.StatusId = (await _statusRepository.GetByIdAsync(2))?.StatusId
-                ?? throw new NotFoundException("وضعیت تأیید شده یافت نشد");
+                                     ?? throw new NotFoundException("وضعیت تأیید شده یافت نشد");
                     break;
 
                 case OrderAction.Cancel:
@@ -519,17 +600,17 @@ public class AgriculturalOrderService : IAgriculturalOrderService
                     }
 
                     order.StatusId = (await _statusRepository.GetByIdAsync(5))?.StatusId
-                        ?? throw new NotFoundException("وضعیت لغو شده یافت نشد");
+                                     ?? throw new NotFoundException("وضعیت لغو شده یافت نشد");
                     break;
 
                 case OrderAction.Sending:
                     order.StatusId = (await _statusRepository.GetByIdAsync(3))?.StatusId
-                        ?? throw new NotFoundException("وضعیت درحال ارسال پیدا نشد");
+                                     ?? throw new NotFoundException("وضعیت درحال ارسال پیدا نشد");
                     break;
 
                 case OrderAction.Arrival:
                     order.StatusId = (await _statusRepository.GetByIdAsync(4))?.StatusId
-                        ?? throw new NotFoundException("وضعیت رسیدن به مبدا پیدا نشد");
+                                     ?? throw new NotFoundException("وضعیت رسیدن به مبدا پیدا نشد");
                     break;
             }
 

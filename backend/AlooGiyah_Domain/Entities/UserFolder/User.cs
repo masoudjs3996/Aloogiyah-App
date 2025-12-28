@@ -77,5 +77,7 @@ public class User : BaseEntity
     public List<Farm> Farms { get; set; } = null!;
     public List<Discount> Discounts { get; set; } = null!;
     public List<Address> Addresses { get; set; } = null!;
+    public List<Cart> Carts { get; set; } = null!;
+
     #endregion
 }

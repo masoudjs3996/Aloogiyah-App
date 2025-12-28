@@ -42,6 +42,22 @@ public class AgriculturalOrderController : ControllerBase
     }
     #endregion
 
+    [HttpPost("CreateFromCart")]
+    [Authorize]
+    public async Task<IActionResult> CreateFromCart([FromBody] CheckoutFromCartDto dto)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var result = await _agriculturalOrderService.CreateFromCartAsync(dto);
+
+        return Ok(new ApiResponse<AgriculturalOrderDto>
+        {
+            IsSuccess = true,
+            Message = "سفارش با موفقیت از سبد خرید ثبت شد",
+            Data = result
+        });
+    }
+
     #region GetByFilter
     [Authorize]
     [HttpGet("GetByFilter")]

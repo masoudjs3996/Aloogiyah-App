@@ -3,6 +3,7 @@ using System;
 using AlooGiyah_Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AlooGiyah_Persistence.Migrations
 {
     [DbContext(typeof(AlooGiyahDbContext))]
-    partial class AlooGiyahDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251227192850_NullUpdateAtCartitems")]
+    partial class NullUpdateAtCartitems
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1143,6 +1146,7 @@ namespace AlooGiyah_Persistence.Migrations
                         .HasDefaultValue(1);
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
+                        .IsRequired()
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("CartItemId");

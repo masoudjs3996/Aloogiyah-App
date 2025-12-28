@@ -129,6 +129,7 @@ builder.Services.AddScoped<IFarmService, FarmService>();
 builder.Services.AddScoped<IPriceCalculatorService, PriceCalculatorService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<ICartService, CartService>();
 
 
 

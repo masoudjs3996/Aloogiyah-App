@@ -8,6 +8,8 @@ public class AgriculturalProductConfiguration : IEntityTypeConfiguration<Agricul
 {
     public void Configure(EntityTypeBuilder<AgriculturalProduct> builder)
     {
+        builder.ToTable("AgriculturalProducts");
+
         builder.HasKey(ap => ap.AgriculturalProductId);
 
         builder.Property(ap => ap.Name)

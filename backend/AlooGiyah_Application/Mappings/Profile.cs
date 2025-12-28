@@ -4,12 +4,14 @@ using AlooGiyah_Application.DTOs.AgriculturalOrderItem;
 using AlooGiyah_Application.DTOs.AgriculturalProduct;
 using AlooGiyah_Application.DTOs.Auction;
 using AlooGiyah_Application.DTOs.AuctionBid;
+using AlooGiyah_Application.DTOs.Cart;
 using AlooGiyah_Application.DTOs.Category;
 using AlooGiyah_Application.DTOs.ChatMessage;
 using AlooGiyah_Application.DTOs.Comment;
 using AlooGiyah_Application.DTOs.Discount;
-using AlooGiyah_Application.DTOs.File;
 using AlooGiyah_Application.DTOs.Farm;
+using AlooGiyah_Application.DTOs.File;
+using AlooGiyah_Application.DTOs.Location;
 using AlooGiyah_Application.DTOs.Order;
 using AlooGiyah_Application.DTOs.OrderItem;
 using AlooGiyah_Application.DTOs.Product;
@@ -20,13 +22,12 @@ using AlooGiyah_Application.DTOs.Users;
 using AlooGiyah_Application.DTOs.Wallet;
 using AlooGiyah_Application.DTOs.Warehouse;
 using AlooGiyah_Application.DTOs.WarehouseInventory;
-using AlooGiyah_Domain.Entities;
-using AutoMapper;
-using AlooGiyah_Domain.Entities.UserFolder;
-using AlooGiyah_Domain.Entities.Store;
-using AlooGiyah_Domain.Entities.UserFolder.AddressFolder;
-using AlooGiyah_Application.DTOs.Location;
 using AlooGiyah_Application.Utils;
+using AlooGiyah_Domain.Entities;
+using AlooGiyah_Domain.Entities.Store;
+using AlooGiyah_Domain.Entities.UserFolder;
+using AlooGiyah_Domain.Entities.UserFolder.AddressFolder;
+using AutoMapper;
 
 namespace AlooGiyah_Application.Mappings
 {
@@ -320,6 +321,18 @@ namespace AlooGiyah_Application.Mappings
                 .ForMember(dest => dest.County, opt => opt.Ignore());
 
             #endregion
+
+            CreateMap<Cart, CartDto>()
+            .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.CartItems.Sum(i => i.Quantity)))
+            .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.CartItems.Sum(i => i.Quantity * i.Price)))
+            .ForMember(dest => dest.IsGuest, opt => opt.MapFrom(src => src.UserId == null));
+
+            CreateMap<CartItem, CartItemDto>()
+                .ForMember(dest => dest.Code, opt => opt.MapFrom(src => src.Code))
+                .ForMember(dest => dest.ProductCode, opt => opt.MapFrom(src => src.AgriculturalProduct.Code))
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.AgriculturalProduct.Name))
+                .ForMember(dest => dest.ProductSlug, opt => opt.MapFrom(src => src.AgriculturalProduct.Slug))
+                .ForMember(dest => dest.AvailableStock, opt => opt.MapFrom(src => src.AgriculturalProduct.Stock));
 
         }
     }

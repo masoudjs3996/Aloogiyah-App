@@ -16,7 +16,6 @@ public class AgriculturalOrder : BaseEntity
 
     public decimal TotalPrice { get; set; }
 
-    [Required]
     public int AddressId { get; set; }
 
     public int? DiscountId { get; set; }

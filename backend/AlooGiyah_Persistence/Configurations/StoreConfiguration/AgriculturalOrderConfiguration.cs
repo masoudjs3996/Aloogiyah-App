@@ -31,6 +31,13 @@ public class AgriculturalOrderConfiguration : IEntityTypeConfiguration<Agricultu
            .IsRequired()
            .HasPrecision(20, 2);
 
+        builder.Property(o => o.AddressId)
+           .IsRequired();
+
+        builder.HasOne(ao => ao.Address)
+            .WithMany(a => a.AgriculturalOrders)
+            .HasForeignKey(ao => ao.AddressId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(ao => ao.Status)
             .WithMany(s => s.AgriculturalOrders)
