@@ -43,7 +43,7 @@ public class UserController : ControllerBase
     #region GetUserByFilter
     [Authorize(Roles = "Manager")]
     [HttpGet("GetUserByFilter")]
-    public async Task<IActionResult> GetUserByFilterAsync(UserFilterDto userFilter)
+    public async Task<IActionResult> GetUserByFilterAsync([FromQuery] UserFilterDto userFilter)
     {
         var users = await _userService.GetUserByFilterAsync(userFilter);
         if (users == null)

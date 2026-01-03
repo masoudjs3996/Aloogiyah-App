@@ -39,9 +39,10 @@ namespace AlooGiyah_Application.Mappings
             CreateMap<RegisterUserDto, User>();
             CreateMap<User, RegisterUserDto>();
             CreateMap<User, UserDto>()
-                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.RoleId));
-            CreateMap<UserDto, User>()
-                .ForMember(dest => dest.RoleId, opt => opt.MapFrom(src => src.Role));
+                 .ForMember(d => d.RoleCode,
+        opt => opt.MapFrom(s => s.Role.Code))
+    .ForMember(d => d.RoleName,
+        opt => opt.MapFrom(s => s.Role.Name));
             CreateMap<UpdateProfileDto, User>();
             CreateMap<ChangePasswordDto, User>();
             CreateMap<User, ChangePasswordDto>();

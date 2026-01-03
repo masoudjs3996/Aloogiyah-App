@@ -73,7 +73,8 @@ public class AuthService : IAuthService
                 new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim("Code", user.Code),
-                new Claim(ClaimTypes.Role, user.Role.Name.ToString())
+                new Claim(ClaimTypes.Role, user.Role.Name.ToString()),
+                new Claim("RoleCode", user.Role.Code.ToString())
             }),
             Expires = DateTime.UtcNow.AddHours(2),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature),

@@ -93,8 +93,8 @@ public class UserService : IUserService
         if (!string.IsNullOrEmpty(filter.PhoneNumber))
             predicate = predicate.And(u => u.PhoneNumber.Contains(filter.PhoneNumber));
 
-        if (filter.RoleId.HasValue)
-            predicate = predicate.And(u => u.RoleId == filter.RoleId.Value);
+        if (!string.IsNullOrEmpty(filter.RoleCode))
+            predicate = predicate.And(u => u.Role.Code == filter.RoleCode);
 
         var result = await _userRepository.GetPagedProjectedAsync(
             filter: predicate,
@@ -106,7 +106,7 @@ public class UserService : IUserService
                 Email = u.Email,
                 UserName = u.UserName,
                 PhoneNumber = u.PhoneNumber,
-                Role = u.RoleId,
+                RoleCode = u.Role.Code,
                 RoleName = u.Role.Name,
                 CreatedAt = u.CreatedAt,
                 UpdatedAt = u.UpdatedAt
