@@ -7,4 +7,5 @@ public interface ICurrentUserService
     string? UserCode { get; }
     IEnumerable<string> Roles { get; }
     bool IsAuthenticated { get; }
+
 }

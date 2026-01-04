@@ -15,7 +15,6 @@ public class UserDto
     public string PhoneNumber { get; set; } = string.Empty;
     public DateTimeOffset CreatedAt { get; set; } 
     public DateTimeOffset? UpdatedAt { get; set; }
-
     public string? ProfileImageUrl { get; set; }
 
 }

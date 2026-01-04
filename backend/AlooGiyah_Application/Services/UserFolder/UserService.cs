@@ -126,19 +126,23 @@ public class UserService : IUserService
     #region Get My Profile
     public async Task<UserDto> GetMyProfileAsync()
     {
-        if (string.IsNullOrEmpty(_currentUserService.UserId))
-            throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
+        if (string.IsNullOrEmpty(_currentUserService.UserCode))
+            throw new ArgumentNullException(nameof(_currentUserService.UserCode), "UserFolder UserCode is required from token.");
 
-        var userId = int.Parse(_currentUserService.UserId);
-        var user = await _userRepository.GetByIdAsync(userId);
+        var userCode = _currentUserService.UserCode;
 
-        if (user == null) throw new NotFoundException("کاربر پیدا نشد");
+        var user = await _userRepository.GetByCodeWithIncludeAsync(
+            userCode,
+            x => x.Role
+        );
+        if (user == null)
+            throw new NotFoundException("کاربر یافت نشد");
 
         var dto = _mapper.Map<UserDto>(user);
-
         dto.ProfileImageUrl = await _fileService.GetPrimaryFileUrlAsync(EntityFile.Profile, user.Code);
 
         return dto;
+
     }
     #endregion
 
