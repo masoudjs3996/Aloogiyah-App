@@ -9,6 +9,7 @@ public interface IAuthService
     Task<(string newAccessToken, RefreshToken newRefreshToken)> RefreshAccessTokenAsync(string refreshToken);
     Task<(string accessToken, RefreshToken refreshToken)> LoginUserAsync(LoginDto loginDto);
     string GenerateAccessToken(User user);
+    string GenerateGuestToken();
     RefreshToken GenerateRefreshToken();
     Task<bool> ChangeUsernameAsync(ChangeUsernameDto model);
     Task<bool> ChangePasswordAsync(ChangePasswordDto model);

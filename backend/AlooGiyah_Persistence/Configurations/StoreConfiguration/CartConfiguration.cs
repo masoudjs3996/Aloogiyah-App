@@ -26,11 +26,20 @@ public class CartConfiguration : IEntityTypeConfiguration<Cart>
         builder.Property(c => c.UserId)
             .IsRequired(false);
 
+        builder.Property(c => c.DiscountId)
+         .IsRequired(false);
+
         // رابطه با User (اختیاری)
         builder.HasOne(c => c.User)
             .WithMany(u => u.Carts) // اگر در User navigation property برای Cartها اضافه کردی
             .HasForeignKey(c => c.UserId)
             .OnDelete(DeleteBehavior.SetNull); // اگر کاربر حذف شد، UserId null بشه
+
+        builder.HasOne(c => c.Discount)
+    .WithMany(u => u.Carts) // اگر در User navigation property برای Cartها اضافه کردی
+    .HasForeignKey(c => c.DiscountId)
+    .OnDelete(DeleteBehavior.SetNull); // اگر کاربر حذف شد، UserId null بشه
+
 
         // رابطه یک به چند با CartItem ها
         builder.HasMany(c => c.CartItems)

@@ -152,7 +152,7 @@ builder.Services.AddMemoryCache();
 #endregion
 
 
-var app = builder.Build();
+    var app = builder.Build();
 
 app.UseHttpsRedirection();
 

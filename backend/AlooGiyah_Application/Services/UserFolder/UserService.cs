@@ -1,7 +1,9 @@
 ﻿using AlooGiyah_Application.DTOs.File;
 using AlooGiyah_Application.DTOs.Users;
 using AlooGiyah_Application.Interfaces;
+using AlooGiyah_Application.Interfaces.Store;
 using AlooGiyah_Application.Interfaces.UserFolder;
+using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Entities.UserFolder;
 using AlooGiyah_Domain.Enums;
 using AlooGiyah_Domain.Interfaces;
@@ -10,7 +12,12 @@ using AlooGiyah_Shared.Exceptions;
 using AutoMapper;
 using LinqKit;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
+using System.Security.Claims;
+using System.Text;
 
 namespace AlooGiyah_Application.Services.UserFolder;
 
@@ -21,7 +28,12 @@ public class UserService : IUserService
     private readonly IGenericRepository<User> _userRepository;
     private readonly IUserRepository _userRepositorySpecific;
     private readonly ICurrentUserService _currentUserService;
+    private readonly ICartService _cartService;
+    private readonly IAuthService _authService;
     private readonly IFileService _fileService;
+    private readonly IHttpContextAccessor _httpContextAccessor;     // اضافه شد
+    private readonly IConfiguration _config;                        // اضافه شد
+    private readonly IGenericRepository<Cart> _cartRepository;      // اضافه شد (برای سبد مهمان)
     private readonly IMapper _mapper;
 
 
@@ -30,17 +42,26 @@ public class UserService : IUserService
         IGenericRepository<User> userRepository,
         IUserRepository userRepositorySpecific,
         ICurrentUserService currentUserService,
+        ICartService cartService,
+        IAuthService authService,
         IFileService fileService,
-        IMapper mapper
+        IMapper mapper,
+        IHttpContextAccessor httpContextAccessor,      // تزریق شد
+            IConfiguration config,                          // تزریق شد
+            IGenericRepository<Cart> cartRepository
         )
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _userRepositorySpecific = userRepositorySpecific ?? throw new ArgumentNullException(nameof(userRepositorySpecific));
-        _currentUserService = currentUserService;
-        _fileService = fileService;
+        _currentUserService = currentUserService ?? throw new ArgumentNullException(nameof(currentUserService));
+        _cartService = cartService ?? throw new ArgumentNullException(nameof(cartService));
+        _authService = authService ?? throw new ArgumentNullException(nameof(authService));
+        _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-
+        _httpContextAccessor = httpContextAccessor;
+        _config = config;
+        _cartRepository = cartRepository ?? throw new ArgumentNullException(nameof(cartRepository));
     }
     #endregion
 
@@ -124,25 +145,98 @@ public class UserService : IUserService
     #endregion
 
     #region Get My Profile
-    public async Task<UserDto> GetMyProfileAsync()
+    public async Task<ProfileResponseDto> GetMyProfileAsync()
     {
-        if (string.IsNullOrEmpty(_currentUserService.UserCode))
-            throw new ArgumentNullException(nameof(_currentUserService.UserCode), "UserFolder UserCode is required from token.");
+        var authHeader = _httpContextAccessor?.HttpContext?.Request.Headers["Authorization"].ToString();
 
-        var userCode = _currentUserService.UserCode;
+        if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
+        {
+            return await CreateAndReturnGuestProfile();
+        }
 
-        var user = await _userRepository.GetByCodeWithIncludeAsync(
-            userCode,
-            x => x.Role
-        );
-        if (user == null)
-            throw new NotFoundException("کاربر یافت نشد");
+        var token = authHeader["Bearer ".Length..].Trim();
 
-        var dto = _mapper.Map<UserDto>(user);
-        dto.ProfileImageUrl = await _fileService.GetPrimaryFileUrlAsync(EntityFile.Profile, user.Code);
+        try
+        {
+            var principal = ValidateToken(token);
 
-        return dto;
+            var isGuestClaim = principal.FindFirst("IsGuest")?.Value;
+            if (bool.TryParse(isGuestClaim, out bool isGuest) && isGuest)
+            {
+                var cartIdClaim = principal.FindFirst("cartId")?.Value;
+                if (Guid.TryParse(cartIdClaim, out Guid cartId))
+                {
+                    return new ProfileResponseDto
+                    {
+                        IsGuest = true,
+                        Message = "شما به عنوان مهمان وارد سایت شده‌اید. برای دسترسی به پروفایل کامل، لطفاً وارد حساب کاربری خود شوید.",
+                        CartId = cartId
+                    };
+                }
+            }
 
+            var userCode = principal.FindFirst("Code")?.Value
+                           ?? throw new UnauthorizedException("کد کاربر در توکن یافت نشد.");
+
+            var user = await _userRepository.GetByCodeWithIncludeAsync(userCode, x => x.Role)
+                       ?? throw new NotFoundException("کاربر یافت نشد.");
+
+            var userDto = _mapper.Map<UserDto>(user);
+            userDto.ProfileImageUrl = await _fileService.GetPrimaryFileUrlAsync(EntityFile.Profile, user.Code);
+
+            return new ProfileResponseDto
+            {
+                IsGuest = false,
+                Message = "پروفایل با موفقیت دریافت شد.",
+                User = userDto
+            };
+        }
+        catch (Exception)
+        {
+            return await CreateAndReturnGuestProfile();
+        }
+    }
+
+    private async Task<ProfileResponseDto> CreateAndReturnGuestProfile()
+    {
+        if (_cartRepository == null)
+            throw new InvalidOperationException("ERROR: _cartRepository is NULL! Check DI registration for IGenericRepository<Cart>");
+
+        if (_unitOfWork == null)
+            throw new InvalidOperationException("ERROR: _unitOfWork is NULL!");
+
+        if (_authService == null)
+            throw new InvalidOperationException("ERROR: _authService is NULL!");
+
+        var guestToken = _authService.GenerateGuestToken();
+
+        return new ProfileResponseDto
+        {
+            IsGuest = true,
+            Message = "شما به عنوان مهمان وارد سایت شده‌اید. سبد خرید برای شما ایجاد شد. برای دسترسی به پروفایل کامل، لطفاً ثبت‌نام یا ورود کنید.",
+            GuestToken = guestToken,
+            
+        };
+    }
+
+    private ClaimsPrincipal ValidateToken(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var keyBytes = Encoding.UTF8.GetBytes(_config["Jwt:Key"] ?? throw new InvalidOperationException("کلید JWT موجود نیست."));
+
+        var validationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = _config["Jwt:Issuer"],
+            ValidAudience = _config["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+            ClockSkew = TimeSpan.Zero
+        };
+
+        return tokenHandler.ValidateToken(token, validationParameters, out _);
     }
     #endregion
 
@@ -201,7 +295,7 @@ public class UserService : IUserService
         {
             File = dto.File,
             EntityCode = user.Code,
-            EntityFile = EntityFile.Profile ,
+            EntityFile = EntityFile.Profile,
             FileTypeCode = "CD5A1A3870",
         };
 
@@ -226,4 +320,6 @@ public class UserService : IUserService
         return await _fileService.GetPrimaryFileUrlAsync(EntityFile.Profile, user.Code);
     }
     #endregion
+
+
 }

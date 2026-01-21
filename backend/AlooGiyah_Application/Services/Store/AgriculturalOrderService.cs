@@ -180,7 +180,7 @@ public class AgriculturalOrderService : IAgriculturalOrderService
         var userId = int.Parse(_currentUserService.UserId); // کاربر باید لاگین باشه
 
         // گرفتن سبد خرید کاربر
-        var cart = await _cartService.GetCartAsync(null, userId);
+        var cart = await _cartService.GetCartAsync();
         if (cart.ItemCount == 0)
             throw new InvalidOperationException("سبد خرید خالی است");
 
@@ -235,7 +235,7 @@ public class AgriculturalOrderService : IAgriculturalOrderService
         await _unitOfWork.SaveChangesAsync();
 
         // پاک کردن سبد خرید
-        await _cartService.ClearCartAsync(cart.CartId);
+        await _cartService.ClearCartAsync();
 
         return _mapper.Map<AgriculturalOrderDto>(order);
     }

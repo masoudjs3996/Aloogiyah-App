@@ -55,6 +55,10 @@ public class DiscountConfiguration : IEntityTypeConfiguration<Discount>
            .HasForeignKey(o => o.DiscountId)
            .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasMany(d => d.Carts)
+           .WithOne(o => o.Discount)
+           .HasForeignKey(o => o.DiscountId)
+           .OnDelete(DeleteBehavior.Restrict);
 
         // رابطه یک-به-چند با ServiceRequest
         builder.HasMany(d => d.ServiceRequests)
@@ -75,6 +79,7 @@ public class DiscountConfiguration : IEntityTypeConfiguration<Discount>
             .WithMany(u => u.Discounts)
             .UsingEntity(j => j.ToTable("DiscountUsers")); // نام جدول واسط
 
+        
         // رابطه چند-به-چند با Product
         builder.HasMany(d => d.Products)
             .WithMany(p => p.Discounts)

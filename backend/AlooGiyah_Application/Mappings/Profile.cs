@@ -328,6 +328,7 @@ namespace AlooGiyah_Application.Mappings
             .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.CartItems.Sum(i => i.Quantity * i.Price)))
             .ForMember(dest => dest.IsGuest, opt => opt.MapFrom(src => src.UserId == null));
 
+
             CreateMap<CartItem, CartItemDto>()
                 .ForMember(dest => dest.Code, opt => opt.MapFrom(src => src.Code))
                 .ForMember(dest => dest.ProductCode, opt => opt.MapFrom(src => src.AgriculturalProduct.Code))

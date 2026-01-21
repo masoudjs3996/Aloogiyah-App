@@ -1,23 +1,25 @@
 ﻿using AlooGiyah_Application.DTOs.Cart;
+using AlooGiyah_Application.Interfaces;
 using AlooGiyah_Application.Interfaces.Store;
 using AlooGiyah_Application.Interfaces.UserFolder;
 using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Shared.Exceptions;
 using AutoMapper;
-using System.Linq.Expressions;
-
+using Microsoft.AspNetCore.Http;
 
 namespace AlooGiyah_Application.Services.Store
 {
     public class CartService : ICartService
     {
-        #region Constructor
         private readonly IGenericRepository<Cart> _cartRepo;
         private readonly IGenericRepository<CartItem> _cartItemRepo;
         private readonly IGenericRepository<AgriculturalProduct> _productRepo;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IPriceCalculatorService _priceCalculatorService;
+        private readonly IAuthService _authService;
         private readonly IMapper _mapper;
 
         public CartService(
@@ -26,6 +28,9 @@ namespace AlooGiyah_Application.Services.Store
             IGenericRepository<AgriculturalProduct> productRepo,
             IUnitOfWork unitOfWork,
             ICurrentUserService currentUserService,
+            IHttpContextAccessor httpContextAccessor,
+            IPriceCalculatorService priceCalculatorService,
+            IAuthService authService,
             IMapper mapper)
         {
             _cartRepo = cartRepo;
@@ -33,284 +38,336 @@ namespace AlooGiyah_Application.Services.Store
             _productRepo = productRepo;
             _unitOfWork = unitOfWork;
             _currentUserService = currentUserService;
+            _httpContextAccessor = httpContextAccessor;
+            _priceCalculatorService = priceCalculatorService;
+            _authService = authService;
             _mapper = mapper;
         }
-        #endregion
 
+        // متد اصلی: گرفتن cartId فعلی (اگر نداشت، جدید می‌سازد)
+        //private Guid ResolveCartId()
+        //{
+        //    // اگر کاربر لاگین شده → نباید از سبد مهمان استفاده کنه
+        //    if (GetCurrentUserId().HasValue)
+        //    {
+        //        throw new InvalidOperationException("کاربران لاگین‌شده نباید از این متد استفاده کنند.");
+        //    }
 
-        #region GetCartAsync
-        public async Task<CartDto> GetCartAsync(Guid? cartId, int? userId)
+        //    var claims = _currentUserService.Claims;
+        //    //var cartIdClaim = claims?.FirstOrDefault(c => c.Type == "cartId")?.Value;
+
+        //    //if (Guid.TryParse(cartIdClaim, out Guid existingCartId))
+        //    //{
+        //    //    return existingCartId;
+        //    //}
+
+        //    // اولین بار کاربر مهمان است → سبد جدید بساز
+        //    //var newCartId = Guid.NewGuid();
+        //    //var newCart = new Cart
+        //    //{
+        //    //    CartId = newCartId,
+        //    //    CartItems = new List<CartItem>()
+        //    //};
+
+        //    // ذخیره در دیتابیس
+        //    _cartRepo.AddAsync(newCart).Wait();
+        //    _unitOfWork.SaveChangesAsync().Wait();
+
+        //    // ساخت توکن مهمان جدید
+        //    var guestToken = _authService.GenerateGuestToken(newCartId);
+
+        //    // برگرداندن توکن در هدر پاسخ
+        //    var context = _httpContextAccessor.HttpContext;
+        //    if (context != null && !context.Response.Headers.ContainsKey("X-Guest-Token"))
+        //    {
+        //        context.Response.Headers.Append("X-Guest-Token", guestToken);
+        //    }
+
+        //    return newCartId;
+        //}
+
+        private int? GetCurrentUserId()
         {
-            Expression<Func<Cart, bool>> filter = userId.HasValue
-                ? c => c.UserId == userId.Value
-                : c => c.CartId == cartId.Value;
+            if (int.TryParse(_currentUserService.UserId, out int userId))
+                return userId;
+            return null;
+        }
+        private Guid CartId()
+        {
+            var cartId = _currentUserService.CartId ?? throw new InvalidOperationException("کاربر توکن مهمان ندارد یا کارت ایدی داخل آن نیست ");
 
-            var paged = await _cartRepo.GetPagedProjectedAsync<Cart>(
-                filter: cartId.HasValue || userId.HasValue ? filter : null,
-                selector: c => c,
-                pageNumber: 1,
-                pageSize: 1,
-                includes: new string[] { "CartItems.AgriculturalProduct" } // ThenInclude با string
-            );
+            return Guid.Parse(cartId);
+        }
 
-            var cart = paged.Items.FirstOrDefault();
+        public async Task<CartDto> GetCartAsync()
+        {
 
-            if (cart == null)
+            var userId = GetCurrentUserId();
+
+            Cart? cart;
+
+            if (userId.HasValue)
             {
-                return new CartDto
-                {
-                    CartId = cartId ?? Guid.NewGuid(),
-                    ItemCount = 0,
-                    TotalPrice = 0,
-                    CartItems = new List<CartItemDto>(),
-                    IsGuest = !userId.HasValue
-                };
+                var paged = await _cartRepo.GetPagedProjectedAsync<Cart>(
+                    filter: c => c.UserId == userId.Value,
+                    selector: c => c, // یا مستقیم مپ کن
+                    pageNumber: 1,
+                    pageSize: 1,
+                    includes: new string[] { "CartItems.AgriculturalProduct" }); // <<<--- این خط کلیدی!
+
+                cart = paged.Items.FirstOrDefault();
+            }
+            else
+            {
+                var cartId = CartId();
+
+                var paged = await _cartRepo.GetPagedProjectedAsync(
+                    filter: c => c.CartId == cartId,
+                    selector: c => c,
+                    pageNumber: 1,
+                    pageSize: 1,
+                    includes: new string[] { "CartItems.AgriculturalProduct" });
+
+                cart = paged.Items.FirstOrDefault();
             }
 
-            // AutoMapper همه چیز رو مپ می‌کنه — فوق‌العاده تمیز!
-            return _mapper.Map<CartDto>(cart);
-        }
-        #endregion
+            var dto = _mapper.Map<CartDto>(cart);
+            //dto.IsGuest = userId == null? true : false;
 
-        #region AddToCartAsync
+            return dto;
+        }
+
         public async Task<CartDto> AddToCartAsync(AddToCartDto dto)
         {
-            if (dto.Quantity <= 0) throw new InvalidOperationException("تعداد باید مثبت باشد.");
+            if (dto.Quantity <= 0)
+                throw new InvalidOperationException("تعداد باید مثبت باشد.");
 
             var product = await _productRepo.GetByCodeAsync(dto.ProductCode)
-                          ?? throw new NotFoundException($"محصول با کد {dto.ProductCode} یافت نشد.");
+                ?? throw new NotFoundException("محصول یافت نشد.");
 
-            var role = _currentUserService.Roles?.FirstOrDefault() ?? "User";
-            var price = role == "Wholesale" ? product.WholesalePrice : product.RetailPrice;
+            var userId = GetCurrentUserId();
+            var role = _currentUserService.Roles.ToString();
 
-            if (product.Stock < dto.Quantity)
-                throw new InvalidOperationException($"موجودی محصول {product.Name} کافی نیست.");
+            Cart cart;
+            bool isNewCart = false;
 
-            var includes = new string[] { "CartItems" };
+            // =============================
+            // 1️⃣ دریافت یا ساخت Cart
+            // =============================
 
-            // جستجو با CartId
-            var cartPaged = await _cartRepo.GetPagedProjectedAsync<Cart>(
-                filter: c => c.CartId == dto.CartId,
-                selector: c => c,
-                pageNumber: 1,
-                pageSize: 1,
-                includes: includes
-            );
-
-            var cart = cartPaged.Items.FirstOrDefault();
-
-            if (cart == null)
+            if (userId.HasValue)
             {
-                // سبد جدید — فقط یک بار ساخته می‌شه
-                cart = new Cart
+                cart = (await _cartRepo.GetPagedProjectedAsync<Cart>(
+                    c => c.UserId == userId.Value && !c.IsDeleted,
+                    c => c,
+                    1, 1,
+                    includes: new[] {
+                "CartItems",
+                "CartItems.AgriculturalProduct",
+                "Discount",
+                "User"
+                    }))
+                    .Items.FirstOrDefault();
+
+                if (cart == null)
                 {
-                    CartId = dto.CartId,
-                    CartItems = new List<CartItem>()
-                };
-                _cartRepo.AddAsync(cart); // فقط Add، نه Update
+                    cart = new Cart
+                    {
+                        UserId = userId.Value,
+                        CartItems = new()
+                    };
+                    isNewCart = true;
+                }
             }
-            // اگر cart وجود داشت، cart.CartItems لود شده و می‌تونیم روش کار کنیم
+            else
+            {
+                var cartId = CartId();
+
+                cart = (await _cartRepo.GetPagedProjectedAsync<Cart>(
+                    c => c.CartId == cartId && !c.IsDeleted,
+                    c => c,
+                    1, 1,
+                    includes: new[] {
+                "CartItems",
+                "CartItems.AgriculturalProduct",
+                "Discount"
+                    }))
+                    .Items.FirstOrDefault();
+
+                if (cart == null)
+                {
+                    cart = new Cart
+                    {
+                        CartId = cartId,
+                        CartItems = new()
+                    };
+                    isNewCart = true;
+                }
+            }
+
+            // =============================
+            // 2️⃣ اگر Cart جدید است → اول Save
+            // =============================
+
+            if (isNewCart)
+            {
+                await _cartRepo.AddAsync(cart);
+                await _unitOfWork.SaveChangesAsync(); // 🔴 حیاتی (FK Fix)
+            }
+
+            // =============================
+            // 3️⃣ اضافه / افزایش CartItem
+            // =============================
 
             var existingItem = cart.CartItems
                 .FirstOrDefault(i => i.AgriculturalProductId == product.AgriculturalProductId);
 
             if (existingItem != null)
             {
-                var totalNeeded = existingItem.Quantity + dto.Quantity;
-                if (product.Stock < totalNeeded - existingItem.Quantity)
-                    throw new InvalidOperationException("موجودی کافی نیست.");
-
-                existingItem.Quantity = totalNeeded;
-                existingItem.Price = price;
+                existingItem.Quantity += dto.Quantity;
             }
             else
             {
                 cart.CartItems.Add(new CartItem
                 {
+                    CartId = cart.CartId, // 🔴 FK معتبر
                     AgriculturalProductId = product.AgriculturalProductId,
-                    Quantity = dto.Quantity,
-                    Price = price
+                    Quantity = dto.Quantity
                 });
             }
 
-            // <<<--- همیشه Update بزن — EF خودش تشخیص می‌ده جدیده یا نه --->
-            await _cartRepo.UpdateAsync(cart); // این خط کلیدی هست!
+            // =============================
+            // 4️⃣ Pricing
+            // =============================
 
-            await _unitOfWork.SaveChangesAsync();
+            Dictionary<int, bool>? eligibility = null;
+            if (cart.Discount != null)
+            {
+                eligibility = await _priceCalculatorService
+                    .PrepareDiscountEligibilityAsync(cart, cart.Discount);
+            }
 
-            return await GetCartAsync(dto.CartId, null);
-        }
-        #endregion
+            _priceCalculatorService.CalculateCart(cart, role, eligibility);
 
-        #region UpdateCartItemAsync
-        public async Task<CartDto> UpdateCartItemAsync(UpdateCartItemDto dto)
-        {
-            if (dto.Quantity <= 0) throw new InvalidOperationException("تعداد باید مثبت باشد.");
-
-            var includes = new string[] { "CartItems" };
-
-            var cartPaged = await _cartRepo.GetPagedProjectedAsync<Cart>(
-                filter: c => c.CartId == dto.CartId,
-                selector: c => c,
-                pageNumber: 1,
-                pageSize: 1,
-                includes: includes
-            );
-
-            var cart = cartPaged.Items.FirstOrDefault()
-                       ?? throw new NotFoundException("سبد خرید یافت نشد");
-
-            var item = cart.CartItems.FirstOrDefault(i => i.Code == dto.ItemCode)
-                       ?? throw new NotFoundException("آیتم سبد یافت نشد.");
-
-            var product = await _productRepo.GetByIdAsync(item.AgriculturalProductId)
-                          ?? throw new NotFoundException("محصول یافت نشد");
-
-            if (product.Stock < dto.Quantity)
-                throw new InvalidOperationException($"موجودی محصول {product.Name} کافی نیست.");
-
-            item.Quantity = dto.Quantity;
-            item.Price = _currentUserService.Roles?.Contains("Wholesale") == true
-                         ? product.WholesalePrice
-                         : product.RetailPrice;
-
-            cart.UpdatedAt = DateTimeOffset.UtcNow;
+            // =============================
+            // 5️⃣ Save نهایی
+            // =============================
 
             await _cartRepo.UpdateAsync(cart);
             await _unitOfWork.SaveChangesAsync();
 
-            return await GetCartAsync(dto.CartId, null);
+            return _mapper.Map<CartDto>(cart);
         }
-        #endregion
 
-        #region RemoveFromCartItemAsync
-        public async Task<CartDto> RemoveFromCartItemAsync(RemoveCartItemDto dto)
+
+
+
+        public async Task<CartDto> UpdateCartItemAsync(UpdateCartItemDto dto)
         {
-            var includes = new string[] { "CartItems" };
+            var cartId = CartId();
 
-            var cartPaged = await _cartRepo.GetPagedProjectedAsync<Cart>(
-                filter: c => c.CartId == dto.CartId,
-                selector: c => c,
+            var paged = await _cartRepo.GetPagedWithIncludeAsync(
+                filter: c => c.CartId == cartId,
                 pageNumber: 1,
                 pageSize: 1,
-                includes: includes
-            );
+                includes: c => c.CartItems);
 
-            var cart = cartPaged.Items.FirstOrDefault()
-                       ?? throw new NotFoundException("سبد خرید یافت نشد");
+            var cart = paged.Items.FirstOrDefault() ?? throw new NotFoundException("سبد خرید یافت نشد.");
 
             var item = cart.CartItems.FirstOrDefault(i => i.Code == dto.ItemCode)
-                       ?? throw new NotFoundException("آیتم سبد یافت نشد.");
+                       ?? throw new NotFoundException("آیتم یافت نشد.");
+
+            item.Quantity = dto.Quantity;
+            await _cartRepo.UpdateAsync(cart);
+            await _unitOfWork.SaveChangesAsync();
+            return await GetCartAsync();
+        }
+
+        public async Task<CartDto> RemoveCartItemAsync(RemoveCartItemDto dto)
+        {
+            var cartId = CartId();
+
+            var paged = await _cartRepo.GetPagedWithIncludeAsync(
+                filter: c => c.CartId == cartId,
+                pageNumber: 1,
+                pageSize: 1,
+                includes: c => c.CartItems);
+
+            var cart = paged.Items.FirstOrDefault() ?? throw new NotFoundException("سبد خرید یافت نشد.");
+
+            var item = cart.CartItems.FirstOrDefault(i => i.Code == dto.ItemCode)
+                       ?? throw new NotFoundException("آیتم یافت نشد.");
 
             cart.CartItems.Remove(item);
             await _cartItemRepo.DeleteAsync(item);
-
-            cart.UpdatedAt = DateTimeOffset.UtcNow;
             await _cartRepo.UpdateAsync(cart);
             await _unitOfWork.SaveChangesAsync();
-
-            return await GetCartAsync(dto.CartId, null);
+            return await GetCartAsync();
         }
-        #endregion
 
-        #region MergeGuestWithUserAsync
-        public async Task<CartDto> MergeGuestWithUserAsync(Guid guestCartId, int userId)
+        public async Task<CartDto> MergeGuestWithUserAsync(int userId, Guid guestCartId)
         {
-            var includes = new string[] { "CartItems" };
-
-            var guestPaged = await _cartRepo.GetPagedProjectedAsync<Cart>(
-                filter: c => c.CartId == guestCartId,
-                selector: c => c,
-                pageNumber: 1,
-                pageSize: 1,
-                includes: includes
+            var guestCart = await _cartRepo.GetPagedWithIncludeAsync(
+                c => c.CartId == guestCartId,
+                1, 1,
+                c => c.CartItems
             );
-            var guestCart = guestPaged.Items.FirstOrDefault();
+            var guest = guestCart.Items.FirstOrDefault();
+            if (guest == null || !guest.CartItems.Any())
+                return await GetCartAsync();
 
-            var userPaged = await _cartRepo.GetPagedProjectedAsync<Cart>(
-                filter: c => c.UserId == userId,
-                selector: c => c,
-                pageNumber: 1,
-                pageSize: 1,
-                includes: includes
+            var userPaged = await _cartRepo.GetPagedWithIncludeAsync(
+                c => c.UserId == userId,
+                1, 1,
+                c => c.CartItems
             );
-            var userCart = userPaged.Items.FirstOrDefault();
 
-            bool isNewUserCart = userCart == null;
+            var userCart = userPaged.Items.FirstOrDefault()
+                           ?? new Cart { UserId = userId, CartItems = new List<CartItem>() };
 
-            if (isNewUserCart)
+            // Merge
+            foreach (var guestItem in guest.CartItems)
             {
-                userCart = new Cart
-                {
-                    UserId = userId,
-                    CartItems = new List<CartItem>()
-                };
+                var existing = userCart.CartItems.FirstOrDefault(i => i.AgriculturalProductId == guestItem.AgriculturalProductId);
+                if (existing != null)
+                    existing.Quantity += guestItem.Quantity;
+                else
+                    userCart.CartItems.Add(new CartItem
+                    {
+                        AgriculturalProductId = guestItem.AgriculturalProductId,
+                        Quantity = guestItem.Quantity,
+                        Price = guestItem.Price
+                    });
             }
 
-            if (guestCart != null && guestCart.CartItems.Any())
+            await _cartRepo.LogicalDeleteAsync(guest);
+            await _cartRepo.UpdateAsync(userCart);
+            await _unitOfWork.SaveChangesAsync();
+
+            return _mapper.Map<CartDto>(userCart);
+        }
+
+
+        public async Task ClearCartAsync()
+        {
+            var userId = GetCurrentUserId();
+
+            if (userId.HasValue)
             {
-                foreach (var guestItem in guestCart.CartItems)
-                {
-                    var userItem = userCart.CartItems
-                        .FirstOrDefault(i => i.AgriculturalProductId == guestItem.AgriculturalProductId);
-
-                    if (userItem != null)
-                    {
-                        userItem.Quantity += guestItem.Quantity;
-                    }
-                    else
-                    {
-                        userCart.CartItems.Add(new CartItem
-                        {
-                            AgriculturalProductId = guestItem.AgriculturalProductId,
-                            Quantity = guestItem.Quantity,
-                            Price = guestItem.Price
-                        });
-                    }
-                }
-
-                await _cartRepo.LogicalDeleteAsync(guestCart);
-            }
-
-            if (isNewUserCart)
-            {
-                await _cartRepo.AddAsync(userCart);
+                var paged = await _cartRepo.GetPagedAsync(filter: c => c.UserId == userId.Value, pageSize: 1);
+                var cart = paged.Items.FirstOrDefault();
+                if (cart != null) await _cartRepo.LogicalDeleteAsync(cart);
             }
             else
             {
-                await _cartRepo.UpdateAsync(userCart);
+                var cartId = CartId();
+                var paged = await _cartRepo.GetPagedAsync(filter: c => c.CartId == cartId, pageSize: 1);
+                var cart = paged.Items.FirstOrDefault();
+                if (cart != null) await _cartRepo.LogicalDeleteAsync(cart);
             }
 
             await _unitOfWork.SaveChangesAsync();
-
-            return await GetCartAsync(null, userId);
         }
-        #endregion
 
-        #region ClearCartAsync
-        public async Task ClearCartAsync(Guid cartId)
-        {
-            var includes = new string[] { "CartItems" };
-
-            var cartPaged = await _cartRepo.GetPagedProjectedAsync<Cart>(
-                filter: c => c.CartId == cartId,
-                selector: c => c,
-                pageNumber: 1,
-                pageSize: 1,
-                includes: includes
-            );
-
-            var cart = cartPaged.Items.FirstOrDefault();
-            if (cart == null) return;
-
-            foreach (var item in cart.CartItems.ToList())
-            {
-                await _cartItemRepo.DeleteAsync(item);
-            }
-
-            await _cartRepo.LogicalDeleteAsync(cart);
-            await _unitOfWork.SaveChangesAsync();
-        }
-        #endregion
     }
 }

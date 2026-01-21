@@ -3,6 +3,7 @@ using AlooGiyah_Application.DTOs.Cart;
 using AlooGiyah_Application.Interfaces.Store;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace AlooGiyah_Api.Controllers
 {
@@ -10,152 +11,135 @@ namespace AlooGiyah_Api.Controllers
     [ApiController]
     public class CartController : ControllerBase
     {
-        #region Constructor
         private readonly ICartService _cartService;
-        public CartController(ICartService cartService)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public CartController(ICartService cartService, IHttpContextAccessor httpContextAccessor)
         {
             _cartService = cartService;
+            _httpContextAccessor = httpContextAccessor;
         }
-        #endregion
 
-        #region Get Cart
-        [HttpGet("Get")]
-        public async Task<IActionResult> GetCart([FromQuery] Guid? cartId)
+        [HttpGet]
+        public async Task<IActionResult> GetCart()
         {
-            // اگر کاربر لاگین کرده، UserId رو از توکن بگیره، وگرنه cartId از کوکی
-            var userId = User.Identity?.IsAuthenticated == true
-                ? int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0")
-                : (int?)null;
-
-            var result = await _cartService.GetCartAsync(cartId, userId);
-
-            return Ok(new ApiResponse<CartDto>
+            try
             {
-                IsSuccess = true,
-                Message = "سبد خرید با موفقیت دریافت شد",
-                Data = result
-            });
-        }
-        #endregion
+                var cart = await _cartService.GetCartAsync();
 
-        #region Add To Cart
+                //// اگر توکن مهمان جدید ساخته شد، در هدر برگردون
+                //var response = _httpContextAccessor.HttpContext?.Response;
+                //if (response != null && response.Headers.ContainsKey("X-Guest-Token"))
+                //{
+                //    // هدر قبلاً اضافه شده
+                //}
+
+                return Ok(new ApiResponse<CartDto>
+                {
+                    IsSuccess = true,
+                    Message = "سبد خرید با موفقیت دریافت شد",
+                    Data = cart
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse<object>
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                });
+            }
+        }
+
         [HttpPost("Add")]
         public async Task<IActionResult> AddToCart([FromBody] AddToCartDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            if (dto.CartId == Guid.Empty)
+            if (!ModelState.IsValid || dto.Quantity <= 0)
+            {
                 return BadRequest(new ApiResponse<object>
                 {
                     IsSuccess = false,
-                    Message = "شناسه سبد خرید (CartId) الزامی است."
+                    Message = "داده‌های ورودی نامعتبر است."
                 });
-
-            if (dto.Quantity <= 0)
-                return BadRequest(new ApiResponse<object>
-                {
-                    IsSuccess = false,
-                    Message = "تعداد محصول باید مثبت باشد."
-                });
+            }
 
             var result = await _cartService.AddToCartAsync(dto);
 
             return Ok(new ApiResponse<CartDto>
             {
                 IsSuccess = true,
-                Message = "محصول با موفقیت به سبد خرید اضافه شد",
+                Message = "محصول با موفقیت به سبد اضافه شد",
                 Data = result
             });
         }
-        #endregion
 
-        #region Update Cart Item
         [HttpPut("UpdateItem")]
         public async Task<IActionResult> UpdateCartItem([FromBody] UpdateCartItemDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            if (dto.Quantity <= 0)
-                return BadRequest(new ApiResponse<object>
-                {
-                    IsSuccess = false,
-                    Message = "تعداد باید مثبت باشد."
-                });
+            if (!ModelState.IsValid || dto.Quantity <= 0)
+            {
+                return BadRequest(new ApiResponse<object> { IsSuccess = false, Message = "داده‌های ورودی نامعتبر است." });
+            }
 
             var result = await _cartService.UpdateCartItemAsync(dto);
-
             return Ok(new ApiResponse<CartDto>
             {
                 IsSuccess = true,
-                Message = "تعداد محصول در سبد خرید با موفقیت ویرایش شد",
+                Message = "آیتم با موفقیت بروزرسانی شد",
                 Data = result
             });
         }
-        #endregion
 
-        #region Remove From Cart
         [HttpDelete("RemoveItem")]
-        public async Task<IActionResult> RemoveFromCart([FromQuery] RemoveCartItemDto dto)
+        public async Task<IActionResult> RemoveCartItem([FromBody] RemoveCartItemDto dto) // بهتر از FromBody استفاده کن
         {
-            if (dto.CartId == Guid.Empty || dto.ItemCode == null || dto.ItemCode == string.Empty)
-                return BadRequest(new ApiResponse<object>
-                {
-                    IsSuccess = false,
-                    Message = "شناسه سبد و آیتم الزامی است."
-                });
+            if (string.IsNullOrEmpty(dto.ItemCode))
+            {
+                return BadRequest(new ApiResponse<object> { IsSuccess = false, Message = "کد آیتم الزامی است." });
+            }
 
-            var result = await _cartService.RemoveFromCartItemAsync(dto);
-
+            var result = await _cartService.RemoveCartItemAsync(dto);
             return Ok(new ApiResponse<CartDto>
             {
                 IsSuccess = true,
-                Message = "محصول با موفقیت از سبد خرید حذف شد",
+                Message = "آیتم با موفقیت حذف شد",
                 Data = result
             });
         }
-        #endregion
-
-        #region Merge Guest Cart (After Login)
-        [Authorize]
+        [Authorize] 
         [HttpPost("Merge")]
-        public async Task<IActionResult> MergeGuestCart([FromBody] Guid guestCartId)
+        public async Task<IActionResult> MergeGuestCart()
         {
-            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
-                                   ?? throw new UnauthorizedAccessException());
+            // 1️⃣ گرفتن UserId از JWT
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            var result = await _cartService.MergeGuestWithUserAsync(guestCartId, userId);
+            // 2️⃣ گرفتن CartId مهمان از Header یا Cookie
+            var guestCartIdHeader = Request.Headers["X-Guest-Cart-Id"].ToString();
+            if (string.IsNullOrWhiteSpace(guestCartIdHeader) || !Guid.TryParse(guestCartIdHeader, out Guid guestCartId))
+                return BadRequest("سبد خرید مهمان یافت نشد.");
+
+            // 3️⃣ Merge سبد مهمان با کاربر
+            var result = await _cartService.MergeGuestWithUserAsync(userId, guestCartId);
 
             return Ok(new ApiResponse<CartDto>
             {
                 IsSuccess = true,
-                Message = "سبد خرید مهمان با حساب شما ادغام شد",
+                Message = "سبد مهمان با حساب شما ادغام شد",
                 Data = result
             });
         }
-        #endregion
 
-        #region Clear Cart
+
         [HttpDelete("Clear")]
-        public async Task<IActionResult> ClearCart([FromQuery] Guid cartId)
+        public async Task<IActionResult> ClearCart()
         {
-            if (cartId == Guid.Empty)
-                return BadRequest(new ApiResponse<object>
-                {
-                    IsSuccess = false,
-                    Message = "شناسه سبد خرید الزامی است."
-                });
-
-            await _cartService.ClearCartAsync(cartId);
-
+            await _cartService.ClearCartAsync();
             return Ok(new ApiResponse<object>
             {
                 IsSuccess = true,
-                Message = "سبد خرید با موفقیت پاک شد",
+                Message = "سبد خرید پاک شد",
                 Data = null
             });
         }
-        #endregion
     }
 }

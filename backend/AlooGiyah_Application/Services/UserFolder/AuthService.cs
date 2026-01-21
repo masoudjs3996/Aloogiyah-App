@@ -1,4 +1,5 @@
 ﻿using AlooGiyah_Application.DTOs.Users;
+using AlooGiyah_Application.Interfaces.Store;
 using AlooGiyah_Application.Interfaces.UserFolder;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.UserFolder;
@@ -25,7 +26,7 @@ public class AuthService : IAuthService
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
     private readonly IEmail _email;
-    
+
 
     public AuthService(
         IGenericRepository<User> genericRepositoryUser,
@@ -98,6 +99,36 @@ public class AuthService : IAuthService
     }
     #endregion
 
+    #region ساخت توکن مهمان
+    public string GenerateGuestToken()
+    {
+        var keyStr = _config["Jwt:Key"] ?? throw new InvalidOperationException("کلید JWT تنظیم نشده است.");
+        var issuer = _config["Jwt:Issuer"] ?? throw new InvalidOperationException("Issuer تنظیم نشده است.");
+        var audience = _config["Jwt:Audience"] ?? throw new InvalidOperationException("Audience تنظیم نشده است.");
+        var cartId = Guid.NewGuid().ToString();
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var keyBytes = Encoding.UTF8.GetBytes(keyStr);
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(new[]
+            {
+               new Claim("cartId", cartId),
+               new Claim(ClaimTypes.Role, "Guest"),
+               new Claim("IsGuest", "true")
+            }),
+            Expires = DateTime.UtcNow.AddHours(2),
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature),
+            Issuer = issuer,
+            Audience = audience
+        };
+
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
+    }
+    #endregion
+
     #region با استفاده از رفرش توکن به اکسس توکن اعتبار می‌دهیم
     public async Task<(string newAccessToken, RefreshToken newRefreshToken)> RefreshAccessTokenAsync(string refreshToken)
     {
@@ -166,7 +197,6 @@ public class AuthService : IAuthService
             var wallet = new Wallet { UserId = user.UserId };
             await _genericRepositoryWallet.AddAsync(wallet);
             await _authRepository.AddAsync(refreshToken);
-
             await _unitOfWork.SaveChangesAsync(); // ذخیره RefreshToken
             await transaction.CommitAsync();
 
@@ -194,7 +224,6 @@ public class AuthService : IAuthService
         var accessToken = GenerateAccessToken(user);
         var refreshToken = GenerateRefreshToken();
         refreshToken.UserId = user.UserId;
-
         await _authRepository.AddAsync(refreshToken);
         await _unitOfWork.SaveChangesAsync();
 

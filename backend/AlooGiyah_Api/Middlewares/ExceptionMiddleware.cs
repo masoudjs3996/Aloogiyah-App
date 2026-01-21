@@ -1,83 +1,107 @@
 ﻿using AlooGiyah_Application.Commons;
 using AlooGiyah_Shared.Exceptions;
+using Microsoft.AspNetCore.Http;
 using System.Net;
+using System.Text.Json;
 
-namespace AlooGiyah_API.Middlewares;
-
-public class ExceptionMiddleware
+namespace AlooGiyah_API.Middlewares
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<ExceptionMiddleware> _logger;
-    private readonly IHostEnvironment _env;
-
-    public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env)
+    public class ExceptionMiddleware
     {
-        _next = next;
-        _logger = logger;
-        _env = env;
-    }
+        private readonly RequestDelegate _next;
+        private readonly ILogger<ExceptionMiddleware> _logger;
+        private readonly IHostEnvironment _env;
 
-    public async Task InvokeAsync(HttpContext context)
-    {
-        try
+        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env)
         {
-            await _next(context);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, ex.Message);
-            await HandleExceptionAsync(context, ex);
-        }
-    }
-
-
-    private Task HandleExceptionAsync(HttpContext context, Exception exception)
-    {
-        context.Response.ContentType = "application/json";
-
-        HttpStatusCode status;
-        string message;
-
-        switch (exception)
-        {
-            case NotFoundException:
-                status = HttpStatusCode.NotFound;
-                message = exception.Message;
-                break;
-
-            case UnauthorizedException:
-                status = HttpStatusCode.Unauthorized;
-                message = exception.Message;
-                break;
-
-            case ForbiddenException:
-                status = HttpStatusCode.Forbidden;
-                message = exception.Message;
-                break;
-
-            case BadRequestException:
-                status = HttpStatusCode.BadRequest;
-                message = exception.Message;
-                break;
-
-            case ValidationException validationEx:
-                status = HttpStatusCode.BadRequest;
-                return context.Response.WriteAsJsonAsync(new
-                {
-                    isSuccess = false,
-                    message = validationEx.Message,
-                    errors = validationEx.Errors
-                });
-
-            default:
-                status = HttpStatusCode.InternalServerError;
-                message = _env.IsDevelopment() ? exception.Message : "خطایی در سرور رخ داده است.";
-                break;
+            _next = next ?? throw new ArgumentNullException(nameof(next));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _env = env ?? throw new ArgumentNullException(nameof(env));
         }
 
-        var response = new ApiResponse<string>(false, message);
-        context.Response.StatusCode = (int)status;
-        return context.Response.WriteAsJsonAsync(response);
-    }
+        public async Task InvokeAsync(HttpContext context)
+        {
+            try
+            {
+                await _next(context);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unhandled exception occurred: {Message}", ex.Message);
+                await HandleExceptionAsync(context, ex);
+            }
+        }
 
+        private async Task HandleExceptionAsync(HttpContext context, Exception exception)
+        {
+            context.Response.ContentType = "application/json";
+
+            ApiResponse<object> response;
+
+            switch (exception)
+            {
+                case NotFoundException notFoundEx:
+                    context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                    response = new ApiResponse<object>(notFoundEx.Message, "NOT_FOUND");
+                    break;
+
+                case UnauthorizedException unauthorizedEx:
+                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    response = new ApiResponse<object>(unauthorizedEx.Message, "UNAUTHORIZED");
+                    break;
+
+                case ForbiddenException forbiddenEx:
+                    context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                    response = new ApiResponse<object>(forbiddenEx.Message, "FORBIDDEN");
+                    break;
+
+                case BadRequestException badRequestEx:
+                    context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    response = new ApiResponse<object>(badRequestEx.Message, "BAD_REQUEST");
+                    break;
+
+                case ValidationException validationEx:
+                    context.Response.StatusCode = (int)HttpStatusCode.BadRequest; // اینجا اصلاح شد: HttpStatusCode نه HttpHttpStatusCode
+
+                    // رفع مشکل نوع Errors
+                    var validationErrors = new List<string>();
+
+                    if (validationEx.Errors != null)
+                    {
+                        foreach (var error in validationEx.Errors)
+                        {
+                            if (error.Value != null)
+                            {
+                                validationErrors.AddRange(error.Value);
+                            }
+                        }
+                    }
+
+                    response = new ApiResponse<object>(
+                        errorMessage: validationEx.Message ?? "اطلاعات ورودی نامعتبر است.",
+                        errorCode: "VALIDATION_ERROR",
+                        additionalErrors: validationErrors.ToArray()
+                    );
+                    break;
+
+                default:
+                    context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    var errorMsg = _env.IsDevelopment()
+                        ? exception.Message
+                        : "خطایی در سرور رخ داده است. لطفاً بعداً تلاش کنید.";
+
+                    response = _env.IsDevelopment()
+                        ? new ApiResponse<object>(exception) // جزئیات کامل در حالت توسعه
+                        : new ApiResponse<object>(errorMsg, "INTERNAL_SERVER_ERROR");
+                    break;
+            }
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
+            await context.Response.WriteAsync(JsonSerializer.Serialize(response, options));
+        }
+    }
 }

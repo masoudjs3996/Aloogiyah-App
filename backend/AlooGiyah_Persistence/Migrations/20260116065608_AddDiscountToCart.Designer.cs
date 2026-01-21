@@ -3,6 +3,7 @@ using System;
 using AlooGiyah_Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AlooGiyah_Persistence.Migrations
 {
     [DbContext(typeof(AlooGiyahDbContext))]
-    partial class AlooGiyahDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260116065608_AddDiscountToCart")]
+    partial class AddDiscountToCart
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

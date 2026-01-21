@@ -7,7 +7,7 @@ namespace AlooGiyah_Application.Interfaces.UserFolder;
 public interface IUserService
 {
     Task<UserDto> GetUserByCode(string? code);
-    Task<UserDto> GetMyProfileAsync();
+    Task<ProfileResponseDto> GetMyProfileAsync();
     Task<PagedResult<UserDto>> GetUserByFilterAsync(UserFilterDto filter);
     Task<UserDto> UpdateProfileAsync(UpdateProfileDto userDto);
     Task<string?> ChangeProfilePhotoAsync(ChangeProfilePhotoDto file);

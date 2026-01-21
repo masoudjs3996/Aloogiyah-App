@@ -6,108 +6,101 @@ using AlooGiyah_Shared.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AlooGiyah_API.Controllers;
-
-[Route("api/[controller]")]
-[ApiController]
-public class UserController : ControllerBase
+namespace AlooGiyah_API.Controllers
 {
-
-    #region Constructor
-    private readonly IUserService _userService;
-
-    public UserController(IUserService userService)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class UserController : ControllerBase
     {
-        _userService = userService;
-    }
-    #endregion
+        private readonly IUserService _userService;
 
-
-    #region GetUser
-    [Authorize(Roles ="Manager")]
-    [HttpGet("GetUserByCode")]
-    public async Task<IActionResult> GetUserByCode(string? code)
-    {
-        var users = await _userService.GetUserByCode(code);
-        if(users == null)
-            throw new NotFoundException(ErrorMessages.UserNotFound);
-        return Ok(new ApiResponse<object>
+        public UserController(IUserService userService)
         {
-            IsSuccess = true,
-            Message = " کاربر با موفقیت دریافت شد",
-            Data = users
-        });
-    }
-    #endregion
+            _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+        }
 
-    #region GetUserByFilter
-    [Authorize(Roles = "Manager")]
-    [HttpGet("GetUserByFilter")]
-    public async Task<IActionResult> GetUserByFilterAsync([FromQuery] UserFilterDto userFilter)
-    {
-        var users = await _userService.GetUserByFilterAsync(userFilter);
-        if (users == null)
-            throw new NotFoundException(ErrorMessages.UserNotFound);
-        return Ok(new ApiResponse<object>
+        // GET: api/User/GetUserByCode?code=ABC123
+        [Authorize(Roles = "Manager")]
+        [HttpGet("GetUserByCode")]
+        public async Task<IActionResult> GetUserByCode([FromQuery] string? code)
         {
-            IsSuccess = true,
-            Message = "لیست کاربران با موفقیت دریافت شد",
-            Data = users
-        });
-    }
-    #endregion
+            if (string.IsNullOrWhiteSpace(code))
+                return BadRequest(new ApiResponse<object> { IsSuccess = false, Message = "کد کاربر الزامی است." });
 
-    #region GetMyProfile
-    [Authorize]
-    [HttpGet("GetMyProfile")]
-    public async Task<IActionResult> GetMyProfileAsync()
-    {
-        var users = await _userService.GetMyProfileAsync();
-        if (users == null)
-            throw new NotFoundException(ErrorMessages.UserNotFound);
-        return Ok(new ApiResponse<object>
+            var user = await _userService.GetUserByCode(code);
+
+            return Ok(new ApiResponse<UserDto>
+            {
+                IsSuccess = true,
+                Message = "کاربر با موفقیت دریافت شد",
+                Data = user
+            });
+        }
+
+        // GET: api/User/GetUserByFilter?FName=علی&PageNumber=1&PageSize=10
+        [Authorize(Roles = "Manager")]
+        [HttpGet("GetUserByFilter")]
+        public async Task<IActionResult> GetUserByFilterAsync([FromQuery] UserFilterDto userFilter)
         {
-            IsSuccess = true,
-            Message = "پروفایل با موفقیت دریافت شد",
-            Data = users
-        });
-    }
-    #endregion
+            var users = await _userService.GetUserByFilterAsync(userFilter);
 
-    #region UpdateProfile
-    [Authorize]
-    [HttpPut("UpdateProfile")]
-    public async Task<IActionResult> UpdateUser([FromBody] UpdateProfileDto userDto)
-    {
-        var result = await _userService.UpdateProfileAsync(userDto);
-        if (result == null)
-            throw new NotFoundException(ErrorMessages.UserNotFound);
+            return Ok(new ApiResponse<object>
+            {
+                IsSuccess = true,
+                Message = users.Items.Any() ? "لیست کاربران با موفقیت دریافت شد" : "کاربری یافت نشد",
+                Data = users
+            });
+        }
 
-        return Ok(new ApiResponse<UserDto>
+        // GET: api/User/GetMyProfile
+
+        [HttpGet("GetMyProfile")]
+        public async Task<IActionResult> GetMyProfileAsync()
         {
-            IsSuccess = true,
-            Message = "اطلاعات با موفقیت بروز شد.",
-            Data = result
-        });
-    }
-    #endregion
+            var profile = await _userService.GetMyProfileAsync();
 
-    #region UploadProfileImage
-    [Authorize]
-    [HttpPost("UploadProfileImage")]
-    public async Task<IActionResult> UploadProfileImage([FromForm] ChangeProfilePhotoDto file)
-    {
-        var result = await _userService.ChangeProfilePhotoAsync(file);
+            return Ok(new ApiResponse<ProfileResponseDto>
+            {
+                IsSuccess = true,
+                Message = profile.Message,
+                Data = profile
+            });
+        }
 
-        if (result == null)
-            throw new NotFoundException(ErrorMessages.UserNotFound);
-
-        return Ok(new ApiResponse<string>
+        // PUT: api/User/UpdateProfile
+        [Authorize] // فقط کاربر لاگین‌شده (نه مهمان)
+        [HttpPut("UpdateProfile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto userDto)
         {
-            IsSuccess = true,
-            Message = "اطلاعات با موفقیت بروز شد.",
-            Data = result
-        });
+            if (!ModelState.IsValid)
+                return BadRequest(new ApiResponse { IsSuccess = false, Message = "داده‌های ورودی معتبر نیست." });
+
+            var result = await _userService.UpdateProfileAsync(userDto);
+
+            return Ok(new ApiResponse<UserDto>
+            {
+                IsSuccess = true,
+                Message = "اطلاعات پروفایل با موفقیت بروزرسانی شد.",
+                Data = result
+            });
+        }
+
+        // POST: api/User/UploadProfileImage
+        [Authorize] // فقط کاربر لاگین‌شده
+        [HttpPost("UploadProfileImage")]
+        public async Task<IActionResult> UploadProfileImage([FromForm] ChangeProfilePhotoDto dto)
+        {
+            if (dto?.File == null || dto.File.Length == 0)
+                return BadRequest(new ApiResponse { IsSuccess = false, Message = "فایل عکس الزامی است." });
+
+            var newImageUrl = await _userService.ChangeProfilePhotoAsync(dto);
+
+            return Ok(new ApiResponse<string>
+            {
+                IsSuccess = true,
+                Message = "عکس پروفایل با موفقیت تغییر کرد.",
+                Data = newImageUrl
+            });
+        }
     }
-    #endregion
 }

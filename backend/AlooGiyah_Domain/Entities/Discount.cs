@@ -28,6 +28,7 @@ public class Discount : BaseEntity
     public List<AgriculturalOrder> AgriculturalOrders { get; set; } = null!;
     public List<AgriculturalProduct> agriculturalProducts { get; set; } = null!;
     public List<ServiceRequest> ServiceRequests { get; set; } = null!;
+    public List<Cart> Carts { get; set; } = null!;
     public List<User> Users { get; set; } = null!;// کاربران مجاز برای تخفیف
     public List<Product> Products { get; set; } = null!;// محصولات مجاز برای تخفیف
     public List<Category> Categories { get; set; } = null!;

@@ -10,4 +10,11 @@ public interface IPriceCalculatorService
     Task<decimal> CalculateAgriculturalOrder(AgriculturalOrder order, string? userRole = null);
     bool IsDiscountValid(Discount discount, string? buyerCode);
     Task<bool> IsProductEligibleForDiscountAsync(AgriculturalProduct product, Discount discount);
+    public decimal CalculateCart(
+        Cart cart,
+        string userRole,
+        Dictionary<int, bool>? discountEligibility = null);
+    Task<Dictionary<int, bool>> PrepareDiscountEligibilityAsync(
+   Cart cart,
+   Discount discount);
 }

@@ -4,6 +4,7 @@ using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Entities.UserFolder;
 using AlooGiyah_Domain.Enums;
 using AlooGiyah_Domain.Interfaces;
+using AlooGiyah_Shared.Exceptions;
 
 namespace AlooGiyah_Application.Services;
 
@@ -128,7 +129,7 @@ public class PriceCalculatorService : IPriceCalculatorService
             var product = await _agriculturalProductRepository.GetByIdAsync(item.AgriculturalProductId);
             if (product == null) continue;
 
-            decimal productPrice = userRole == "User" ? product.RetailPrice : product.WholesalePrice;
+            decimal productPrice = userRole == "User" || userRole == "Gust" ? product.RetailPrice : product.WholesalePrice;
             decimal subtotal = productPrice * item.Quantity;
             item.Price = productPrice;
 
@@ -160,6 +161,92 @@ public class PriceCalculatorService : IPriceCalculatorService
         return Math.Max(0, totalPrice - totalDiscountAmount);
     }
     #endregion
+
+    #region Cart Pricing
+    public decimal CalculateCart(
+      Cart cart,
+      string userRole,
+      Dictionary<int, bool>? discountEligibility = null)
+    {
+        if (cart?.CartItems == null || !cart.CartItems.Any())
+            return 0;
+
+        decimal totalPrice = 0;
+        decimal totalDiscountAmount = 0;
+
+        var discount = cart.Discount;
+        var buyerCode = cart.User?.Code;
+
+        if (discount != null && !IsDiscountValid(discount, buyerCode))
+            discount = null;
+
+        foreach (var item in cart.CartItems)
+        {
+            var product = item.AgriculturalProduct;
+            if (product == null) continue;
+
+            decimal productPrice = userRole is "User" or "Guest"
+                ? product.RetailPrice
+                : product.WholesalePrice;
+
+            decimal subtotal = productPrice * item.Quantity;
+            item.Price = productPrice;
+
+            decimal itemDiscount = 0;
+
+            if (discount != null &&
+                discountEligibility?.TryGetValue(item.AgriculturalProductId, out bool eligible) == true &&
+                eligible)
+            {
+                itemDiscount = discount.DiscountType switch
+                {
+                    DiscountType.Percentage =>
+                        Math.Min(subtotal * discount.Value / 100m,
+                                 discount.MaxDiscountAmount ?? decimal.MaxValue),
+
+                    DiscountType.Fixed =>
+                        Math.Min(discount.Value * item.Quantity,
+                                 discount.MaxDiscountAmount ?? decimal.MaxValue),
+
+                    _ => 0
+                };
+            }
+
+            totalPrice += subtotal;
+            totalDiscountAmount += itemDiscount;
+        }
+
+        cart.TotalPrice = totalPrice;
+        cart.DiscountAmount = totalDiscountAmount;
+
+        return Math.Max(0, totalPrice - totalDiscountAmount);
+    }
+
+
+
+    #endregion
+
+    public async Task<Dictionary<int, bool>> PrepareDiscountEligibilityAsync(
+    Cart cart,
+    Discount discount)
+    {
+        var result = new Dictionary<int, bool>();
+
+        if (cart?.CartItems == null || discount == null)
+            return result;
+
+        foreach (var item in cart.CartItems)
+        {
+            var product = item.AgriculturalProduct;
+            if (product == null) continue;
+
+            bool eligible = await IsProductEligibleForDiscountAsync(product, discount);
+            result[item.AgriculturalProductId] = eligible;
+        }
+
+        return result;
+    }
+
 
     public bool IsDiscountValid(Discount discount, string? buyerCode)
     {

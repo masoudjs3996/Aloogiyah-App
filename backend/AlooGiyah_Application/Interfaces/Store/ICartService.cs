@@ -4,10 +4,10 @@ namespace AlooGiyah_Application.Interfaces.Store;
 
 public interface ICartService
 {
-    Task<CartDto> GetCartAsync(Guid? cartId, int? userId);
-    Task<CartDto> AddToCartAsync(AddToCartDto dto);
+    Task<CartDto> GetCartAsync(); // بدون پارامتر
+    Task<CartDto> AddToCartAsync(AddToCartDto dto); // فقط ProductCode و Quantity
     Task<CartDto> UpdateCartItemAsync(UpdateCartItemDto dto);
-    Task<CartDto> RemoveFromCartItemAsync(RemoveCartItemDto dto);
-    Task<CartDto> MergeGuestWithUserAsync(Guid guestCartId, int userId);
-    Task ClearCartAsync(Guid cartId);
+    Task<CartDto> RemoveCartItemAsync(RemoveCartItemDto dto);
+    Task<CartDto> MergeGuestWithUserAsync(int userId, Guid guestCartId);
+    Task ClearCartAsync();
 }
