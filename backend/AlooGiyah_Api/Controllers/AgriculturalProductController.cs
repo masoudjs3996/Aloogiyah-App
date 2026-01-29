@@ -42,6 +42,7 @@ public class AgriculturalProductController : ControllerBase
     }
     #endregion
 
+    #region CreateWithImages
     [Authorize(Roles = "Admin,Farmer")]
     [HttpPost("CreateWithImages")]
     public async Task<IActionResult> CreateWithImages([FromForm] AgriculturalProductCreateDto dto)
@@ -71,6 +72,7 @@ public class AgriculturalProductController : ControllerBase
             });
         }
     }
+    #endregion
 
     #region GetByFilter
     [AllowAnonymous]
@@ -86,7 +88,7 @@ public class AgriculturalProductController : ControllerBase
         {
             IsSuccess = true,
             Message = "لیست محصولات کشاورزی با موفقیت دریافت شد",
-            Data = result
+            Data = result.Items
         });
     }
     #endregion

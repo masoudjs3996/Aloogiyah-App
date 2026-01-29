@@ -9,6 +9,7 @@ public interface ICurrentUserService
     string? UserCode { get; }
     IEnumerable<string> Roles { get; }
     bool IsAuthenticated { get; }
-    string? CartId { get; }
+    string? CartId { get; set; }
+    bool IsGuest { get; }
 
 }

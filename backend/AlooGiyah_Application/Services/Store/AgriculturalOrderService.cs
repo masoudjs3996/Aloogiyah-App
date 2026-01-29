@@ -1,5 +1,6 @@
 ﻿using AlooGiyah_Application.DTOs.AgriculturalOrder;
 using AlooGiyah_Application.DTOs.AgriculturalOrderItem;
+using AlooGiyah_Application.DTOs.Cart;
 using AlooGiyah_Application.Interfaces;
 using AlooGiyah_Application.Interfaces.Store;
 using AlooGiyah_Application.Interfaces.UserFolder;
@@ -175,12 +176,27 @@ public class AgriculturalOrderService : IAgriculturalOrderService
     }
     #endregion
 
+    #region CreateFromCartAsync
     public async Task<AgriculturalOrderDto> CreateFromCartAsync(CheckoutFromCartDto dto)
     {
-        var userId = int.Parse(_currentUserService.UserId); // کاربر باید لاگین باشه
+        var userId = int.Parse(_currentUserService.UserId);
 
-        // گرفتن سبد خرید کاربر
-        var cart = await _cartService.GetCartAsync();
+        CartDto cart;
+
+        if (dto.CartId.HasValue)
+        {
+            // گرفتن سبد خاص
+            cart = await _cartService.GetCartByIdAsync(dto.CartId.Value)
+                   ?? throw new NotFoundException("سبد خرید موردنظر یافت نشد");
+        }
+        else
+        {
+            // fallback → اولین سبد (یا ارور بده)
+            var carts = await _cartService.GetCartsAsync();
+            cart = carts.FirstOrDefault()
+                   ?? throw new InvalidOperationException("هیچ سبد خریدی یافت نشد");
+        }
+
         if (cart.ItemCount == 0)
             throw new InvalidOperationException("سبد خرید خالی است");
 
@@ -239,6 +255,7 @@ public class AgriculturalOrderService : IAgriculturalOrderService
 
         return _mapper.Map<AgriculturalOrderDto>(order);
     }
+    #endregion
 
     #region Update 
     public async Task<bool> UpdateAsync(AgriculturalOrderUpdateDto dto)

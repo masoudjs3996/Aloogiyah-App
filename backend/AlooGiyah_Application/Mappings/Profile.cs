@@ -323,6 +323,7 @@ namespace AlooGiyah_Application.Mappings
 
             #endregion
 
+            #region Cart
             CreateMap<Cart, CartDto>()
             .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.CartItems.Sum(i => i.Quantity)))
             .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.CartItems.Sum(i => i.Quantity * i.Price)))
@@ -330,12 +331,13 @@ namespace AlooGiyah_Application.Mappings
 
 
             CreateMap<CartItem, CartItemDto>()
-                .ForMember(dest => dest.Code, opt => opt.MapFrom(src => src.Code))
-                .ForMember(dest => dest.ProductCode, opt => opt.MapFrom(src => src.AgriculturalProduct.Code))
-                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.AgriculturalProduct.Name))
-                .ForMember(dest => dest.ProductSlug, opt => opt.MapFrom(src => src.AgriculturalProduct.Slug))
-                .ForMember(dest => dest.AvailableStock, opt => opt.MapFrom(src => src.AgriculturalProduct.Stock));
-
+             .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.Price))  // ← این خط کلیدی است
+             .ForMember(dest => dest.TotalPrice, opt => opt.Ignore())                 // چون computed property است
+             .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.AgriculturalProduct.Name))
+             .ForMember(dest => dest.ProductCode, opt => opt.MapFrom(src => src.AgriculturalProduct.Code))
+             .ForMember(dest => dest.ProductSlug, opt => opt.MapFrom(src => src.AgriculturalProduct.Slug))
+             .ForMember(dest => dest.AvailableStock, opt => opt.MapFrom(src => src.AgriculturalProduct.Stock));
+            #endregion
         }
     }
 }

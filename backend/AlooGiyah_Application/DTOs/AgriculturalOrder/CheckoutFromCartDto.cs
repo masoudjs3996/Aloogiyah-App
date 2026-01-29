@@ -6,6 +6,6 @@ public class CheckoutFromCartDto
 {
     [Required]
     public string AddressCode { get; set; } = string.Empty;
-
     public string? DiscountCode { get; set; }
+    public Guid? CartId { get; set; }
 }

@@ -1,6 +1,14 @@
 {
   "ExpandedNodes": [
+<<<<<<< Updated upstream
     ""
   ],
+=======
+    "",
+    "\\backend",
+    "\\backend\\AlooGiyah_Persistence"
+  ],
+  "SelectedNode": "\\backend\\AlooGiyah.sln",
+>>>>>>> Stashed changes
   "PreviewInSolutionExplorer": false
 }
