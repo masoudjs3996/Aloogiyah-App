@@ -11,6 +11,7 @@ namespace AlooGiyah_Api.Controllers
     [ApiController]
     public class CartController : ControllerBase
     {
+        #region Constructor
         private readonly ICartService _cartService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
@@ -19,10 +20,10 @@ namespace AlooGiyah_Api.Controllers
             _cartService = cartService;
             _httpContextAccessor = httpContextAccessor;
         }
+        #endregion
 
-
-    #region Get Cart
-    [HttpGet]
+        #region Get Cart
+        [HttpGet]
     public async Task<IActionResult> GetCarts()
     {
         var carts = await _cartService.GetCartsAsync();
@@ -34,8 +35,9 @@ namespace AlooGiyah_Api.Controllers
             Data = carts
         });
     }
-    #endregion
+        #endregion
 
+        #region Add
         [HttpPost("Add")]
         public async Task<IActionResult> AddToCart([FromBody] AddToCartDto dto)
         {
@@ -57,7 +59,9 @@ namespace AlooGiyah_Api.Controllers
                 Data = result
             });
         }
+        #endregion
 
+        #region Update Item
         [HttpPut("UpdateItem")]
         public async Task<IActionResult> UpdateCartItem([FromBody] UpdateCartItemDto dto)
         {
@@ -74,6 +78,8 @@ namespace AlooGiyah_Api.Controllers
                 Data = result
             });
         }
+        #endregion
+
         #region RemoveItem
         [HttpDelete("RemoveItem")]
         public async Task<IActionResult> RemoveCartItem([FromBody] RemoveCartItemDto dto) // بهتر از FromBody استفاده کن
@@ -116,6 +122,7 @@ namespace AlooGiyah_Api.Controllers
         }
         #endregion
 
+        #region Clear
         [HttpDelete("Clear")]
         public async Task<IActionResult> ClearCart()
         {
@@ -127,5 +134,6 @@ namespace AlooGiyah_Api.Controllers
                 Data = null
             });
         }
+        #endregion
     }
 }

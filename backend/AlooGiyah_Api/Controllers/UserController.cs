@@ -19,7 +19,7 @@ namespace AlooGiyah_API.Controllers
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
-        // GET: api/User/GetUserByCode?code=ABC123
+        #region GetUserByCode
         [Authorize(Roles = "Manager")]
         [HttpGet("GetUserByCode")]
         public async Task<IActionResult> GetUserByCode([FromQuery] string? code)
@@ -36,6 +36,7 @@ namespace AlooGiyah_API.Controllers
                 Data = user
             });
         }
+        #endregion
 
         // GET: api/User/GetUserByFilter?FName=علی&PageNumber=1&PageSize=10
         [Authorize(Roles = "Manager")]

@@ -213,10 +213,10 @@ public class UserService : IUserService
         return new ProfileResponseDto
         {
             IsGuest = true,
-            Message = "شما به عنوان مهمان وارد سایت شده‌اید. سبد خرید برای شما ایجاد شد. برای دسترسی به پروفایل کامل، لطفاً ثبت‌نام یا ورود کنید.",
-            GuestToken = guestToken,
-            
+            Message = "شما به عنوان مهمان وارد سایت شده‌اید...",
+            GuestToken = $"Bearer {guestToken}"
         };
+
     }
 
     private ClaimsPrincipal ValidateToken(string token)
