@@ -189,16 +189,16 @@ public class AgriculturalOrderService : IAgriculturalOrderService
             cart = await _cartService.GetCartByIdAsync(dto.CartId.Value)
                    ?? throw new NotFoundException("سبد خرید موردنظر یافت نشد");
         }
-        else
-        {
-            // fallback → اولین سبد (یا ارور بده)
-            var carts = await _cartService.GetCartsAsync();
-            cart = carts.FirstOrDefault()
-                   ?? throw new InvalidOperationException("هیچ سبد خریدی یافت نشد");
-        }
+        //else
+        //{
+        //    // fallback → اولین سبد (یا ارور بده)
+        //    //var carts = await _cartService.GetCartsAsync();
+        //    //cart = carts.FirstOrDefault()
+        //           ?? throw new InvalidOperationException("هیچ سبد خریدی یافت نشد");
+        //}
 
-        if (cart.ItemCount == 0)
-            throw new InvalidOperationException("سبد خرید خالی است");
+        //if (cart.ItemCount == 0)
+        //    throw new InvalidOperationException("سبد خرید خالی است");
 
         // گرفتن و چک آدرس
         var address = await _addressRepository.GetByCodeAsync(dto.AddressCode)
@@ -220,24 +220,24 @@ public class AgriculturalOrderService : IAgriculturalOrderService
         };
 
         // تبدیل آیتم‌های سبد به سفارش
-        foreach (var item in cart.CartItems)
-        {
-            var product = await _agriculturalProductRepository.GetByCodeAsync(item.ProductCode)
-                          ?? throw new InvalidOperationException($"محصول با کد {item.ProductCode} یافت نشد");
+        //foreach (var item in cart.CartItems)
+        //{
+        //    var product = await _agriculturalProductRepository.GetByCodeAsync(item.ProductCode)
+        //                  ?? throw new InvalidOperationException($"محصول با کد {item.ProductCode} یافت نشد");
 
-            if (product.Stock < item.Quantity)
-                throw new InvalidOperationException($"موجودی محصول {item.ProductName} کافی نیست");
+        //    if (product.Stock < item.Quantity)
+        //        throw new InvalidOperationException($"موجودی محصول {item.ProductName} کافی نیست");
 
-            product.Stock -= item.Quantity;
-            await _agriculturalProductRepository.UpdateAsync(product);
+        //    product.Stock -= item.Quantity;
+        //    await _agriculturalProductRepository.UpdateAsync(product);
 
-            order.AgriculturalOrderItems.Add(new AgriculturalOrderItem
-            {
-                AgriculturalProductId = product.AgriculturalProductId,
-                Quantity = item.Quantity,
-                Price = item.UnitPrice
-            });
-        }
+        //    order.AgriculturalOrderItems.Add(new AgriculturalOrderItem
+        //    {
+        //        AgriculturalProductId = product.AgriculturalProductId,
+        //        Quantity = item.Quantity,
+        //        Price = item.UnitPrice
+        //    });
+        //}
 
         // اعمال تخفیف اگر داشت
         if (!string.IsNullOrEmpty(dto.DiscountCode))
@@ -245,7 +245,7 @@ public class AgriculturalOrderService : IAgriculturalOrderService
             // منطق تخفیف...
         }
 
-        order.TotalPrice = cart.TotalPrice;
+        //order.TotalPrice = cart.TotalPrice;
 
         await _agriculturalOrderRepository.AddAsync(order);
         await _unitOfWork.SaveChangesAsync();
