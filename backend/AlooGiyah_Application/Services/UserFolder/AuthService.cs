@@ -1,7 +1,6 @@
 ﻿using AlooGiyah_Application.DTOs.Users;
 using AlooGiyah_Application.Interfaces.Store;
 using AlooGiyah_Application.Interfaces.UserFolder;
-using AlooGiyah_Application.Services.Store;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.UserFolder;
 using AlooGiyah_Domain.Interfaces;
@@ -120,9 +119,10 @@ public class AuthService : IAuthService
             {
                new Claim("cartId", cartId),
                new Claim(ClaimTypes.Role, "Guest"),
+               new Claim("RoleCode", "47C2D51E0F"),
                new Claim("IsGuest", "true")
             }),
-            Expires = DateTime.UtcNow.AddHours(2),
+            Expires = DateTime.UtcNow.AddDays(30),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature),
             Issuer = issuer,
             Audience = audience

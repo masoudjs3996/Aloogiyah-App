@@ -147,82 +147,51 @@ public class UserService : IUserService
     #region Get My Profile
     public async Task<ProfileResponseDto> GetMyProfileAsync()
     {
-        var authHeader = _httpContextAccessor?.HttpContext?.Request.Headers["Authorization"].ToString();
-
-        if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer "))
-        {
-            return await CreateAndReturnGuestProfile();
-        }
+        var authHeader = _httpContextAccessor.HttpContext!
+            .Request.Headers["Authorization"].ToString();
 
         var token = authHeader["Bearer ".Length..].Trim();
 
-        try
+        var principal = ValidateToken(token);
+
+        // اگر توکن مهمان بود
+        var isGuestClaim = principal.FindFirst("IsGuest")?.Value;
+        if (bool.TryParse(isGuestClaim, out bool isGuest) && isGuest)
         {
-            var principal = ValidateToken(token);
-
-            var isGuestClaim = principal.FindFirst("IsGuest")?.Value;
-            if (bool.TryParse(isGuestClaim, out bool isGuest) && isGuest)
-            {
-                var cartIdClaim = principal.FindFirst("cartId")?.Value;
-                if (Guid.TryParse(cartIdClaim, out Guid cartId))
-                {
-                    return new ProfileResponseDto
-                    {
-                        IsGuest = true,
-                        Message = "شما به عنوان مهمان وارد سایت شده‌اید. برای دسترسی به پروفایل کامل، لطفاً وارد حساب کاربری خود شوید.",
-                        CartId = cartId
-                    };
-                }
-            }
-
-            var userCode = principal.FindFirst("Code")?.Value
-                           ?? throw new UnauthorizedException("کد کاربر در توکن یافت نشد.");
-
-            var user = await _userRepository.GetByCodeWithIncludeAsync(userCode, x => x.Role)
-                       ?? throw new NotFoundException("کاربر یافت نشد.");
-
-            var userDto = _mapper.Map<UserDto>(user);
-            userDto.ProfileImageUrl = await _fileService.GetPrimaryFileUrlAsync(EntityFile.Profile, user.Code);
+            var cartIdClaim = principal.FindFirst("cartId")?.Value;
 
             return new ProfileResponseDto
             {
-                IsGuest = false,
-                Message = "پروفایل با موفقیت دریافت شد.",
-                User = userDto
+                IsGuest = true,
+                Message = "شما با توکن مهمان وارد شده‌اید. برای مشاهده پروفایل کامل وارد حساب کاربری شوید.",
+                CartId = Guid.TryParse(cartIdClaim, out var cartId) ? cartId : null
             };
         }
-        catch (Exception)
-        {
-            return await CreateAndReturnGuestProfile();
-        }
-    }
 
-    private async Task<ProfileResponseDto> CreateAndReturnGuestProfile()
-    {
-        if (_cartRepository == null)
-            throw new InvalidOperationException("ERROR: _cartRepository is NULL! Check DI registration for IGenericRepository<Cart>");
+        // کاربر واقعی
+        var userCode = principal.FindFirst("Code")?.Value
+                       ?? throw new UnauthorizedException("کد کاربر در توکن یافت نشد.");
 
-        if (_unitOfWork == null)
-            throw new InvalidOperationException("ERROR: _unitOfWork is NULL!");
+        var user = await _userRepository.GetByCodeWithIncludeAsync(userCode, x => x.Role)
+                   ?? throw new NotFoundException("کاربر یافت نشد.");
 
-        if (_authService == null)
-            throw new InvalidOperationException("ERROR: _authService is NULL!");
-
-        var guestToken = _authService.GenerateGuestToken();
+        var userDto = _mapper.Map<UserDto>(user);
+        userDto.ProfileImageUrl =
+            await _fileService.GetPrimaryFileUrlAsync(EntityFile.Profile, user.Code);
 
         return new ProfileResponseDto
         {
-            IsGuest = true,
-            Message = "شما به عنوان مهمان وارد سایت شده‌اید...",
-            GuestToken = $"Bearer {guestToken}"
+            IsGuest = false,
+            Message = "پروفایل با موفقیت دریافت شد.",
+            User = userDto
         };
-
-    }
-
+        }
     private ClaimsPrincipal ValidateToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var keyBytes = Encoding.UTF8.GetBytes(_config["Jwt:Key"] ?? throw new InvalidOperationException("کلید JWT موجود نیست."));
+        var keyBytes = Encoding.UTF8.GetBytes(
+            _config["Jwt:Key"] ?? throw new InvalidOperationException("کلید JWT موجود نیست.")
+        );
 
         var validationParameters = new TokenValidationParameters
         {
@@ -238,7 +207,24 @@ public class UserService : IUserService
 
         return tokenHandler.ValidateToken(token, validationParameters, out _);
     }
+
     #endregion
+
+    public CurrentUserRoleDto GetCurrentUserRole()
+    {
+        var principal = _httpContextAccessor.HttpContext?.User
+            ?? throw new UnauthorizedAccessException("کاربر احراز هویت نشده است.");
+
+        var roleName = principal.FindFirst(ClaimTypes.Role)?.Value;
+        var roleCode = principal.FindFirst("RoleCode")?.Value;
+
+        return new CurrentUserRoleDto
+        {
+            RoleName = roleName,
+            RoleCode = roleCode,
+        };
+    }
+
 
     #region Update
     public async Task<UserDto> UpdateProfileAsync(UpdateProfileDto userDto)

@@ -24,7 +24,7 @@ public class AuthController : ControllerBase
 
 
     #region Register
-    [AllowAnonymous]
+    [Authorize]
     [HttpPost("Register")]
     public async Task<IActionResult> Register([FromBody] RegisterUserDto userDto)
     {
@@ -48,7 +48,7 @@ public class AuthController : ControllerBase
     #endregion
 
     #region Login
-    [AllowAnonymous]
+    [Authorize]
     [HttpPost("Login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
@@ -116,6 +116,24 @@ public class AuthController : ControllerBase
     }
     #endregion
 
+    #region Guest Token
+    [AllowAnonymous]
+    [HttpPost("GuestToken")]
+    public IActionResult CreateGuestToken()
+    {
+        var guestToken = _authService.GenerateGuestToken();
+
+        return Ok(new ApiResponse<object>
+        {
+            IsSuccess = true,
+            Message = "توکن مهمان با موفقیت ساخته شد.",
+            Data = new
+            {
+                Token = $"Bearer {guestToken}"
+            }
+        });
+    }
+    #endregion
     #region ChangePassword
     [Authorize]
     [HttpPatch("ChangePassword")]

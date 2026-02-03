@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\backend"
+    "\\backend\\AlooGiyah_Api",
+    "\\frontend"
   ],
-  "SelectedNode": "\\backend\\AlooGiyah.sln",
+  "SelectedNode": "\\backend",
   "PreviewInSolutionExplorer": false
 }

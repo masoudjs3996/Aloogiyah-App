@@ -9,6 +9,7 @@ public interface IUserService
     Task<UserDto> GetUserByCode(string? code);
     Task<ProfileResponseDto> GetMyProfileAsync();
     Task<PagedResult<UserDto>> GetUserByFilterAsync(UserFilterDto filter);
+    CurrentUserRoleDto GetCurrentUserRole();
     Task<UserDto> UpdateProfileAsync(UpdateProfileDto userDto);
     Task<string?> ChangeProfilePhotoAsync(ChangeProfilePhotoDto file);
     Task<RegisterUserDto> GetUserByUsername(string username);

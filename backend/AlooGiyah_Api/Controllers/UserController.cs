@@ -1,8 +1,7 @@
 ﻿using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.Users;
 using AlooGiyah_Application.Interfaces.UserFolder;
-using AlooGiyah_Shared.Constants;
-using AlooGiyah_Shared.Exceptions;
+using AlooGiyah_Application.Services.UserFolder;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,10 +12,11 @@ namespace AlooGiyah_API.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
-
-        public UserController(IUserService userService)
+        private readonly ICurrentUserService _currentUser;
+        public UserController(IUserService userService, ICurrentUserService currentUser)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+            _currentUser = currentUser;
         }
 
         #region GetUserByCode
@@ -54,7 +54,7 @@ namespace AlooGiyah_API.Controllers
         }
 
         // GET: api/User/GetMyProfile
-
+        [Authorize]
         [HttpGet("GetMyProfile")]
         public async Task<IActionResult> GetMyProfileAsync()
         {
@@ -67,6 +67,23 @@ namespace AlooGiyah_API.Controllers
                 Data = profile
             });
         }
+        #region Current User Role
+        [Authorize]
+        [HttpGet("GetRole")]
+        public IActionResult GetCurrentUserRole()
+        {
+            var result = _userService.GetCurrentUserRole();
+
+            return Ok(new ApiResponse<object>
+            {
+                IsSuccess = true,
+                Message = "اطلاعات نقش کاربر با موفقیت دریافت شد.",
+                Data = result
+            });
+        }
+        #endregion
+
+
 
         // PUT: api/User/UpdateProfile
         [Authorize] // فقط کاربر لاگین‌شده (نه مهمان)
