@@ -68,7 +68,7 @@ const AddFarmProductForm = ({
       ...selectedCategoryCodes,
     ].filter(Boolean);
     payload.append("FarmCode", fermCode);
-    payload.append("Name", "گل");
+    payload.append("Name", form.name.trim());
     payload.append("Description", form.description.trim());
     payload.append("RetailPrice", form.retailPrice.toString());
     payload.append("WholesalePrice", form.wholesalePrice.toString());

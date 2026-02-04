@@ -7,13 +7,17 @@ import {
 } from "@/shared/types/farm";
 
 export async function CreateFarm(
-  payload: any
+  payload: FormData
 ): Promise<CreateFarmResponse | null> {
-  console.log(payload);
   try {
     const { data } = await axiosInstance.post<CreateFarmResponse>(
       "/Farm/Create",
-      payload
+      payload,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
     );
 
     return data ?? null;
@@ -57,4 +61,3 @@ export async function GetFarmsByFilter(): Promise<GetFarmByFilterResponse | null
     return null;
   }
 }
-

@@ -9,7 +9,6 @@ import { useState } from "react";
 export default function WalletPage() {
   const [open, setOpen] = useState(false);
   const { data } = useWallet();
-  console.log(data);
   return (
     <div className="p-4 space-y-6">
       <WalletSummary

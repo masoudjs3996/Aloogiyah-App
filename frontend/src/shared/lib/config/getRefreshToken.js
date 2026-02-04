@@ -20,7 +20,6 @@ export const refreshAccessToken = async () => {
     });
     return response.data.data.refreshToken;
   } catch (error) {
-    console.log(error.status);
     const status = error?.status;
     if (status === 401 || status === 400) {
       window.location.href = "/login";

@@ -51,7 +51,6 @@ export const EditProfileForm = () => {
       },
       {
         onSuccess: (data) => {
-          console.log("Uploaded:", data);
           toast.success(data?.message || "فرم با موفقیت ارسال شد ");
         },
         onError: (err) => {
@@ -62,7 +61,6 @@ export const EditProfileForm = () => {
     );
     uploadImage.mutate(data.profileImage, {
       onSuccess: (data) => {
-        console.log("Uploaded:", data);
         toast.success(data?.message || "فرم با موفقیت ارسال شد ");
       },
       onError: (err) => {
@@ -70,7 +68,6 @@ export const EditProfileForm = () => {
         toast.error("خطا در ارسال فرم ");
       },
     });
-    console.log("DATA:", data);
   };
 
   const handleImage = (file: File) => {

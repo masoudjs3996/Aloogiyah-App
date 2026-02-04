@@ -13,7 +13,7 @@ const schema = yup
   .object({
     firstName: yup.string().required("نام الزامی است"),
     lastName: yup.string().required("نام خانوادگی الزامی است"),
-    email: yup.string().email("ایمیل معتبر نیست").required("ایمیل الزامی است"),
+    userName: yup.string().required("نام کاربری  الزامی است"),
     password: yup
       .string()
       .min(6, "رمز عبور حداقل 6 کاراکتر باشد")
@@ -41,7 +41,7 @@ const RegisterForm = () => {
 
   const onSubmit = (valuse: RegFormValues) => {
     const data = {
-      userName: valuse?.email,
+      userName: valuse?.userName,
       password: valuse?.password,
       fName: valuse?.firstName,
       lName: valuse?.lastName,
@@ -84,9 +84,9 @@ const RegisterForm = () => {
         error={errors.lastName?.message}
       />
       <TextField
-        label="ایمیل"
-        {...register("email")}
-        error={errors.email?.message}
+        label="نام کاربری"
+        {...register("userName")}
+        error={errors.userName?.message}
       />
       <TextField
         label="رمز عبور"

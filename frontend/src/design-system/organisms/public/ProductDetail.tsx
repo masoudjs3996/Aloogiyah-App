@@ -42,7 +42,6 @@ const reviews: Review[] = [
 
 const ProductDetail = ({ productId }: { productId: string }) => {
   const { product, isLoading } = useProduct(productId);
-  console.log(product.data);
   const { name, retailPrice, wholesalePrice, description, primaryImageUrl } =
     product.data ?? {};
   return (

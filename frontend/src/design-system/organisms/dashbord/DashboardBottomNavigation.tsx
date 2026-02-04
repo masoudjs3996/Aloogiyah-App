@@ -7,7 +7,7 @@ import { BsBarChart } from "react-icons/bs";
 import { IoStorefrontSharp } from "react-icons/io5";
 const DashboardBottomNavigation: FC = () => {
   const navItems = [
-    { href: "/dashboard/profile", icon: FaUser, label: "حساب کاربری" },
+    { href: "/profile", icon: FaUser, label: "حساب کاربری" },
     { href: "/dashboard/farm/myFarms", icon: GiFarmer, label: "مزرعه ها " },
     {
       href: "/dashboard/store",

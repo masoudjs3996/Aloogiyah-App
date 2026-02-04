@@ -7,7 +7,7 @@ const baseURL =
 const axiosInstance: AxiosInstance = axios.create({
   // baseURL: process.env.NEXT_PUBLIC_BASE_URL,
   baseURL: baseURL,
-  timeout: 10000,
+  // timeout: 10000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -16,7 +16,7 @@ const axiosInstance: AxiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = Cookies.get("token");
-    if (token && config.headers) {
+    if (token && config.headers) { 
       config.headers.Authorization = token;
     }
     return config;

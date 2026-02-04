@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 const FarmCard = ({ farm }: { farm: ICreateFarmResponse }) => {
-  console.log(farm);
 
   return (
     <Link href={`/farm/${farm?.code}`}>

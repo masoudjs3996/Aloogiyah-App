@@ -5,7 +5,7 @@ import { BiCategory } from "react-icons/bi";
 import { FaUser, FaShoppingCart, FaInfoCircle, FaHome } from "react-icons/fa";
 const HomeBottomNavigation: FC = () => {
   const navItems = [
-    { href: "/dashboard/profile", icon: FaUser, label: "حساب کاربری" },
+    { href: "/profile", icon: FaUser, label: "حساب کاربری" },
     {
       href: "/categories",
       icon: BiCategory,
