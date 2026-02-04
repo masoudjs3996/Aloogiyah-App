@@ -1,9 +1,7 @@
 ﻿using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.Cart;
 using AlooGiyah_Application.Interfaces.Store;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace AlooGiyah_Api.Controllers
 {
@@ -26,9 +24,9 @@ namespace AlooGiyah_Api.Controllers
         [HttpGet]
     public async Task<IActionResult> GetCarts()
     {
-        var carts = await _cartService.GetCartsAsync();
+        var carts = await _cartService.GetCartAsync();
 
-        return Ok(new ApiResponse<List<CartDto>>
+        return Ok(new ApiResponse<CartDto>
         {
             IsSuccess = true,
             Message = "سبدهای خرید دریافت شد",
@@ -98,28 +96,6 @@ namespace AlooGiyah_Api.Controllers
             Data = result
         });
     }
-        #endregion
-
-        #region Merge Guest Cart
-        [Authorize]
-        [HttpPost("Merge")]
-        public async Task<IActionResult> MergeGuestCart()
-        {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
-            await _cartService.MergeGuestCartWithUserAsync(userId);
-
-            // دفاع در عمق: حتی اگر سرویس پاک نکرده باشد، اینجا پاک کن
-            Response.Cookies.Delete("GuestCartId");
-
-            Response.Headers.Add("X-Guest-Token-Expired", "true");
-
-            return Ok(new ApiResponse
-            {
-                IsSuccess = true,
-                Message = "سبد مهمان با حساب شما ادغام شد"
-            });
-        }
         #endregion
 
         #region Clear

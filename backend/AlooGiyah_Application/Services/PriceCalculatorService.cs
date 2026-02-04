@@ -164,15 +164,15 @@ public class PriceCalculatorService : IPriceCalculatorService
 
     #region Cart Pricing
     public decimal CalculateCart(
-      Cart cart,
-      string userRole,
-      Dictionary<int, bool>? discountEligibility = null)
+     Cart cart,
+     string userRole,
+     Dictionary<int, bool>? discountEligibility = null)
     {
         if (cart?.CartItems == null || !cart.CartItems.Any())
             return 0;
 
-        decimal totalPrice = 0;
-        decimal totalDiscountAmount = 0;
+        decimal totalBeforeDiscount = 0;
+        decimal totalDiscount = 0;
 
         var discount = cart.Discount;
         var buyerCode = cart.User?.Code;
@@ -185,17 +185,19 @@ public class PriceCalculatorService : IPriceCalculatorService
             var product = item.AgriculturalProduct;
             if (product == null) continue;
 
-            decimal productPrice = userRole is "User" or "Guest"
+            decimal unitPrice =
+                userRole is "User" or "Guest"
                 ? product.RetailPrice
                 : product.WholesalePrice;
 
-            decimal subtotal = productPrice * item.Quantity;
-            item.Price = productPrice;
+            decimal subtotal = unitPrice * item.Quantity;
+
+            item.Price = subtotal; // ✅ قیمت کل آیتم
 
             decimal itemDiscount = 0;
 
             if (discount != null &&
-                discountEligibility?.TryGetValue(item.AgriculturalProductId, out bool eligible) == true &&
+                discountEligibility?.TryGetValue(item.AgriculturalProductId, out var eligible) == true &&
                 eligible)
             {
                 itemDiscount = discount.DiscountType switch
@@ -212,17 +214,15 @@ public class PriceCalculatorService : IPriceCalculatorService
                 };
             }
 
-            totalPrice += subtotal;
-            totalDiscountAmount += itemDiscount;
+            totalBeforeDiscount += subtotal;
+            totalDiscount += itemDiscount;
         }
 
-        cart.TotalPrice = totalPrice;
-        cart.DiscountAmount = totalDiscountAmount;
+        cart.DiscountAmount = totalDiscount;
+        cart.TotalPrice = Math.Max(0, totalBeforeDiscount - totalDiscount);
 
-        return Math.Max(0, totalPrice - totalDiscountAmount);
+        return cart.TotalPrice;
     }
-
-
 
     #endregion
 
@@ -265,21 +265,28 @@ public class PriceCalculatorService : IPriceCalculatorService
     }
 
     // کاملاً امن و درست — دقیقاً طبق خواسته‌ت
-    public async Task<bool> IsProductEligibleForDiscountAsync(AgriculturalProduct product, Discount discount)
+    public async Task<bool> IsProductEligibleForDiscountAsync(
+     AgriculturalProduct product,
+     Discount discount)
     {
-        // اگر هیچ محدودیتی نبود → همه محصولات مجاز
-        bool noProductLimit = discount.Products == null || !discount.Products.Any();
+        bool noProductLimit = discount.agriculturalProducts == null || !discount.agriculturalProducts.Any();
         bool noCategoryLimit = discount.Categories == null || !discount.Categories.Any();
         bool noFarmLimit = !discount.FarmId.HasValue;
 
-        bool inAllowedProducts = discount.agriculturalProducts?.Any(p => p.AgriculturalProductId == product.AgriculturalProductId) == true;
-        bool inAllowedCategories = product.Categories?.Any(pc =>
-            discount.Categories?.Any(dc => dc.CategoryId == pc.CategoryId) == true) == true;
-        bool inAllowedFarm = discount.FarmId.HasValue && discount.FarmId == product.FarmId;
+        bool inAllowedProducts =
+            discount.agriculturalProducts?.Any(p => p.AgriculturalProductId == product.AgriculturalProductId) == true;
 
-        return (noProductLimit || inAllowedProducts) &&
-               (noCategoryLimit || inAllowedCategories) &&
-               (noFarmLimit || inAllowedFarm);
+        bool inAllowedCategories =
+            product.Categories?.Any(pc =>
+                discount.Categories?.Any(dc => dc.CategoryId == pc.CategoryId) == true) == true;
+
+        bool inAllowedFarm =
+            discount.FarmId.HasValue && discount.FarmId == product.FarmId;
+
+        return (noProductLimit || inAllowedProducts)
+            && (noCategoryLimit || inAllowedCategories)
+            && (noFarmLimit || inAllowedFarm);
     }
+
 
 }

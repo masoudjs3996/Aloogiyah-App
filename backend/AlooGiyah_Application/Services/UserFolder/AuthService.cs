@@ -20,6 +20,7 @@ public class AuthService : IAuthService
     private readonly IGenericRepository<Role> _genericRepositoryRole;
     private readonly IGenericRepository<Wallet> _genericRepositoryWallet;
     private readonly IConfiguration _config;
+    private readonly ICartService _cartService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuthRepository _authRepository;
     private readonly IUserRepository _userRepository;
@@ -33,6 +34,7 @@ public class AuthService : IAuthService
         IGenericRepository<Role> genericRepositoryRole,
         IGenericRepository<Wallet> genericRepositoryWallet,
         IConfiguration config,
+        ICartService cartService,
         IUnitOfWork unitOfWork,
         IAuthRepository authRepository,
         IUserRepository userRepository,
@@ -44,6 +46,7 @@ public class AuthService : IAuthService
         _genericRepositoryRole = genericRepositoryRole ?? throw new ArgumentNullException(nameof(genericRepositoryRole));
         _genericRepositoryWallet = genericRepositoryWallet ?? throw new ArgumentNullException(nameof(genericRepositoryWallet));
         _config = config ?? throw new ArgumentNullException(nameof(config));
+        _cartService = cartService  ?? throw new ArgumentNullException(nameof(config));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _authRepository = authRepository ?? throw new ArgumentNullException(nameof(authRepository));
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
@@ -116,9 +119,10 @@ public class AuthService : IAuthService
             {
                new Claim("cartId", cartId),
                new Claim(ClaimTypes.Role, "Guest"),
+               new Claim("RoleCode", "47C2D51E0F"),
                new Claim("IsGuest", "true")
             }),
-            Expires = DateTime.UtcNow.AddHours(2),
+            Expires = DateTime.UtcNow.AddDays(30),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature),
             Issuer = issuer,
             Audience = audience
@@ -191,15 +195,27 @@ public class AuthService : IAuthService
             await _genericRepositoryUser.AddAsync(user);
             await _unitOfWork.SaveChangesAsync(); // ذخیره کاربر برای تولید UserId
 
+            // -------------------
+            // ساخت توکن کاربر
             var accessToken = GenerateAccessToken(user);
             var refreshToken = GenerateRefreshToken();
-            refreshToken.UserId = user.UserId; // حالا UserId معتبر است
+            refreshToken.UserId = user.UserId;
+
+            // merge کارت مهمان با کاربر جدید
+            if (_currentUserService.CartId != null) // یعنی توکن مهمان موجود است
+            {
+                var CartCode = Guid.Parse(_currentUserService.CartId);
+                await _cartService.MergeGuestCartWithUserAsync(user.UserId, CartCode);
+
+                _currentUserService.ClearGuestCartId();
+            }
+
             var wallet = new Wallet { UserId = user.UserId };
             await _genericRepositoryWallet.AddAsync(wallet);
             await _authRepository.AddAsync(refreshToken);
-            await _unitOfWork.SaveChangesAsync(); // ذخیره RefreshToken
-            await transaction.CommitAsync();
+            await _unitOfWork.SaveChangesAsync(); // ذخیره RefreshToken و Wallet
 
+            await transaction.CommitAsync();
             return (accessToken, refreshToken);
         }
         catch
@@ -208,6 +224,7 @@ public class AuthService : IAuthService
             throw;
         }
     }
+
 
     #endregion
 
@@ -218,17 +235,27 @@ public class AuthService : IAuthService
             throw new ArgumentNullException(nameof(loginDto));
 
         var user = await _userRepository.GetByUsernameAsync(loginDto.Username);
-        if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password) || user.UserName != loginDto.Username)
+        if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
             throw new UnauthorizedAccessException("نام کاربری یا رمز عبور اشتباه است.");
 
         var accessToken = GenerateAccessToken(user);
         var refreshToken = GenerateRefreshToken();
         refreshToken.UserId = user.UserId;
+
+        // merge کارت مهمان با کاربر
+        if (_currentUserService.CartId != null)
+        {
+         var CartCode =    Guid.Parse(_currentUserService.CartId);
+            await _cartService.MergeGuestCartWithUserAsync(user.UserId, CartCode);
+            _currentUserService.ClearGuestCartId();
+        }
+
         await _authRepository.AddAsync(refreshToken);
         await _unitOfWork.SaveChangesAsync();
 
         return (accessToken, refreshToken);
     }
+
     #endregion
 
     #region ویرایش یوزرنیم

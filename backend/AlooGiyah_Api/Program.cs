@@ -139,6 +139,7 @@ builder.Services.AddScoped<IFileRepository, FileRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRepositoryFactory, RepositoryFactory>();
 builder.Services.AddScoped<IServiceRequestRepository, ServiceRequestRepository>();
+builder.Services.AddScoped<ICartRepository,CartRepository>();
 
 builder.Services.AddScoped<IEmail, Email>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();

@@ -3,21 +3,14 @@ namespace AlooGiyah_Application.DTOs.Cart;
 
 public class CartDto
 {
-
     public Guid CartId { get; set; }
+    public string Code { get; set; } = string.Empty;
 
-    public   string Code { get; set; }
-    public int ItemCount { get; set; } = 0;
+    public List<FarmCartDto> Farms { get; set; } = new();
 
-    public decimal TotalPrice { get; set; } = 0;
+    public int ItemCount => Farms.Sum(f => f.Items.Sum(i => i.Quantity));
+    public decimal TotalPrice => Farms.Sum(f => f.TotalPrice);
 
-
-    public decimal SubtotalPrice { get; set; } = 0;
-
-    public decimal DiscountAmount { get; set; } = 0;
-
-
-    public List<CartItemDto> CartItems { get; set; } = new List<CartItemDto>();
-
-    public bool IsGuest { get; set; } = true;
+    public bool IsGuest { get; set; }
 }
+

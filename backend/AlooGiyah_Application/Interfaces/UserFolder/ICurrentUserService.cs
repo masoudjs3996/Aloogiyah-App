@@ -9,7 +9,9 @@ public interface ICurrentUserService
     string? UserCode { get; }
     IEnumerable<string> Roles { get; }
     bool IsAuthenticated { get; }
-    string? CartId { get; set; }
+    string? CartId { get; }
     bool IsGuest { get; }
+    public string? GuestCartId {  get; }
 
+    void ClearGuestCartId();  // اضافه کردن متد
 }

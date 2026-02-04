@@ -1,12 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿
+namespace AlooGiyah_Domain.Interfaces;
 
-namespace AlooGiyah_Domain.Interfaces
+public interface IUnitOfWork : IDisposable
 {
-    public interface IUnitOfWork : IDisposable
-    {
-        Task<int> SaveChangesAsync();
+    Task<int> SaveChangesAsync();
 
-        Task<ITransaction> BeginTransactionAsync();
-    }
+    Task<ITransaction> BeginTransactionAsync();
 }
