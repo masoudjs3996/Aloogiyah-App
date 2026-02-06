@@ -1,4 +1,3 @@
-import { string } from "yup";
 import { IApiResponse } from "./general";
 
 export interface IUser {
@@ -8,8 +7,8 @@ export interface IUser {
   email: string | null;
   userName: string;
   isEmailConfirmed: boolean;
-  age: number;
-  role: number;
+  age: number | string;
+  roleCode: string;
   roleName: string | null;
   phoneNumber: number | string;
   createdAt: string;

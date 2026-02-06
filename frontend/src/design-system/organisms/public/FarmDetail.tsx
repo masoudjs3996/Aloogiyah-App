@@ -59,7 +59,6 @@ const FarmDetail = ({ farmId }: { farmId: string }) => {
   const FarmDetail = farmDetail?.data;
   const { name, description, capacity, minPurchase, imageUrl, address } =
     FarmDetail || {};
-  console.log(products);
 
   return (
     <div className="mx-auto max-w-md bg-white min-h-screen border">

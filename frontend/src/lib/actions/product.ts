@@ -79,17 +79,19 @@ export async function getProducts(
 //   }
 // }
 export async function AddProduct(payload: FormData) {
-  console.log("FormData payload:");
-  for (const [key, value] of payload.entries()) {
-    console.log(key, value);
-  }
   try {
-    const { data } = await axiosInstance.post(
+    const res = await axiosInstance.post(
       "/AgriculturalProduct/CreateWithImages",
-      payload
+      payload,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
     );
+    
 
-    return data;
+    return res?.data;
   } catch (error) {
     console.error("Error creating product:", error);
     throw error;

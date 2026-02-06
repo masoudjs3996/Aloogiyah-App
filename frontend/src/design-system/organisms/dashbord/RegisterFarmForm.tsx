@@ -1,6 +1,5 @@
 "use client";
 
-
 import Button from "@/design-system/atoms/Button";
 import Input from "@/design-system/atoms/Input";
 import { SelectBox } from "@/design-system/atoms/SelectBox";
@@ -9,7 +8,8 @@ import { useLocationData } from "@/hooks/queries/useCounties";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import useCreateFarm from "@/hooks/mutations/useCreateFarm";
 import toast from "react-hot-toast";
-
+import { FaTrash, FaUpload } from "react-icons/fa";
+import { useState } from "react";
 type RegisterFarmFormProps = {
   provinces: IProvinces[] | null | undefined;
 };
@@ -23,12 +23,18 @@ type FormValues = {
   address: string;
   postalCode: string;
   minPurchase: string;
+  selectedLocation?: { code: string; name: string; type: "City" | "Village" };
 };
 
 const RegisterFarmForm = ({ provinces }: RegisterFarmFormProps) => {
   const { control, handleSubmit, watch, setValue, register, reset } =
-    useForm<FormValues>();
-
+    useForm<FormValues>({
+      defaultValues: {
+        selectedLocation: undefined,
+      },
+    });
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const selectedProvinceCode = watch("province");
   const selectedCountyCode = watch("county");
 
@@ -40,40 +46,81 @@ const RegisterFarmForm = ({ provinces }: RegisterFarmFormProps) => {
 
   const { createFarm } = useCreateFarm();
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    createFarm.mutate(
-      {
-        name: data.farmName,
-        description: data.farmDescription,
-        address: {
-          street: data.address,
-          postalCode: data.postalCode,
-          latitude: 0,
-          longitude: 0,
-          isDefault: false,
-          provinceCode: data.province,
-          countyCode: data.county,
-          cityCode: data.city,
-          villageCode: "",
-        },
-        capacity: 0,
-        minPurchase: Number(data?.minPurchase),
+    if (!imageFile) {
+      toast.error("لطفا یک تصویر انتخاب کنید");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("Name", data.farmName?.trim());
+    formData.append("Description", data.farmDescription?.trim());
+    formData.append("MinPurchase", data.minPurchase || "0");
+    formData.append("Capacity", "0");
+    formData.append("Address.Street", data.address?.trim());
+    formData.append("Address.PostalCode", data.postalCode?.trim());
+    formData.append("Address.Latitude", "0");
+    formData.append("Address.Longitude", "0");
+    formData.append("Address.IsDefault", "false");
+    formData.append("Address.ProvinceCode", data.province || "");
+    formData.append("Address.CountyCode", data.county || "");
+    // formData.append("Address.CityCode", data.city || "");
+    // formData.append("Address.VillageCode", "");
+
+    const selectedLocation = data.selectedLocation as any;
+
+    if (selectedLocation?.type === "Village") {
+      formData.append("Address.CityCode", "");
+      formData.append("Address.VillageCode", selectedLocation.code);
+    } else if (selectedLocation?.type === "City" || selectedLocation) {
+      formData.append(
+        "Address.CityCode",
+        selectedLocation?.code || data.city || ""
+      );
+      formData.append("Address.VillageCode", "");
+    } else {
+      formData.append("Address.CityCode", "");
+      formData.append("Address.VillageCode", "");
+    }
+    formData.append("Image", imageFile);
+
+    createFarm.mutate(formData, {
+      onSuccess: (response) => {
+        toast.success(response?.message || "مزرعه با موفقیت ثبت شد");
+        reset();
+        setImageFile(null);
+        setImagePreview(null);
       },
-      {
-        onSuccess: (data) => {
-          toast.success(data?.message || "فرم با موفقیت ارسال شد");
-          reset();
-        },
-        onError: () => toast.error("خطا در ارسال فرم"),
-      }
-    );
+      onError: (error: any) => {
+        console.error("خطا:", error);
+        toast.error("خطا در ثبت مزرعه");
+      },
+    });
   };
 
   return (
     <form className="space-y-6 w-full" onSubmit={handleSubmit(onSubmit)}>
       <h2 className="text-xl font-bold text-center">ثبت مزرعه</h2>
+      <div className="rounded-2xl overflow-hidden shadow relative">
+        {imagePreview ? (
+          <img src={imagePreview} className="w-full object-cover max-h-40" />
+        ) : (
+          <div className="h-40 bg-gray-100 flex items-center justify-center text-gray-400">
+            عکس محصول
+          </div>
+        )}
+        <label className="absolute bottom-0 left-0 right-0 bg-black/40 text-white p-2 text-sm flex items-center justify-center gap-x-2 cursor-pointer">
+          <FaUpload /> ویرایش عکس
+          <input type="file" className="hidden" onChange={handleImageUpload} />
+        </label>
+      </div>
 
-    
       <Controller
         control={control}
         name="farmName"
@@ -133,15 +180,22 @@ const RegisterFarmForm = ({ provinces }: RegisterFarmFormProps) => {
             label="شهر یا روستا"
             options={cities?.map((c) => c.name) ?? []}
             value={cities?.find((c) => c.code === field.value)?.name || ""}
+            // onChange={(name) => {
+            //   const found = cities?.find((c) => c.name === name);
+            //   setValue("city", found?.code ?? "");
+            // }}
             onChange={(name) => {
               const found = cities?.find((c) => c.name === name);
-              setValue("city", found?.code ?? "");
+              if (found) {
+                setValue("city", found.code);
+
+                setValue("selectedLocation", found as any);
+              }
             }}
           />
         )}
       />
 
-   
       <Controller
         control={control}
         name="address"
@@ -150,7 +204,6 @@ const RegisterFarmForm = ({ provinces }: RegisterFarmFormProps) => {
         )}
       />
 
-   
       <Controller
         control={control}
         name="postalCode"
@@ -159,7 +212,6 @@ const RegisterFarmForm = ({ provinces }: RegisterFarmFormProps) => {
         )}
       />
 
-  
       <input
         type="number"
         placeholder="حداقل مبلغ خرید (ریال)"
@@ -183,4 +235,3 @@ const RegisterFarmForm = ({ provinces }: RegisterFarmFormProps) => {
 };
 
 export default RegisterFarmForm;
-
