@@ -60,13 +60,19 @@ namespace AlooGiyah_API.Controllers
         {
             var profile = await _userService.GetMyProfileAsync();
 
+            var message = profile.IsGuest
+                ? "شما با توکن مهمان وارد شده‌اید. برای مشاهده پروفایل کامل وارد حساب کاربری شوید."
+                : "پروفایل با موفقیت دریافت شد.";
+
             return Ok(new ApiResponse<ProfileResponseDto>
             {
                 IsSuccess = true,
-                Message = profile.Message,
+                Message = message,
                 Data = profile
             });
         }
+
+
         #region Current User Role
         [Authorize]
         [HttpGet("GetRole")]

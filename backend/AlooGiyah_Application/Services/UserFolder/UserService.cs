@@ -151,10 +151,8 @@ public class UserService : IUserService
             .Request.Headers["Authorization"].ToString();
 
         var token = authHeader["Bearer ".Length..].Trim();
-
         var principal = ValidateToken(token);
 
-        // اگر توکن مهمان بود
         var isGuestClaim = principal.FindFirst("IsGuest")?.Value;
         if (bool.TryParse(isGuestClaim, out bool isGuest) && isGuest)
         {
@@ -163,17 +161,15 @@ public class UserService : IUserService
             return new ProfileResponseDto
             {
                 IsGuest = true,
-                Message = "شما با توکن مهمان وارد شده‌اید. برای مشاهده پروفایل کامل وارد حساب کاربری شوید.",
                 CartId = Guid.TryParse(cartIdClaim, out var cartId) ? cartId : null
             };
         }
 
-        // کاربر واقعی
         var userCode = principal.FindFirst("Code")?.Value
-                       ?? throw new UnauthorizedException("کد کاربر در توکن یافت نشد.");
+            ?? throw new UnauthorizedException("کد کاربر در توکن یافت نشد.");
 
         var user = await _userRepository.GetByCodeWithIncludeAsync(userCode, x => x.Role)
-                   ?? throw new NotFoundException("کاربر یافت نشد.");
+            ?? throw new NotFoundException("کاربر یافت نشد.");
 
         var userDto = _mapper.Map<UserDto>(user);
         userDto.ProfileImageUrl =
@@ -182,10 +178,9 @@ public class UserService : IUserService
         return new ProfileResponseDto
         {
             IsGuest = false,
-            Message = "پروفایل با موفقیت دریافت شد.",
             User = userDto
         };
-        }
+    }
     private ClaimsPrincipal ValidateToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();

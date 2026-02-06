@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace AlooGiyah_Application.Services.UserFolder;
@@ -80,7 +81,7 @@ public class AuthService : IAuthService
                 new Claim(ClaimTypes.Role, user.Role.Name.ToString()),
                 new Claim("RoleCode", user.Role.Code.ToString())
             }),
-            Expires = DateTime.UtcNow.AddHours(2),
+            Expires = DateTime.UtcNow.AddMinutes(2),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature),
             Issuer = issuer,
             Audience = audience
@@ -96,8 +97,8 @@ public class AuthService : IAuthService
     {
         return new RefreshToken
         {
-            Token = Guid.NewGuid().ToString(),
-            Expires = DateTime.UtcNow.AddDays(7)
+            Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+            Expires = DateTime.UtcNow.AddMinutes(5)
         };
     }
     #endregion
@@ -122,7 +123,7 @@ public class AuthService : IAuthService
                new Claim("RoleCode", "47C2D51E0F"),
                new Claim("IsGuest", "true")
             }),
-            Expires = DateTime.UtcNow.AddDays(30),
+            Expires = DateTime.UtcNow.AddMinutes(2),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(keyBytes), SecurityAlgorithms.HmacSha256Signature),
             Issuer = issuer,
             Audience = audience

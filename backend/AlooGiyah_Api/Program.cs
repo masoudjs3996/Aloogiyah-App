@@ -49,6 +49,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.Zero
         };
     });
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("UserOnly", policy =>
+        policy.RequireClaim("token_type", "user"));
+
+    options.AddPolicy("GuestOrUser", policy =>
+        policy.RequireClaim("token_type", "guest", "user"));
+});
+
 #endregion
 
 #region CORS
