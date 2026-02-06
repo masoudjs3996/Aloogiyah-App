@@ -16,6 +16,7 @@ export interface IUser {
   profileImageUrl: string | null;
 }
 
+export type getGuestTokenResponse = IApiResponse<{ token: string }>;
 export type GetUserResponse = IApiResponse<IUser>;
 
 export type EditUserResponse = IApiResponse<IUser>;

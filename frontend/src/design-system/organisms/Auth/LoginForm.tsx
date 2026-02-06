@@ -10,6 +10,7 @@ import Button from "@/design-system/atoms/Button";
 import { LogFormValues } from "./type";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 const schema = yup
   .object({
     userName: yup.string().required("نام کاربری الزامی است"),
@@ -23,6 +24,7 @@ const schema = yup
 const LoginForm = () => {
   const { loginuser } = useLoginUser();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
@@ -41,6 +43,10 @@ const LoginForm = () => {
       onSuccess: (date) => {
         console.log(data);
         if (date?.data?.token && date?.data?.refreshToken) {
+          queryClient.invalidateQueries({
+            queryKey: ["userProfile"],
+          });
+          Cookies.remove("guestToken");
           Cookies.set("token", date.data.token, {
             expires: 7,
             secure: true,

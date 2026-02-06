@@ -16,12 +16,21 @@ const axiosInstance: AxiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = Cookies.get("token");
-    if (token && config.headers) { 
+    const GuestUserToken = Cookies.get("guestToken");
+
+    if (token) {
       config.headers.Authorization = token;
+    } else if (GuestUserToken) {
+      config.headers.Authorization = GuestUserToken;
     }
     return config;
+    // const token = Cookies.get("token");
+    // if (token && config.headers) {
+    //   config.headers.Authorization = token;
+    // }
+    // return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 axiosInstance.interceptors.response.use(
   (response) => response,
@@ -33,15 +42,20 @@ axiosInstance.interceptors.response.use(
       try {
         const response = await refreshAccessToken();
         const token = Cookies.get("token");
+        const GuestUserToken = Cookies.get("guestToken");
+
         if (token) {
           config.headers.Authorization = token;
+        } else if (GuestUserToken) {
+          config.headers.Authorization = GuestUserToken;
         }
         return axiosInstance(config);
       } catch (err) {
         return Promise.reject(err);
       }
     }
-  }
+    return Promise.reject(error);
+  },
 );
 
 // axiosInstance.interceptors.response.use(

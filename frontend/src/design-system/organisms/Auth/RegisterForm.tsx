@@ -9,6 +9,7 @@ import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { TextField } from "@/design-system/molecules/public";
 import Button from "@/design-system/atoms/Button";
+import { useQueryClient } from "@tanstack/react-query";
 const schema = yup
   .object({
     firstName: yup.string().required("نام الزامی است"),
@@ -22,7 +23,7 @@ const schema = yup
       .string()
       .oneOf(
         [yup.ref("password")],
-        "تکرار رمز عبور باید با رمز عبور یکسان باشد"
+        "تکرار رمز عبور باید با رمز عبور یکسان باشد",
       )
       .required("تکرار رمز عبور الزامی است"),
   })
@@ -31,6 +32,7 @@ const schema = yup
 const RegisterForm = () => {
   const { registeruser } = useRegisterUser();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
@@ -49,7 +51,10 @@ const RegisterForm = () => {
     registeruser.mutate(data, {
       onSuccess: (date) => {
         if (date?.data?.token && date?.data?.refreshToken) {
-          console.log(date?.data);
+          queryClient.invalidateQueries({
+            queryKey: ["userProfile"],
+          });
+          Cookies.remove("guestToken");
           Cookies.set("token", date.data.token, {
             expires: 7,
             secure: true,
