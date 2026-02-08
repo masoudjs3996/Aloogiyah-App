@@ -1,7 +1,8 @@
 "use client";
 
+import { useCart } from "@/hooks/queries/useCart";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BiTrash } from "react-icons/bi";
 
 type Product = {
@@ -18,6 +19,7 @@ type Store = {
 };
 
 const CartPage = () => {
+  const { data } = useCart();
   const [stores, setStores] = useState<Store[]>([
     {
       id: 1,
@@ -62,11 +64,12 @@ const CartPage = () => {
       ],
     },
   ]);
+  console.log(data);
 
   const handleQuantityChange = (
     storeId: number,
     productId: number,
-    delta: number
+    delta: number,
   ) => {
     setStores((prev) =>
       prev.map((store) =>
@@ -76,11 +79,11 @@ const CartPage = () => {
               products: store.products.map((p) =>
                 p.id === productId
                   ? { ...p, quantity: Math.max(1, p.quantity + delta) }
-                  : p
+                  : p,
               ),
             }
-          : store
-      )
+          : store,
+      ),
     );
   };
 
@@ -92,8 +95,8 @@ const CartPage = () => {
               ...store,
               products: store.products.filter((p) => p.id !== productId),
             }
-          : store
-      )
+          : store,
+      ),
     );
   };
 
