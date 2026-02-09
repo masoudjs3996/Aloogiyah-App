@@ -13,9 +13,9 @@ export const useProducts = (filters?: ProductFilter) => {
   });
 
   return {
-    products: data?.items ?? [],
-    pagination: data ?? null,
-    totalCount: data?.totalCount ?? 0,
+    products: data,
+    // pagination: data ?? null,
+    // totalCount: data?.totalCount ?? 0,
     error,
     isLoading,
     isSuccess,

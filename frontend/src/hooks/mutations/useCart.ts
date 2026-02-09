@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 const useCart = () => {
   const addCart = useMutation({
     mutationFn: (params: {
-      cartId: number | string;
+      // cartId: number | string;
       productCode: string;
       quantity: number;
     }) => AddCart(params),

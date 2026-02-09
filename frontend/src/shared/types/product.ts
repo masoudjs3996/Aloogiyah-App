@@ -49,6 +49,4 @@ export interface ProductFilter {
   pageSize?: number;
 }
 
-export type GetProductResponse = IApiResponse<
-  IPaginatedResult<IAgriculturalProduct>
->;
+export type GetProductResponse = IApiResponse<IAgriculturalProduct>;

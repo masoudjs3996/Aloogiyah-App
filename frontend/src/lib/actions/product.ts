@@ -7,8 +7,8 @@ import {
 } from "@/shared/types/product";
 
 export async function getProducts(
-  filters?: ProductFilter
-): Promise<IPaginatedResult<IAgriculturalProduct> | null> {
+  filters?: ProductFilter,
+): Promise<IAgriculturalProduct[] | null> {
   try {
     const params = new URLSearchParams();
     if (!filters) {
@@ -27,7 +27,7 @@ export async function getProducts(
 
       if (filters.categoryCodes?.length) {
         filters.categoryCodes.forEach((code) =>
-          params.append("CategoryCodes", code)
+          params.append("CategoryCodes", code),
         );
       }
 
@@ -44,7 +44,9 @@ export async function getProducts(
       return null;
     }
 
-    return data.data ?? null;
+    console.log(data);
+
+    return data.data ?? [];
   } catch (error: any) {
     console.error("Error fetching products:", error);
     return null;
@@ -87,9 +89,8 @@ export async function AddProduct(payload: FormData) {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      }
+      },
     );
-    
 
     return res?.data;
   } catch (error) {
@@ -101,7 +102,7 @@ export async function AddProduct(payload: FormData) {
 export async function GetDetailProduct(payload?: string) {
   try {
     const { data } = await axiosInstance.get(
-      `/AgriculturalProduct/GetByCode?code=${payload}`
+      `/AgriculturalProduct/GetByCode?code=${payload}`,
     );
 
     return data;

@@ -19,11 +19,13 @@ const ProductDetailUI = ({ productId }: { productId: string }) => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
+  console.log(product);
 
   useEffect(() => {
     const get = async () => {
       setLoading(true);
       const response = await GetDetailProduct(productId);
+
       setProduct(response.data);
       setLoading(false);
     };
@@ -133,9 +135,7 @@ const ProductDetailUI = ({ productId }: { productId: string }) => {
 
         {/* Categories */}
         <div>
-          <p className="text-xs sm:text-sm text-gray-500 mb-2">
-            دسته‌بندی‌ها
-          </p>
+          <p className="text-xs sm:text-sm text-gray-500 mb-2">دسته‌بندی‌ها</p>
           <div className="flex flex-wrap gap-2">
             {product.categoryCodes.map((cat) => (
               <span
@@ -174,13 +174,7 @@ const PriceCard = ({
   </div>
 );
 
-const StatCard = ({
-  title,
-  value,
-}: {
-  title: string;
-  value: string;
-}) => (
+const StatCard = ({ title, value }: { title: string; value: string }) => (
   <div className="rounded-xl sm:rounded-2xl border bg-white p-3 sm:p-4">
     <p className="text-[11px] sm:text-sm text-gray-500">{title}</p>
     <p className="text-sm sm:text-lg font-semibold mt-1 text-gray-900">
