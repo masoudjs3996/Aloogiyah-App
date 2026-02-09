@@ -24,7 +24,7 @@ public class AgriculturalOrderController : ControllerBase
 
 
     #region Create
-    [Authorize]
+    [Authorize(Policy = "NotGuest")]
     [HttpPost("Create")]
     public async Task<IActionResult> CreateAgriculturalOrder(AgriculturalOrderCreateDto createDto)
     {
@@ -43,7 +43,7 @@ public class AgriculturalOrderController : ControllerBase
     #endregion
 
     [HttpPost("CreateFromCart")]
-    [Authorize]
+    [Authorize(Policy = "NotGuest")]
     public async Task<IActionResult> CreateFromCart([FromBody] CheckoutFromCartDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -59,7 +59,7 @@ public class AgriculturalOrderController : ControllerBase
     }
 
     #region GetByFilter
-    [Authorize]
+    [Authorize(Policy = "NotGuest")]
     [HttpGet("GetByFilter")]
     public async Task<IActionResult> GetByFilterAsync([FromQuery] AgriculturalOrderFilterDto filterDto)
     {
@@ -79,7 +79,7 @@ public class AgriculturalOrderController : ControllerBase
 
     #region GetByCode
     [HttpGet("GetByCode")]
-    [Authorize]
+    [Authorize(Policy = "NotGuest")]
     public async Task<IActionResult> GetByCodeAsync([FromQuery] string code)
     {
         var result = await _agriculturalOrderService.GetByCodeAsync(code);
@@ -96,7 +96,7 @@ public class AgriculturalOrderController : ControllerBase
     #endregion
 
     #region Update
-    [Authorize]
+    [Authorize(Policy = "NotGuest")]
     [HttpPut("Update")]
     public async Task<IActionResult> UpdateAgriculturalOrder(AgriculturalOrderUpdateDto updateDto)
     {
@@ -115,7 +115,7 @@ public class AgriculturalOrderController : ControllerBase
     #endregion
 
     #region Approve Order
-    [Authorize]
+    [Authorize(Policy = "NotGuest")]
     [HttpPatch("ChangeOrderStatus")]
     public async Task<IActionResult> ChangeOrderStatus(string OrderCode, OrderAction action)
     {
@@ -134,7 +134,7 @@ public class AgriculturalOrderController : ControllerBase
     #endregion
 
     [HttpPost("pay")]
-    [Authorize]
+    [Authorize(Policy = "NotGuest")]
     public async Task<IActionResult> ProceedToPayment(string orderCode)
     {
         var result = await _agriculturalOrderService.ProceedToPaymentAsync(orderCode);

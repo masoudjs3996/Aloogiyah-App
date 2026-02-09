@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize] // همه نیاز به لاگین دارن
+[Authorize(Policy = "NotGuest")] // همه نیاز به لاگین دارن
 public class AddressController : ControllerBase
 {
     private readonly IAddressService _addressService;

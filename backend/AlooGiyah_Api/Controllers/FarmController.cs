@@ -23,7 +23,7 @@ namespace AlooGiyah_Api.Controllers
 
 
         #region CreateFarm
-        [Authorize]
+        [Authorize(Roles = "Admin,Manager,Farmer")]
         [HttpPost("Create")]    
         public async Task<IActionResult> CreateGreenhouse([FromForm] FarmCreateDto createDto)
         {
@@ -42,7 +42,7 @@ namespace AlooGiyah_Api.Controllers
         #endregion
 
         #region GetMyFarm
-        [Authorize]
+        [Authorize(Roles = "Admin,Manager,Farmer")]
         [HttpGet("GetMyFarm")]
         public async Task<IActionResult> GetMyGreenhouse([FromQuery] GetMyFarmDto greenhouseFilterDto)
         {
@@ -98,7 +98,7 @@ namespace AlooGiyah_Api.Controllers
         #endregion
 
         #region UpdateFarm
-        [Authorize]
+        [Authorize(Roles = "Admin,Manager,Farmer")]
         [HttpPut("Update")]
         public async Task<IActionResult> UpdateGreenhouse(FarmUpdateDto updateDto)
         {
@@ -117,7 +117,7 @@ namespace AlooGiyah_Api.Controllers
         #endregion
 
         #region UploadImage
-        [Authorize]
+        [Authorize(Roles = "Admin,Manager,Farmer")]
         [HttpPatch("UploadImage")]
         public async Task<IActionResult> ChangeFarmImagAsinc(UploadFarmImageDto upload)
         {
@@ -133,7 +133,7 @@ namespace AlooGiyah_Api.Controllers
         #endregion
 
         #region DeleteFarm
-        [Authorize]
+        [Authorize(Roles = "Admin,Manager,Farmer")]
         [HttpDelete("Delete")]
         public async Task<IActionResult> DeleteGreenhouse(string code)
         {

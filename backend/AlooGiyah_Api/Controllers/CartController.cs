@@ -1,6 +1,7 @@
 ﻿using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.Cart;
 using AlooGiyah_Application.Interfaces.Store;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AlooGiyah_Api.Controllers
@@ -21,6 +22,7 @@ namespace AlooGiyah_Api.Controllers
         #endregion
 
         #region Get Cart
+        [Authorize]
         [HttpGet]
     public async Task<IActionResult> GetCarts()
     {
@@ -36,6 +38,7 @@ namespace AlooGiyah_Api.Controllers
         #endregion
 
         #region Add
+        [Authorize]
         [HttpPost("Add")]
         public async Task<IActionResult> AddToCart([FromBody] AddToCartDto dto)
         {
@@ -60,6 +63,7 @@ namespace AlooGiyah_Api.Controllers
         #endregion
 
         #region Update Item
+        [Authorize]
         [HttpPut("UpdateItem")]
         public async Task<IActionResult> UpdateCartItem([FromBody] UpdateCartItemDto dto)
         {
@@ -79,6 +83,7 @@ namespace AlooGiyah_Api.Controllers
         #endregion
 
         #region RemoveItem
+        [Authorize]
         [HttpDelete("RemoveItem")]
         public async Task<IActionResult> RemoveCartItem([FromBody] RemoveCartItemDto dto) // بهتر از FromBody استفاده کن
         {
@@ -99,6 +104,7 @@ namespace AlooGiyah_Api.Controllers
         #endregion
 
         #region Clear
+        [Authorize]
         [HttpDelete("Clear")]
         public async Task<IActionResult> ClearCart()
         {

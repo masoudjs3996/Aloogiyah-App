@@ -43,7 +43,7 @@ public class AgriculturalProductController : ControllerBase
     #endregion
 
     #region CreateWithImages
-    [Authorize(Roles = "Admin,Farmer")]
+    [Authorize(Roles = "Admin,Manager,Farmer")]
     [HttpPost("CreateWithImages")]
     public async Task<IActionResult> CreateWithImages([FromForm] AgriculturalProductCreateDto dto)
     {

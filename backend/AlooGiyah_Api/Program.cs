@@ -22,6 +22,7 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 #region DbContext
+
 //builder.Services.AddDbContext<AlooGiyahDbContext>(opt =>
 //    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -49,16 +50,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.Zero
         };
     });
+
+#endregion
+
+#region Authorization Policies
+
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("UserOnly", policy =>
-        policy.RequireClaim("token_type", "user"));
-
-    options.AddPolicy("GuestOrUser", policy =>
-        policy.RequireClaim("token_type", "guest", "user"));
+    options.AddPolicy("NotGuest", policy =>
+        policy.RequireAssertion(context =>
+            !context.User.IsInRole("Guest")));
 });
 
 #endregion
+
 
 #region CORS
 builder.Services.AddCors(o => o.AddPolicy("AllowAll", p =>
