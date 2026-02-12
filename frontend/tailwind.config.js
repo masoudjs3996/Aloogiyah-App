@@ -17,6 +17,13 @@ export default {
   darkMode: ["class", '[class="dark-mode"]'],
   theme: {
     extend: {
+      container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
       colors: {
         primary: {
           900: withOpacity("--color-primary-900"),
@@ -42,6 +49,13 @@ export default {
           50: withOpacity("--color-secondary-50"),
           0: withOpacity("--color-secondary-0"),
         },
+        green:withOpacity("--color-green"),
+        green_foreground:withOpacity("--color-green-foreground"),
+        accent_foreground: withOpacity("--accent-foreground"),
+        foreground: withOpacity("--foreground"),
+        accent: withOpacity("--accent"),
+        muted_foreground: withOpacity("--muted-foreground"),
+         
         success: withOpacity("--color-success"),
         warning: withOpacity("--color-warning"),
         error: withOpacity("--color-error"),
