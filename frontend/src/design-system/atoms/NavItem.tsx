@@ -18,7 +18,7 @@ const NavItem: FC<NavItemProps> = ({ href, icon: Icon, label }) => {
     <Link
       href={href}
       className={`flex flex-col items-center transition-colors  ${
-        isActive ? "text-teal-500" : "text-gray-600 dark:text-gray-300"
+        isActive ? "text-accent_foreground" : "text-muted_foreground "
       }`}
     >
       <Icon className="w-6 h-6" />

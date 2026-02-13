@@ -12,7 +12,7 @@ interface BottomNavBarProps {
 }
 const BottomNavBar: FC<BottomNavBarProps> = ({ navItems }) => {
   return (
-    <footer className="bg-white dark:bg-gray-800 shadow-inner p-2 flex justify-around items-center fixed bottom-0 w-full z-50 ">
+    <footer className="bg-white dark:bg-gray-800 shadow-inner p-2 flex justify-around items-center fixed bottom-0 w-full z-50  md:hidden">
       {navItems.map((item) => (
         <NavItem
           key={item.href}

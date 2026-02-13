@@ -32,11 +32,13 @@
       --color-secondary-50: 249, 250, 251;
       --color-secondary-0: 255, 255, 255;
       --color-green: 34, 139, 34;
+      --color-prymary-green: 44, 96, 65;
       --color-green-foreground: 255, 255, 255;
       --accent-foreground: 36, 76, 51;
       --accent: 224, 232, 217;
       --muted-foreground: 109, 120, 115;
       --foreground: 34, 42, 38;
+      --card-foreground: 34, 42, 38;
       --color-success: 56, 211, 183;
       --color-warning: 255, 153, 0;
       --color-error: 255, 71, 87;
@@ -57,11 +59,13 @@
       --color-secondary-50: 17, 24, 39;
       --color-secondary-0: 24, 33, 47;
       --color-green: 74, 222, 128;
-      --foreground: 34, 42, 38;
+      --color-prymary-green: 75, 155, 104;
+      --foreground: 230, 255, 238;
       --color-green-foreground: 230, 255, 238;
       --accent-foreground: 74, 222, 128;
       --accent: 41, 54, 47;
       --muted-foreground: 109, 120, 115;
+      --card-foreground: 246, 244, 238;
       --backdrop-color: 0, 0, 0;
     }
   }

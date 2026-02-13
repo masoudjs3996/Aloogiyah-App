@@ -50,11 +50,13 @@ export default {
           0: withOpacity("--color-secondary-0"),
         },
         green:withOpacity("--color-green"),
+        prymary_green:withOpacity("--color-prymary-green"),
         green_foreground:withOpacity("--color-green-foreground"),
         accent_foreground: withOpacity("--accent-foreground"),
         foreground: withOpacity("--foreground"),
         accent: withOpacity("--accent"),
         muted_foreground: withOpacity("--muted-foreground"),
+        card_foreground: withOpacity("--card-foreground"),
          
         success: withOpacity("--color-success"),
         warning: withOpacity("--color-warning"),
