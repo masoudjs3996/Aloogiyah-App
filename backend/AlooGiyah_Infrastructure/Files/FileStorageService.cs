@@ -123,6 +123,7 @@ public class FileStorageService : IFileStorageService
         EntityFile.ServiceRequest => "service-requests",
         EntityFile.AgriculturalProduct => "agricultural-products",
         EntityFile.Farm => "Farm",
+        EntityFile.Slider => "Slider",
         _ => "others"
     };
 }

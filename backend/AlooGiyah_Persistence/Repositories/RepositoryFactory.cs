@@ -30,7 +30,8 @@ public class RepositoryFactory : IRepositoryFactory
             { EntityFile.ServiceRequest, typeof(ServiceRequest) },
             { EntityFile.Auction, typeof(Auction) },
             { EntityFile.Category, typeof(Category) },
-            { EntityFile.Farm, typeof(Farm) }
+            { EntityFile.Farm, typeof(Farm) },
+            {EntityFile.Slider, typeof(Slider) }
 
         };
 

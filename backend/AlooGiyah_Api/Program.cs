@@ -9,6 +9,7 @@ using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Infrastructur.Email;
 using AlooGiyah_Infrastructure.Files;
 using AlooGiyah_Persistence;
+using AlooGiyah_Persistence.Connection;
 using AlooGiyah_Persistence.Context;
 using AlooGiyah_Persistence.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -144,6 +145,7 @@ builder.Services.AddScoped<IPriceCalculatorService, PriceCalculatorService>();
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<ISliderService, SliderService>();
 
 
 
@@ -154,6 +156,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRepositoryFactory, RepositoryFactory>();
 builder.Services.AddScoped<IServiceRequestRepository, ServiceRequestRepository>();
 builder.Services.AddScoped<ICartRepository,CartRepository>();
+builder.Services.AddScoped<IDbConnectionFactory, SqlConnectionFactory>();
+
 
 builder.Services.AddScoped<IEmail, Email>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
