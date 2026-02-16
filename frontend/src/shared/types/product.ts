@@ -49,4 +49,4 @@ export interface ProductFilter {
   pageSize?: number;
 }
 
-export type GetProductResponse = IApiResponse<IAgriculturalProduct>;
+export type GetProductResponse = IApiResponse<IAgriculturalProduct[]>;

@@ -36,7 +36,10 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const config = error.config;
-
+    const GuestUserToken = Cookies.get("guestToken");
+    if (error.response?.status === 403 && GuestUserToken) {
+      window.location.href = "/Login";
+    }
     if (error.response?.status === 401 && !config._retry) {
       config._retry = true;
       try {
