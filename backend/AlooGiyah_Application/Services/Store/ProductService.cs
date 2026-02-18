@@ -1,7 +1,7 @@
 ﻿using AlooGiyah_Application.DTOs.Category;
 using AlooGiyah_Application.DTOs.Product;
-using AlooGiyah_Application.Interfaces.Store;
-using AlooGiyah_Application.Interfaces.UserFolder;
+using AlooGiyah_Application.Interfaces.Service.Store;
+using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Interfaces;

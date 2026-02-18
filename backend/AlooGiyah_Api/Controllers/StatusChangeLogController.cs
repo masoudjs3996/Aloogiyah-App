@@ -1,6 +1,6 @@
 ﻿using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.StatusChangeLog;
-using AlooGiyah_Application.Interfaces;
+using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Shared.Constants;
 using AlooGiyah_Shared.Exceptions;
 using Microsoft.AspNetCore.Authorization;

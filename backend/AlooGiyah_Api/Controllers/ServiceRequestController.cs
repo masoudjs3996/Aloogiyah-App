@@ -1,7 +1,7 @@
 ﻿using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.ServiceRequest;
 using AlooGiyah_Application.DTOs.Users;
-using AlooGiyah_Application.Interfaces;
+using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Domain.Pagination;
 using AlooGiyah_Shared.Constants;
 using AlooGiyah_Shared.Exceptions;

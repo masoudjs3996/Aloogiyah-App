@@ -7,8 +7,8 @@ using AlooGiyah_Shared.Commons;
 using AlooGiyah_Shared.Exceptions;
 using AutoMapper;
 using AlooGiyah_Domain.Enums;
-using AlooGiyah_Application.Interfaces.UserFolder;
 using AlooGiyah_Domain.Entities.UserFolder;
+using AlooGiyah_Application.Interfaces.Service.UserFolder;
 
 namespace AlooGiyah_Application.Services;
 

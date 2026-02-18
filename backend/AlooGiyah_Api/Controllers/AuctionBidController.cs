@@ -1,7 +1,7 @@
 ﻿using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.Auction;
 using AlooGiyah_Application.DTOs.AuctionBid;
-using AlooGiyah_Application.Interfaces.Store;
+using AlooGiyah_Application.Interfaces.Service.Store;
 using AlooGiyah_Shared.Constants;
 using AlooGiyah_Shared.Exceptions;
 using Microsoft.AspNetCore.Authorization;

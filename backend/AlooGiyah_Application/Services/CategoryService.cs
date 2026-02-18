@@ -1,6 +1,6 @@
 ﻿using AlooGiyah_Application.DTOs.Category;
 using AlooGiyah_Application.DTOs.File;
-using AlooGiyah_Application.Interfaces;
+using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Enums;
 using AlooGiyah_Domain.Interfaces;

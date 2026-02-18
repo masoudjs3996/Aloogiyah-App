@@ -1,6 +1,6 @@
 ﻿using AlooGiyah_Application.DTOs.Auction;
 using AlooGiyah_Application.DTOs.AuctionBid;
-using AlooGiyah_Application.Interfaces.Store;
+using AlooGiyah_Application.Interfaces.Service.Store;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Entities.UserFolder;

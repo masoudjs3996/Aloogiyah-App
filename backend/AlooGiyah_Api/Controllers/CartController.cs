@@ -1,6 +1,6 @@
 ﻿using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.Cart;
-using AlooGiyah_Application.Interfaces.Store;
+using AlooGiyah_Application.Interfaces.Service.Store;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

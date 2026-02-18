@@ -1,6 +1,6 @@
 ﻿using AlooGiyah_Application.DTOs.Users;
-using AlooGiyah_Application.Interfaces.Store;
-using AlooGiyah_Application.Interfaces.UserFolder;
+using AlooGiyah_Application.Interfaces.Service.Store;
+using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.UserFolder;
 using AlooGiyah_Domain.Interfaces;

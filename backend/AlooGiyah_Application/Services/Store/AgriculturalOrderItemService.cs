@@ -1,5 +1,5 @@
 ﻿using AlooGiyah_Application.DTOs.AgriculturalOrderItem;
-using AlooGiyah_Application.Interfaces.Store;
+using AlooGiyah_Application.Interfaces.Service.Store;
 using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Domain.Pagination;

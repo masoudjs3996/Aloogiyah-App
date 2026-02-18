@@ -1,9 +1,7 @@
 {
   "ExpandedNodes": [
-    "",
-    "\\backend",
-    "\\backend\\AlooGiyah_Persistence"
+    ""
   ],
-  "SelectedNode": "\\backend\\AlooGiyah_Persistence\\EfCoreTransaction.cs",
+  "SelectedNode": "\\AlooGiyah_Api.sln",
   "PreviewInSolutionExplorer": false
 }

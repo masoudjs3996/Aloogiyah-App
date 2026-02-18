@@ -1,5 +1,5 @@
 ﻿using AlooGiyah_Application.DTOs.Location;
-using AlooGiyah_Application.Interfaces.UserFolder;
+using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.UserFolder.AddressFolder;
 using AlooGiyah_Domain.Enums;

@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Application.Interfaces;
+﻿using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Entities.UserFolder;
