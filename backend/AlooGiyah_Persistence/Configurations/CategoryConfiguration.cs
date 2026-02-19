@@ -22,8 +22,11 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
 
         builder.Property(p => p.Slug)
-    .IsRequired()
-    .HasMaxLength(255);
+            .IsRequired()
+            .HasMaxLength(255);
+
+        builder.Property(p => p.Icon)
+            .HasMaxLength(255);
 
         builder.Property(p => p.MetaTitle)
             .HasMaxLength(255);

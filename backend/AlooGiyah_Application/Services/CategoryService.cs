@@ -336,6 +336,7 @@ public class CategoryService : ICategoryService
 
         entity.Name = dto.Name.Trim();
         entity.Slug = slug;
+        entity.Icon = dto.Icon;
         entity.MetaTitle = dto.MetaTitle ?? string.Empty;
         entity.MetaDescription = dto.MetaDescription ?? string.Empty;
         entity.MetaKeywords = dto.MetaKeywords;

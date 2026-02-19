@@ -1,9 +1,11 @@
 ﻿using AlooGiyah_Application.DTOs.Users;
+using AlooGiyah_Application.Interfaces.Query;
 using AlooGiyah_Application.Interfaces.Service.Store;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.UserFolder;
 using AlooGiyah_Domain.Interfaces;
+using AlooGiyah_Shared.Exceptions;
 using AutoMapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -20,11 +22,11 @@ public class AuthService : IAuthService
     private readonly IGenericRepository<User> _genericRepositoryUser;
     private readonly IGenericRepository<Role> _genericRepositoryRole;
     private readonly IGenericRepository<Wallet> _genericRepositoryWallet;
+    private readonly IUserQuery _userQuery;
     private readonly IConfiguration _config;
     private readonly ICartService _cartService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuthRepository _authRepository;
-    private readonly IUserRepository _userRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
     private readonly IEmail _email;
@@ -34,11 +36,11 @@ public class AuthService : IAuthService
         IGenericRepository<User> genericRepositoryUser,
         IGenericRepository<Role> genericRepositoryRole,
         IGenericRepository<Wallet> genericRepositoryWallet,
+        IUserQuery userQuery,
         IConfiguration config,
         ICartService cartService,
         IUnitOfWork unitOfWork,
         IAuthRepository authRepository,
-        IUserRepository userRepository,
         ICurrentUserService currentUserService,
         IMapper mapper,
         IEmail email)
@@ -46,11 +48,11 @@ public class AuthService : IAuthService
         _genericRepositoryUser = genericRepositoryUser ?? throw new ArgumentNullException(nameof(genericRepositoryUser));
         _genericRepositoryRole = genericRepositoryRole ?? throw new ArgumentNullException(nameof(genericRepositoryRole));
         _genericRepositoryWallet = genericRepositoryWallet ?? throw new ArgumentNullException(nameof(genericRepositoryWallet));
+        _userQuery = userQuery;
         _config = config ?? throw new ArgumentNullException(nameof(config));
         _cartService = cartService  ?? throw new ArgumentNullException(nameof(config));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _authRepository = authRepository ?? throw new ArgumentNullException(nameof(authRepository));
-        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _currentUserService = currentUserService;
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _email = email ?? throw new ArgumentNullException(nameof(email));
@@ -178,9 +180,11 @@ public class AuthService : IAuthService
         if (dto == null)
             throw new ArgumentNullException(nameof(dto));
 
-        var existing = await _userRepository.GetByUsernameAsync(dto.UserName);
-        if (existing != null)
-            throw new Exception("کاربر قبلاً وجود دارد");
+        var existing = await _userQuery.ExistsByUsernameAsync(dto.UserName);
+        if (existing)
+            throw new BadRequestException(
+        message: "نام کاربری قبلاً ثبت شده است.",
+        errorCode: "USERNAME_ALREADY_EXISTS");
 
         await using var transaction = await _unitOfWork.BeginTransactionAsync();
         try
@@ -190,7 +194,7 @@ public class AuthService : IAuthService
 
             var role = await _genericRepositoryRole.GetByIdAsync(1); // لود Role با Id = 1
             if (role == null)
-                throw new Exception("نقش پیش‌فرض با Id 1 پیدا نشد.");
+                throw new BadRequestException("نقش پیش‌فرض با Id 1 پیدا نشد.");
             user.Role = role;
 
             await _genericRepositoryUser.AddAsync(user);
@@ -235,7 +239,7 @@ public class AuthService : IAuthService
         if (loginDto == null)
             throw new ArgumentNullException(nameof(loginDto));
 
-        var user = await _userRepository.GetByUsernameAsync(loginDto.Username);
+        var user = await _userQuery.GetByUsernameAsync(loginDto.Username);
         if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password))
             throw new UnauthorizedAccessException("نام کاربری یا رمز عبور اشتباه است.");
 
@@ -277,7 +281,7 @@ public class AuthService : IAuthService
         if (!BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
             return false;
 
-        var existingUser = await _userRepository.GetByUsernameAsync(model.NewUsername);
+        var existingUser = await _userQuery.GetByUsernameAsync(model.NewUsername);
         if (existingUser != null)
             throw new Exception("یوزرنیم جدید قبلاً گرفته شده است");
 

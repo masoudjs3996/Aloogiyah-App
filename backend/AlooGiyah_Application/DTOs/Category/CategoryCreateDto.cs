@@ -12,6 +12,9 @@ namespace AlooGiyah_Application.DTOs.Category
         public string Slug { get; set; } = string.Empty;
 
         [MaxLength(255)]
+        public string? Icon { get; set; }
+
+        [MaxLength(255)]
         public string MetaTitle { get; set; } = string.Empty;
 
         [MaxLength(500)]

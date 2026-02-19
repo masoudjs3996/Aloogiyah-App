@@ -1,7 +1,36 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\PcFi\\source\\repos\\Aloogiyah-App\\",
-  "Documents": [],
+  "WorkspaceRootPath": "G:\\f\\poroge\\Aloogiyah-App\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Api\\Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:backend\\AlooGiyah_Api\\Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Api\\libman.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:backend\\AlooGiyah_Api\\libman.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:backend\\AlooGiyah_Api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Api\\appsettings.Development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:backend\\AlooGiyah_Api\\appsettings.Development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Api\\AlooGiyah_Api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:backend\\AlooGiyah_Api\\AlooGiyah_Api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Api\\AlooGiyah_Api.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:backend\\AlooGiyah_Api\\AlooGiyah_Api.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\obj\\AlooGiyah_Persistence.EntityFrameworkCore.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:obj\\AlooGiyah_Persistence.EntityFrameworkCore.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,11 +38,96 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Api\\Program.cs",
+              "RelativeDocumentMoniker": "backend\\AlooGiyah_Api\\Program.cs",
+              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Api\\Program.cs",
+              "RelativeToolTip": "backend\\AlooGiyah_Api\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-19T13:45:50.965Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Api\\appsettings.json",
+              "RelativeDocumentMoniker": "backend\\AlooGiyah_Api\\appsettings.json",
+              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Api\\appsettings.json",
+              "RelativeToolTip": "backend\\AlooGiyah_Api\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-02-19T13:45:41.942Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "AlooGiyah_Api.csproj",
+              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Api\\AlooGiyah_Api.csproj",
+              "RelativeDocumentMoniker": "backend\\AlooGiyah_Api\\AlooGiyah_Api.csproj",
+              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Api\\AlooGiyah_Api.csproj",
+              "RelativeToolTip": "backend\\AlooGiyah_Api\\AlooGiyah_Api.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-02-19T13:45:23.699Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "AlooGiyah_Api.http",
+              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Api\\AlooGiyah_Api.http",
+              "RelativeDocumentMoniker": "backend\\AlooGiyah_Api\\AlooGiyah_Api.http",
+              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Api\\AlooGiyah_Api.http",
+              "RelativeToolTip": "backend\\AlooGiyah_Api\\AlooGiyah_Api.http",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAyAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003502|",
+              "WhenOpened": "2026-02-19T13:44:48.604Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Api\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "backend\\AlooGiyah_Api\\appsettings.Development.json",
+              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Api\\appsettings.Development.json",
+              "RelativeToolTip": "backend\\AlooGiyah_Api\\appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-02-19T13:44:37.034Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "libman.json",
+              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Api\\libman.json",
+              "RelativeDocumentMoniker": "backend\\AlooGiyah_Api\\libman.json",
+              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Api\\libman.json",
+              "RelativeToolTip": "backend\\AlooGiyah_Api\\libman.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-02-19T13:44:34.215Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "AlooGiyah_Persistence.EntityFrameworkCore.targets",
+              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\obj\\AlooGiyah_Persistence.EntityFrameworkCore.targets",
+              "RelativeDocumentMoniker": "obj\\AlooGiyah_Persistence.EntityFrameworkCore.targets",
+              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\obj\\AlooGiyah_Persistence.EntityFrameworkCore.targets",
+              "RelativeToolTip": "obj\\AlooGiyah_Persistence.EntityFrameworkCore.targets",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAABHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
+              "WhenOpened": "2026-02-19T13:29:38.239Z"
             }
           ]
         }

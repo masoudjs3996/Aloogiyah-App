@@ -38,7 +38,7 @@ namespace AlooGiyah_API.Controllers
         }
         #endregion
 
-        // GET: api/User/GetUserByFilter?FName=علی&PageNumber=1&PageSize=10
+     
         [Authorize(Roles = "Manager")]
         [HttpGet("GetUserByFilter")]
         public async Task<IActionResult> GetUserByFilterAsync([FromQuery] UserFilterDto userFilter)
