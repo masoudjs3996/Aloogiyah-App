@@ -11,27 +11,28 @@ import { ProfileCard } from "@/design-system/molecules/dashbord/ProfileCard";
 import { ProfileMenuList } from "@/design-system/organisms/dashbord/ProfileMenuList";
 import { IoGiftOutline } from "react-icons/io5";
 import { MdOutlineChecklistRtl } from "react-icons/md";
+import { useSelector } from "react-redux";
 
 export default function ProfilePage() {
-  const [userInfo, setUserInfo] = useState<any>(null);
+  // const [userInfo, setUserInfo] = useState<any>(null);
+  const user = useSelector((state: any) => state.user.data);
+  // useEffect(() => {
+  //   const getUser = async () => {
+  //     const res = await getUserInfo();
+  //     const user = res?.data ?? null;
+  //     if (!user) {
+  //       setUserInfo(null);
+  //       return;
+  //     }
+  //     user.profileImageUrl = user.profileImageUrl
+  //       ? getImageUrl(user.profileImageUrl)
+  //       : null;
 
-  useEffect(() => {
-    const getUser = async () => {
-      const res = await getUserInfo();
-      const user = res?.data ?? null;
-      if (!user) {
-        setUserInfo(null);
-        return;
-      }
-      user.profileImageUrl = user.profileImageUrl
-        ? getImageUrl(user.profileImageUrl)
-        : null;
+  //     setUserInfo(user);
+  //   };
 
-      setUserInfo(user);
-    };
-
-    getUser();
-  }, []);
+  //   getUser();
+  // }, []);
 
   const menuItems = [
     {
@@ -53,12 +54,12 @@ export default function ProfilePage() {
     },
   ];
 
-  if (!userInfo) return null;
+  // if (!userInfo) return null;
 
   return (
-    <div className="min-h-screen flex flex-col justify-between  gap-y-4">
+    <div className="min-h-screen flex flex-col justify-between  gap-y-4 py-10">
       <div>
-        <ProfileCard user={userInfo} />
+        <ProfileCard user={user} />
       </div>
       <ProfileMenuList items={menuItems} />
     </div>

@@ -19,7 +19,7 @@ type Product = {
 };
 const TABS = ["همه", "بالاترین قیمت", "بیشترین موجودی", "کمترین موجودی"];
 const FarmDetail = ({ farmId }: { farmId: string }) => {
-  const { farmDetail, farmDetailLoading } = useMyFarm(farmId);
+  const { farmDetail, farmDetailLoading,} = useMyFarm(farmId);
   const [activeTab, setActiveTab] = useState("همه");
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);

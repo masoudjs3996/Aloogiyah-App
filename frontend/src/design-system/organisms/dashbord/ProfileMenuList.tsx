@@ -8,7 +8,7 @@ const userItem = [
   {
     icon: IoPricetagOutline,
     title: "تخفیف و جایزه شما",
-    href: "/dashboard/profile/rewards",
+    href: "/profile/rewards",
   },
   { icon: IoWalletOutline, title: "کیف پول " },
   { icon: SlEnvolopeLetter, title: "پیام ها" },

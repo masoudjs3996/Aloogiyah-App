@@ -8,6 +8,7 @@ export const useMyFarm = (code?: string) => {
   const myFarmsQuery = useQuery({
     queryKey: ["GetMyFarm"],
     queryFn: GetMyFarm,
+    enabled: !code,
     staleTime: 1000 * 60 * 2,
   });
   const farmDetailQuery = useQuery({

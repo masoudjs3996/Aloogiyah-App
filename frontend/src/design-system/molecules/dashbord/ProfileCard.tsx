@@ -17,12 +17,12 @@ export const ProfileCard = ({ user }: { user: any }) => {
         </div>
 
         <div className="flex-1">
-          <Title>{user.fName}</Title>
-          <Text>{user.userName}</Text>
-          <SmallText>{user.email}</SmallText>
+          <Title>{user?.fName}</Title>
+          <Text>{user?.userName}</Text>
+          <SmallText>{user?.email}</SmallText>
         </div>
       </div>
-      <Link href={"/dashboard/profile/editProfile"}>
+      <Link href={"/profile/editProfile"}>
         <GrEdit className="w-6 h-6 cursor-pointer" />
       </Link>
     </div>
