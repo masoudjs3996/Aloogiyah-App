@@ -10,7 +10,7 @@ const userItem = [
     title: "تخفیف و جایزه شما",
     href: "/profile/rewards",
   },
-  { icon: IoWalletOutline, title: "کیف پول " },
+  { icon: IoWalletOutline, href: "/profile/wallet", title: "کیف پول " },
   { icon: SlEnvolopeLetter, title: "پیام ها" },
 ];
 export const ProfileMenuList = ({ items }: any) => (
@@ -22,7 +22,7 @@ export const ProfileMenuList = ({ items }: any) => (
         </Link>
       ) : (
         <MenuItem key={i} {...item} />
-      )
+      ),
     )}
     <div className="h-[2px] bg-secondary-400 w-full my-4"> </div>
     {items.map((item: any, i: number) => (

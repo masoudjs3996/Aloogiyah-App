@@ -1,19 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 import { ICategoryTree } from "@/shared/types/categories";
 import { CategoryIcon } from "@/design-system/atoms/CategoryIcon";
 
 interface Props {
   categories: ICategoryTree[];
+  setActiveCat: Dispatch<SetStateAction<ICategoryTree[]>>;
 }
 
-export const CategorySidebar = ({ categories }: Props) => {
+export const CategorySidebar = ({ categories, setActiveCat }: Props) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
+  useEffect(() => {
+    console.log(categories);
+  }, [categories]);
   return (
-    <div className="flex flex-col items-start border-l w-36">
+    <div className="flex flex-col items-start border-l w-36 ">
       {categories.map((cat, index) => (
         <div
           key={cat.code}
@@ -23,7 +27,10 @@ export const CategorySidebar = ({ categories }: Props) => {
         >
           <div
             className="flex flex-col items-center cursor-pointer"
-            onClick={() => setActiveIndex(index)}
+            onClick={() => {
+              setActiveIndex(index);
+              setActiveCat(cat?.subCategories);
+            }}
           >
             <CategoryIcon slug={cat.slug} />
             <span

@@ -2,6 +2,7 @@
 
 import { Avatar } from "@/design-system/atoms/Avatar";
 import { SmallText, Text, Title } from "@/design-system/atoms/Typography";
+import { getImageUrl } from "@/shared/utils/getImageUrl";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { GrEdit } from "react-icons/gr";
@@ -10,7 +11,7 @@ export const ProfileCard = ({ user }: { user: any }) => {
     <div className="bg-secondary-0 p-2 m-4 rounded-lg shadow-sm flex justify-between items-center ">
       <div className="flex items-center space-x-4 space-x-reverse">
         <div className="relative">
-          <Avatar src={user?.profileImageUrl} />
+          <Avatar src={getImageUrl(user?.profileImageUrl)} />
           <button className="absolute bottom-0 right-0 bg-teal-500 text-white rounded-full p-1">
             <PlusIcon className="w-4 h-4" />
           </button>
