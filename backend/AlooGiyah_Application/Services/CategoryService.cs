@@ -59,6 +59,7 @@ public class CategoryService : ICategoryService
                 c.Code,
                 c.Name,
                 c.Slug,
+                c.Icon,
                 c.ParentCategoryId,
                 c.MetaTitle,
                 c.MetaDescription,
@@ -106,6 +107,7 @@ public class CategoryService : ICategoryService
                 Code = c.Code,
                 Name = c.Name,
                 Slug = c.Slug,
+                Icon = c.Icon,
                 ParentCategoryCode = c.ParentCategoryId.HasValue ? parentMap.GetValueOrDefault(c.ParentCategoryId.Value) : null,
                 MetaTitle = c.MetaTitle ?? string.Empty,
                 MetaDescription = c.MetaDescription ?? string.Empty,
@@ -197,6 +199,7 @@ public class CategoryService : ICategoryService
                 Code = c.Code,
                 Name = c.Name,
                 Slug = c.Slug,
+                Icon = c.Icon,
                 ParentCategoryCode = c.ParentCategory != null ? c.ParentCategory.Code : null
             },
             orderBy: c => c.SortOrder,
