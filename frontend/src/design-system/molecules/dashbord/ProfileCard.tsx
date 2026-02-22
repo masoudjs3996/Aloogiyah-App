@@ -23,7 +23,7 @@ export const ProfileCard = ({ user }: { user: any }) => {
           <SmallText>{user?.email}</SmallText>
         </div>
       </div>
-      <Link href={"/profile/editProfile"}>
+      <Link href={"/dashboard/profile/editProfile"}>
         <GrEdit className="w-6 h-6 cursor-pointer" />
       </Link>
     </div>

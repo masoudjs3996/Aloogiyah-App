@@ -8,9 +8,9 @@ const userItem = [
   {
     icon: IoPricetagOutline,
     title: "تخفیف و جایزه شما",
-    href: "/profile/rewards",
+    href: "/dashboard/profile/rewards",
   },
-  { icon: IoWalletOutline, href: "/profile/wallet", title: "کیف پول " },
+  { icon: IoWalletOutline, href: "/dashboard/profile/wallet", title: "کیف پول " },
   { icon: SlEnvolopeLetter, title: "پیام ها" },
 ];
 export const ProfileMenuList = ({ items }: any) => (

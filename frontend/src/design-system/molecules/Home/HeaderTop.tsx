@@ -16,7 +16,7 @@ const HeaderTop: FC = () => {
   const logout = useLogout();
 
   const links = [
-    { href: "/dashboard/farm/myFarms", label: "داشبورد" },
+    { href: "/dashboard", label: "داشبورد" },
     { href: "/profile", label: "پروفایل" },
     { href: "/orders", label: "سفارش‌ها" },
     { href: "/contact", label: "تماس با ما" },

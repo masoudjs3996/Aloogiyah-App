@@ -8,7 +8,7 @@ const HomeBottomNavigation: FC = () => {
   const user = useSelector((state: any) => state.user.data);
   const navItems = [
     {
-      href: "/profile",
+      href: "/dashboard/profile",
       icon: FaUser,
       label: user !== null ? user?.userName : "حساب کاربری",
     },
