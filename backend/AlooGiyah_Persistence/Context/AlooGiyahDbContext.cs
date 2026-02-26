@@ -42,6 +42,7 @@ public class AlooGiyahDbContext : DbContext
     public DbSet<Wallet> Wallets { get; set; }
     public DbSet<Warehouse> Warehouses { get; set; }
     public DbSet<WarehouseInventory> WarehouseInventories { get; set; }
+    public DbSet<Slider> Sliders { get; set; }
 
     public AlooGiyahDbContext(DbContextOptions<AlooGiyahDbContext> options) : base(options)
     {
@@ -52,5 +53,17 @@ public class AlooGiyahDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AlooGiyahDbContext).Assembly);
+
+        // ⭐ index روی Code + IsDeleted برای همه BaseEntity ها
+        var entityTypes = modelBuilder.Model.GetEntityTypes()
+            .Where(e => typeof(BaseEntity).IsAssignableFrom(e.ClrType));
+
+        foreach (var entityType in entityTypes)
+        {
+            modelBuilder.Entity(entityType.ClrType)
+                .HasIndex(new[] { nameof(BaseEntity.Code), nameof(BaseEntity.IsDeleted) })
+                .IsUnique(); 
+        }
     }
+
 }

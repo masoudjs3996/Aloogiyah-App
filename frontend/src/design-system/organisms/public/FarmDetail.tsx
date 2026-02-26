@@ -19,7 +19,7 @@ type Product = {
 };
 const TABS = ["همه", "بالاترین قیمت", "بیشترین موجودی", "کمترین موجودی"];
 const FarmDetail = ({ farmId }: { farmId: string }) => {
-  const { farmDetail, farmDetailLoading } = useMyFarm(farmId);
+  const { farmDetail, farmDetailLoading,} = useMyFarm(farmId);
   const [activeTab, setActiveTab] = useState("همه");
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
@@ -90,7 +90,7 @@ const FarmDetail = ({ farmId }: { farmId: string }) => {
         <AnimatedSearchInput value={search} onChange={setSearch} />
       </div>
       <div className="flex px-4 mt-4 gap-6 text-sm border-b">
-        {TABS.map((tab) => (
+        {TABS?.map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -105,7 +105,7 @@ const FarmDetail = ({ farmId }: { farmId: string }) => {
         ))}
       </div>
       <div className="divide-y">
-        {products.map((product) => (
+        {products?.map((product) => (
           <div key={product.code} className="flex p-4 gap-4">
             <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden relative">
               {product.name && (

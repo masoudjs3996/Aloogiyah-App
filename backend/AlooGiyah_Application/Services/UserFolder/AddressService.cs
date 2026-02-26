@@ -1,5 +1,4 @@
 ﻿using AlooGiyah_Application.DTOs.Address;
-using AlooGiyah_Application.Interfaces.UserFolder;
 using AlooGiyah_Domain.Entities.UserFolder.AddressFolder;
 using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Domain.Pagination;
@@ -8,6 +7,7 @@ using AutoMapper;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using AlooGiyah_Shared.Commons;
+using AlooGiyah_Application.Interfaces.Service.UserFolder;
 
 
 namespace AlooGiyah_Application.Services.UserFolder;

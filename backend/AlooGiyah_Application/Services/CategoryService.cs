@@ -1,6 +1,6 @@
 ﻿using AlooGiyah_Application.DTOs.Category;
 using AlooGiyah_Application.DTOs.File;
-using AlooGiyah_Application.Interfaces;
+using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Enums;
 using AlooGiyah_Domain.Interfaces;
@@ -59,6 +59,7 @@ public class CategoryService : ICategoryService
                 c.Code,
                 c.Name,
                 c.Slug,
+                c.Icon,
                 c.ParentCategoryId,
                 c.MetaTitle,
                 c.MetaDescription,
@@ -106,6 +107,7 @@ public class CategoryService : ICategoryService
                 Code = c.Code,
                 Name = c.Name,
                 Slug = c.Slug,
+                Icon = c.Icon,
                 ParentCategoryCode = c.ParentCategoryId.HasValue ? parentMap.GetValueOrDefault(c.ParentCategoryId.Value) : null,
                 MetaTitle = c.MetaTitle ?? string.Empty,
                 MetaDescription = c.MetaDescription ?? string.Empty,
@@ -197,6 +199,7 @@ public class CategoryService : ICategoryService
                 Code = c.Code,
                 Name = c.Name,
                 Slug = c.Slug,
+                Icon = c.Icon,
                 ParentCategoryCode = c.ParentCategory != null ? c.ParentCategory.Code : null
             },
             orderBy: c => c.SortOrder,
@@ -336,6 +339,7 @@ public class CategoryService : ICategoryService
 
         entity.Name = dto.Name.Trim();
         entity.Slug = slug;
+        entity.Icon = dto.Icon;
         entity.MetaTitle = dto.MetaTitle ?? string.Empty;
         entity.MetaDescription = dto.MetaDescription ?? string.Empty;
         entity.MetaKeywords = dto.MetaKeywords;

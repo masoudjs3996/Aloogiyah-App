@@ -10,5 +10,6 @@ public enum  EntityFile
     Article = 4,
     Auction = 5,
     Farm = 6,
-    Category = 7
+    Category = 7,
+    Slider = 8
 }

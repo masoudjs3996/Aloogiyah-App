@@ -1,6 +1,6 @@
 ﻿using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.AgriculturalOrder;
-using AlooGiyah_Application.Interfaces.Store;
+using AlooGiyah_Application.Interfaces.Service.Store;
 using AlooGiyah_Domain.Enums;
 using AlooGiyah_Shared.Constants;
 using AlooGiyah_Shared.Exceptions;

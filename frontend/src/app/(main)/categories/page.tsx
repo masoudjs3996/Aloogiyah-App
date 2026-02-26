@@ -4,6 +4,8 @@ import SectionWrapper from "@/design-system/molecules/Home/SectionWrapper";
 import CategoryCard from "@/design-system/molecules/public/CategoryCard";
 
 export default function CategoryPage() {
+  //   const res = await getCategoryTree();
+  // const categories = res?.data ?? [];
   return (
     <SectionWrapper>
       <BreadcrumbNav items={[{ label: "دسته بندی" }]} />

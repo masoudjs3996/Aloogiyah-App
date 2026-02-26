@@ -1,8 +1,9 @@
 ﻿using AlooGiyah_Application.DTOs.File;
 using AlooGiyah_Application.DTOs.Users;
-using AlooGiyah_Application.Interfaces;
-using AlooGiyah_Application.Interfaces.Store;
-using AlooGiyah_Application.Interfaces.UserFolder;
+using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.Interfaces.Service;
+using AlooGiyah_Application.Interfaces.Service.Store;
+using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Entities.UserFolder;
 using AlooGiyah_Domain.Enums;
@@ -35,6 +36,7 @@ public class UserService : IUserService
     private readonly IConfiguration _config;                        // اضافه شد
     private readonly IGenericRepository<Cart> _cartRepository;      // اضافه شد (برای سبد مهمان)
     private readonly IMapper _mapper;
+    private readonly IUserQuery _userQuery;
 
 
     public UserService(
@@ -48,7 +50,8 @@ public class UserService : IUserService
         IMapper mapper,
         IHttpContextAccessor httpContextAccessor,      // تزریق شد
             IConfiguration config,                          // تزریق شد
-            IGenericRepository<Cart> cartRepository
+            IGenericRepository<Cart> cartRepository,
+            IUserQuery userQuery
         )
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -62,6 +65,7 @@ public class UserService : IUserService
         _httpContextAccessor = httpContextAccessor;
         _config = config;
         _cartRepository = cartRepository ?? throw new ArgumentNullException(nameof(cartRepository));
+        _userQuery = userQuery;
     }
     #endregion
 
@@ -72,7 +76,7 @@ public class UserService : IUserService
         if (string.IsNullOrEmpty(username))
             throw new ArgumentNullException(nameof(username));
 
-        var user = await _userRepositorySpecific.GetByUsernameAsync(username);
+        var user = await _userQuery.GetByUsernameAsync(username);
         if (user == null)
             throw new NotFoundException("کاربر پیدا نشد");
 
@@ -164,16 +168,20 @@ public class UserService : IUserService
                 CartId = Guid.TryParse(cartIdClaim, out var cartId) ? cartId : null
             };
         }
+        var userIdStr = _currentUserService.UserId;
+        if (string.IsNullOrWhiteSpace(userIdStr))
+            throw new UnauthorizedException("شناسه کاربر در توکن یافت نشد.");
 
-        var userCode = principal.FindFirst("Code")?.Value
-            ?? throw new UnauthorizedException("کد کاربر در توکن یافت نشد.");
+        if (!int.TryParse(userIdStr, out int userId))
+            throw new UnauthorizedException("شناسه کاربر نامعتبر است (parse به int نشد).");
 
-        var user = await _userRepository.GetByCodeWithIncludeAsync(userCode, x => x.Role)
+        var userDto = await _userQuery.GetByIdAsync(userId, includeRole: true)
             ?? throw new NotFoundException("کاربر یافت نشد.");
 
-        var userDto = _mapper.Map<UserDto>(user);
-        userDto.ProfileImageUrl =
-            await _fileService.GetPrimaryFileUrlAsync(EntityFile.Profile, user.Code);
+        userDto.ProfileImageUrl = await _fileService.GetPrimaryFileUrlAsync(
+            EntityFile.Profile,
+            userDto.Code   // هنوز از Code برای فایل‌ها استفاده می‌کنی
+        );
 
         return new ProfileResponseDto
         {

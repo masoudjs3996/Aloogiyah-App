@@ -1,6 +1,6 @@
 ﻿using AlooGiyah_Application.DTOs.ChatMessage;
-using AlooGiyah_Application.Interfaces;
-using AlooGiyah_Application.Interfaces.UserFolder;
+using AlooGiyah_Application.Interfaces.Service;
+using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.UserFolder;
 using AlooGiyah_Domain.Interfaces;

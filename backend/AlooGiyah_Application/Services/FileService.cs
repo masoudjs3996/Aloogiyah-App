@@ -1,6 +1,6 @@
 ﻿using AlooGiyah_Application.DTOs.File;
-using AlooGiyah_Application.Interfaces;
-using AlooGiyah_Application.Interfaces.UserFolder;
+using AlooGiyah_Application.Interfaces.Service;
+using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Entities.UserFolder;
@@ -273,7 +273,8 @@ public class FileService : IFileService
             { EntityFile.Auction, async (code) => await _repositoryFactory.GetFileRepository<Auction>(entityType).ExistsAsync(e => e.Code == code) },
             { EntityFile.Category, async (code) => await _repositoryFactory.GetFileRepository<Category>(entityType).ExistsAsync(e => e.Code == code) },
             { EntityFile.Profile, async (code) => await _repositoryFactory.GetFileRepository<User>(entityType).ExistsAsync(e => e.Code == code) },
-            { EntityFile.Farm, async (code) => await _repositoryFactory.GetFileRepository<Farm>(entityType).ExistsAsync(e => e.Code == code) }
+            { EntityFile.Farm, async (code) => await _repositoryFactory.GetFileRepository<Farm>(entityType).ExistsAsync(e => e.Code == code) },
+            { EntityFile.Slider, async (code) => await _repositoryFactory.GetFileRepository<Slider>(entityType).ExistsAsync(e => e.Code == code) }
         };
 
         if (!repositoryMap.ContainsKey(entityType))
@@ -295,6 +296,7 @@ public class FileService : IFileService
         EntityFile.Article => false,          // مقاله: فایل کم
         EntityFile.Profile => false,          // پروفایل: فایل کم
         EntityFile.Farm => false,
+        EntityFile.Slider => false,
         _ => false
     };
 

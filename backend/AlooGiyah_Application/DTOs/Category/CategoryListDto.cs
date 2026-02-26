@@ -7,5 +7,6 @@ public class CategoryListDto
     public string Name { get; set; } = string.Empty;
     public string? ParentCategoryCode { get; set; }
     public string? ImageUrl { get; set; }
+    public string? Icon { get; set; }
     public string Slug { get; set; } = string.Empty;
 }

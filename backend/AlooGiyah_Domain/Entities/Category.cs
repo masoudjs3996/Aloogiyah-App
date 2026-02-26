@@ -16,7 +16,8 @@ public class Category : BaseEntity
     public string Name { get; set; } = string.Empty;
 
     public int? ParentCategoryId { get; set; }
-
+    [MaxLength(255)]
+    public string? Icon { get; set; } 
 
     public int SortOrder { get; set; } = 0; // برای ترتیب نمایش در صفحه اصلی
 

@@ -1,6 +1,6 @@
 ﻿using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.Users;
-using AlooGiyah_Application.Interfaces.UserFolder;
+using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Application.Services.UserFolder;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +38,7 @@ namespace AlooGiyah_API.Controllers
         }
         #endregion
 
-        // GET: api/User/GetUserByFilter?FName=علی&PageNumber=1&PageSize=10
+     
         [Authorize(Roles = "Manager")]
         [HttpGet("GetUserByFilter")]
         public async Task<IActionResult> GetUserByFilterAsync([FromQuery] UserFilterDto userFilter)

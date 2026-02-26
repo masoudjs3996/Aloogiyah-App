@@ -110,6 +110,9 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("AuthorId");
 
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
+
                     b.ToTable("Articles");
                 });
 
@@ -131,6 +134,10 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.Property<int?>("DiscountId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Icon")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
@@ -179,6 +186,9 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("StatusId");
 
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
+
                     b.ToTable("Categories");
                 });
 
@@ -223,6 +233,9 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasIndex("ReceiverId");
 
                     b.HasIndex("SenderId");
+
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
 
                     b.ToTable("ChatMessages");
                 });
@@ -276,6 +289,9 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasIndex("ParentCommentId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
 
                     b.HasIndex("EntityCode", "EntityComment");
 
@@ -344,6 +360,9 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("FarmId");
 
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
+
                     b.ToTable("Discounts");
                 });
 
@@ -376,6 +395,9 @@ namespace AlooGiyah_Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("FileTypeId");
+
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
 
                     b.ToTable("FileTypes");
                 });
@@ -435,6 +457,9 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
+
                     b.ToTable("Files");
                 });
 
@@ -479,6 +504,9 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasKey("NotificationId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
 
                     b.ToTable("Notifications");
                 });
@@ -539,6 +567,9 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("ExpertId");
 
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
+
                     b.ToTable("QualityAssessments");
                 });
 
@@ -583,6 +614,9 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasKey("RefreshTokenId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
 
                     b.ToTable("RefreshToken");
                 });
@@ -659,7 +693,62 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
+
                     b.ToTable("ServiceRequests");
+                });
+
+            modelBuilder.Entity("AlooGiyah_Domain.Entities.Slider", b =>
+                {
+                    b.Property<int>("SliderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SliderId"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LinkUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("SliderId");
+
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
+
+                    b.HasIndex("IsActive", "Order");
+
+                    b.ToTable("Sliders");
                 });
 
             modelBuilder.Entity("AlooGiyah_Domain.Entities.Status", b =>
@@ -697,6 +786,9 @@ namespace AlooGiyah_Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("StatusId");
+
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
 
                     b.ToTable("Statuses");
                 });
@@ -753,6 +845,9 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasIndex("OldStatusId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
 
                     b.HasIndex("EntityId", "EntityStatus");
 
@@ -827,6 +922,9 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("StatusId");
 
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
+
                     b.ToTable("AgriculturalOrders");
                 });
 
@@ -870,6 +968,9 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasIndex("AgriculturalOrderId");
 
                     b.HasIndex("AgriculturalProductId");
+
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
 
                     b.ToTable("AgriculturalOrderItems");
                 });
@@ -956,6 +1057,9 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
+
                     b.ToTable("AgriculturalProducts", (string)null);
                 });
 
@@ -1031,6 +1135,9 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("WinnerId");
 
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
+
                     b.ToTable("Auctions");
                 });
 
@@ -1071,6 +1178,9 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasIndex("AuctionId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
 
                     b.ToTable("AuctionBids");
                 });
@@ -1125,6 +1235,9 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
+
                     b.ToTable("Carts", (string)null);
                 });
 
@@ -1170,6 +1283,9 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasIndex("AgriculturalProductId");
 
                     b.HasIndex("CartId");
+
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
 
                     b.ToTable("CartItems", (string)null);
                 });
@@ -1224,6 +1340,9 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasIndex("AddressId");
 
                     b.HasIndex("OwnerId");
+
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
 
                     b.ToTable("Farms");
                 });
@@ -1289,6 +1408,9 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
+
                     b.ToTable("Orders");
                 });
 
@@ -1336,6 +1458,9 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
 
                     b.ToTable("OrderItems");
                 });
@@ -1403,6 +1528,9 @@ namespace AlooGiyah_Persistence.Migrations
                         .HasColumnType("numeric(20,2)");
 
                     b.HasKey("ProductId");
+
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
 
                     b.ToTable("Products");
                 });
@@ -1479,6 +1607,9 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("VillageId");
 
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
+
                     b.HasIndex("UserId", "IsDefault")
                         .IsUnique()
                         .HasFilter("\"IsDefault\" = true");
@@ -1523,6 +1654,9 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("StatusId");
 
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
+
                     b.HasIndex("CountyId", "Name")
                         .IsUnique();
 
@@ -1566,6 +1700,9 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("StatusId");
 
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
+
                     b.HasIndex("ProvinceId", "Name")
                         .IsUnique();
 
@@ -1608,6 +1745,9 @@ namespace AlooGiyah_Persistence.Migrations
                         .IsUnique();
 
                     b.HasIndex("StatusId");
+
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
 
                     b.ToTable("Provinces");
                 });
@@ -1655,6 +1795,9 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("StatusId");
 
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
+
                     b.HasIndex("CountyId", "Name")
                         .IsUnique();
 
@@ -1690,6 +1833,9 @@ namespace AlooGiyah_Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("RoleId");
+
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
 
                     b.ToTable("Roles");
                 });
@@ -1777,6 +1923,9 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasIndex("UserName")
                         .IsUnique();
 
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
+
                     b.ToTable("Users");
                 });
 
@@ -1820,6 +1969,9 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
+
                     b.ToTable("Wallets");
                 });
 
@@ -1860,6 +2012,9 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasKey("WarehouseId");
 
                     b.HasIndex("FarmerId");
+
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
 
                     b.ToTable("Warehouses");
                 });
@@ -1914,6 +2069,9 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasIndex("ProductId");
 
                     b.HasIndex("WarehouseId");
+
+                    b.HasIndex("Code", "IsDeleted")
+                        .IsUnique();
 
                     b.HasIndex("EntityId", "EntityWarehouse");
 

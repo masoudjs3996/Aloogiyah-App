@@ -1,6 +1,6 @@
 ﻿using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.Users;
-using AlooGiyah_Application.Interfaces.UserFolder;
+using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Shared.Constants;
 using AlooGiyah_Shared.Exceptions;
 using Microsoft.AspNetCore.Authorization;

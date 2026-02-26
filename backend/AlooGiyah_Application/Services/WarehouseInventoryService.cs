@@ -1,6 +1,6 @@
 ﻿using AlooGiyah_Application.DTOs.Warehouse;
 using AlooGiyah_Application.DTOs.WarehouseInventory;
-using AlooGiyah_Application.Interfaces;
+using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Enums;

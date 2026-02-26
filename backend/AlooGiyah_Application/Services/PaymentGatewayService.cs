@@ -1,5 +1,4 @@
-﻿
-using AlooGiyah_Application.Interfaces;
+﻿using AlooGiyah_Application.Interfaces.Service;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 

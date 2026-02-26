@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.Interfaces.UserFolder;
+﻿using AlooGiyah_Application.Interfaces.Service.UserFolder;
+using AlooGiyah_Shared.Exceptions;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
@@ -14,7 +15,24 @@ public class CurrentUserService : ICurrentUserService
     }
 
     public string? UserId =>
-        _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+         _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+    // Helper جدید برای راحتی (اختیاری اما توصیه می‌کنم)
+    public int? GetUserIdAsInt()
+    {
+        var idStr = UserId;
+        return string.IsNullOrEmpty(idStr) ? null : int.TryParse(idStr, out int id) ? id : null;
+    }
+
+    // اگر می‌خوای exception بیندازه اگر parse نشد
+    public int GetRequiredUserIdAsInt()
+    {
+        var id = GetUserIdAsInt();
+        if (id == null)
+            throw new UnauthorizedException("شناسه کاربر در توکن یافت نشد یا نامعتبر است.");
+
+        return id.Value;
+    }
 
     public string? UserCode =>
         _httpContextAccessor.HttpContext?.User?.FindFirstValue("Code");

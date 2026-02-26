@@ -1,9 +1,9 @@
 ﻿using AlooGiyah_Application.DTOs.Address;
 using AlooGiyah_Application.DTOs.Farm;
 using AlooGiyah_Application.DTOs.File;
-using AlooGiyah_Application.Interfaces;
-using AlooGiyah_Application.Interfaces.Store;
-using AlooGiyah_Application.Interfaces.UserFolder;
+using AlooGiyah_Application.Interfaces.Service;
+using AlooGiyah_Application.Interfaces.Service.Store;
+using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Entities.UserFolder;

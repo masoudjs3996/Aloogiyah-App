@@ -28,9 +28,9 @@ export default function AuthInitializer() {
 
   useEffect(() => {
     if (data) {
-      console.log(data);
-      
-      dispatch(setUser(data?.data));
+      console.log();
+
+      dispatch(setUser(data?.data?.user));
     }
   }, [data]);
 
