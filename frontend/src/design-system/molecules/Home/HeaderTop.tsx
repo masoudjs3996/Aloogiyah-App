@@ -6,18 +6,33 @@ import { usePathname, useRouter } from "next/navigation";
 import { TiShoppingCart } from "react-icons/ti";
 import { FaLeaf } from "react-icons/fa";
 import { BiMenu, BiX } from "react-icons/bi";
+import { useSelector } from "react-redux";
+import useLogout from "@/shared/hooks/useLogout";
 
 const HeaderTop: FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const router = useRouter();
+  const user = useSelector((state: any) => state.user.data);
+  const logout = useLogout();
   const pathname = usePathname();
   const navLinks = [
     { id: 1, href: "/", label: "خانه" },
     { id: 2, href: "/categories", label: "دسته بندی" },
     { id: 3, href: "/product", label: "محصولات" },
     { id: 4, href: "/farm", label: "مزارع" },
+    { id: 6, href: "/dashboard", label: "داشبورد" },
     { id: 5, href: "/contact", label: "تماس با ما" },
+   
   ];
+const handleAuthClick = async () => {
+    setIsMenuOpen(false);
 
+    if (user) {
+      await logout();
+    } else {
+      router.push("/Login");
+    }
+  };
   return (
     <header className="fixed left-0 right-0 top-0 z-50 border-b border-border bg-white/95 backdrop-blur-md">
       <div className="container-custom flex h-16 items-center justify-between md:h-20">
@@ -68,7 +83,14 @@ const HeaderTop: FC = () => {
       {/* mobile nav */}
       {isMenuOpen && (
         <div className="border-t border-border bg-card md:hidden">
+
           <nav className="container-custom flex flex-col gap-1 py-4">
+            <p
+          onClick={handleAuthClick}
+          className="rounded-md px-4 py-3 text-base font-medium transition-colors text-muted_foreground hover:bg-accent"
+        >
+          {user ? "خروج" : "ورود"}
+        </p>
             {navLinks.map((link) => (
               <Link
                 key={link.id}
@@ -91,89 +113,3 @@ const HeaderTop: FC = () => {
 };
 
 export default HeaderTop;
-
-
-// "use client";
-// import { FC, useState } from "react";
-// import IconButton from "../../atoms/IconButton";
-// import { IoMdMenu } from "react-icons/io";
-// import { TiShoppingCart } from "react-icons/ti";
-// import Link from "next/link";
-// import { IoCloseOutline } from "react-icons/io5";
-// import { useRouter } from "next/navigation";
-// import { useSelector } from "react-redux";
-// import useLogout from "@/shared/hooks/useLogout";
-
-// const HeaderTop: FC = () => {
-//   const [isMenuOpen, setIsMenuOpen] = useState(false);
-//   const router = useRouter();
-//   const user = useSelector((state: any) => state.user.data);
-//   const logout = useLogout();
-
-//   const links = [
-//     { href: "/dashboard", label: "داشبورد" },
-//     { href: "/profile", label: "پروفایل" },
-//     { href: "/orders", label: "سفارش‌ها" },
-//     { href: "/contact", label: "تماس با ما" },
-//   ];
-
-//   const handleAuthClick = async () => {
-//     setIsMenuOpen(false);
-
-//     if (user) {
-//       await logout();
-//     } else {
-//       router.push("/Login");
-//     }
-//   };
-
-//   return (
-//     <div className="relative">
-//       <div className="flex justify-between items-center px-4 py-3 bg-white shadow-md">
-//         <IconButton
-//           icon={
-//             isMenuOpen ? (
-//               <IoCloseOutline className="w-6 h-6" />
-//             ) : (
-//               <IoMdMenu className="w-6 h-6" />
-//             )
-//           }
-//           onClick={() => setIsMenuOpen(!isMenuOpen)}
-//         />
-
-//         <p className="font-bold text-lg">LOGO</p>
-
-//         <IconButton
-//           onClick={() => router.push("/checkout/card")}
-//           icon={<TiShoppingCart className="w-6 h-6" />}
-//         />
-//       </div>
-
-//       <div
-//         className={`absolute top-full left-0 w-full bg-white shadow-md flex flex-col p-4 space-y-2 z-50 overflow-hidden transition-all duration-300 ${
-//           isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-//         }`}
-//       >
-//         <p
-//           onClick={handleAuthClick}
-//           className="text-gray-700 hover:text-blue-500 cursor-pointer"
-//         >
-//           {user ? "خروج" : "ورود"}
-//         </p>
-
-//         {links.map((link) => (
-//           <Link
-//             key={link.href}
-//             href={link.href}
-//             className="text-gray-700 hover:text-blue-500"
-//             onClick={() => setIsMenuOpen(false)}
-//           >
-//             {link.label}
-//           </Link>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default HeaderTop;
