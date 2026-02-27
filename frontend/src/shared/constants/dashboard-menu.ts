@@ -9,36 +9,47 @@ import {
 } from "react-icons/io5";
 
 export const dashboardMenu = [
-  { path: "/", icon: FaHome, label: "خانه", roles: ["admin", "user"] },
+    {
+        path: "/",
+        icon: FaHome,
+        label: "خانه",
+        roles: ["Admin", "User", "Manager", "Farmer", "Buyer"]
+    },
   {
     path: "/dashboard/farm/myFarms",
     icon: GiFarmer,
     label: "مزرعه ها ",
-    roles: ["admin", "user"],
+      roles: ["Admin", "Manager", "Farmer"],
   },
   {
     path: "/dashboard/profile",
     icon: FaUser,
     label: "حساب کاربری",
-    roles: ["admin"],
+      roles: ["Admin", "User", "Manager", "Farmer", "Buyer"],
   },
   {
     path: "/dashboard/farm/registerFarm",
     icon: IoStorefrontSharp,
     label: "ثبت مزرعه ",
-    roles: ["admin", "user"],
+      roles: ["Admin", "Manager", "Farmer" ],
   },
   {
     label: "تخفیف های شما",
     icon: IoPricetagOutline,
     path: "/dashboard/profile/rewards",
-    roles: ["admin", "user"],
+      roles: ["Admin", "User", "Manager", "Farmer", "Buyer"],
   },
 
   {
     path: "/dashboard/profile/wallet",
     icon: IoWalletOutline,
     label: "کیف پول",
-    roles: ["admin", "user"],
-  },
+      roles: ["Admin", "Manager", "Farmer", "User", "Buyer"],
+    },
+    {
+        path: "",
+        icon: IoWalletOutline,
+        label: "فاکتور ها",
+        roles: ["Admin", "Manager", "Farmer", "Buyer"],
+    },
 ];
