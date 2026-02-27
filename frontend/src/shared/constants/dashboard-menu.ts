@@ -14,31 +14,31 @@ export const dashboardMenu = [
     path: "/dashboard/farm/myFarms",
     icon: GiFarmer,
     label: "مزرعه ها ",
-    roles: ["admin", "user"],
+    roles: ["Admin", "user"],
   },
   {
     path: "/dashboard/profile",
     icon: FaUser,
     label: "حساب کاربری",
-    roles: ["admin"],
+    roles: ["Admin"],
   },
   {
     path: "/dashboard/farm/registerFarm",
     icon: IoStorefrontSharp,
     label: "ثبت مزرعه ",
-    roles: ["admin", "user"],
+    roles: ["Admin", "user"],
   },
   {
     label: "تخفیف های شما",
     icon: IoPricetagOutline,
     path: "/dashboard/profile/rewards",
-    roles: ["admin", "user"],
+    roles: ["Admin", "user"],
   },
 
   {
     path: "/dashboard/profile/wallet",
     icon: IoWalletOutline,
     label: "کیف پول",
-    roles: ["admin", "user"],
+    roles: ["Admin", "user"],
   },
 ];

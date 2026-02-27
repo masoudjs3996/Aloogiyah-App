@@ -1,6 +1,5 @@
 "use client";
 import { FC, useEffect } from "react";
-import SearchInput from "../../atoms/SearchInput";
 import { HeaderTop } from "../../molecules/Home";
 import { useSelector } from "react-redux";
 
@@ -12,10 +11,11 @@ const HomeHeader: FC = () => {
   }, [user]);
 
   return (
-    <HeaderTop />
-    // <div className="px-4 pb-3">
-    //   <SearchInput />
-    // </div>
+    <>
+      {" "}
+      <HeaderTop />
+      
+    </>
   );
 };
 

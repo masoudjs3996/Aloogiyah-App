@@ -18,6 +18,10 @@ export interface IUser {
 
 export type getGuestTokenResponse = IApiResponse<{ token: string }>;
 export type GetUserResponse = IApiResponse<IUser>;
+export type GetUserRoulResponse = IApiResponse<{
+  roleName: string;
+  roleCode: string;
+}>;
 
 export type EditUserResponse = IApiResponse<IUser>;
 

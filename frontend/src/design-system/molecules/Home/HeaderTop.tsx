@@ -8,6 +8,7 @@ import { FaLeaf } from "react-icons/fa";
 import { BiMenu, BiX } from "react-icons/bi";
 import { useSelector } from "react-redux";
 import useLogout from "@/shared/hooks/useLogout";
+import SearchInput from "@/design-system/atoms/SearchInput";
 
 const HeaderTop: FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -73,12 +74,14 @@ const handleAuthClick = async () => {
             </Link>
           ))}
         </nav>
+         <SearchInput />
         <Link
           href="/checkout/card"
           className=" rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-primary/90 inline-flex"
         >
           <IconButton icon={<TiShoppingCart className="w-6 h-7 " />} />
         </Link>
+        
       </div>
       {/* mobile nav */}
       {isMenuOpen && (
