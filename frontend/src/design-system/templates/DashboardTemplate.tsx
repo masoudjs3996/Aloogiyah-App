@@ -1,16 +1,19 @@
 "use client";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { Sidebar } from "../organisms/dashbord/Sidebar";
 import Notification from "../molecules/dashbord/NotificationItem";
+import { useUser } from "@/hooks/queries/useUser";
 
 interface DashboardTemplateProps {
   children: ReactNode;
 }
 
 const DashboardTemplate = ({ children }: DashboardTemplateProps) => {
+  const { roulData } = useUser();
+
   return (
     <div className="flex h-screen  justify-end">
-      <Sidebar role={"admin"} />
+      {roulData?.data?.roleName && <Sidebar role={roulData?.data?.roleName} />}
       <main className="flex-1 p-8 overflow-y-auto">{children}</main>
       {/* <aside className="w-36 bg-white border-l p-6 hidden lg:block">
         <h3 className="text-lg font-semibold mb-4">Notifications</h3>

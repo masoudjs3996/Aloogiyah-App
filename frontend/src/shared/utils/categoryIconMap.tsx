@@ -4,11 +4,11 @@ import { GiFlowerPot, GiSummits, GiCabbage } from "react-icons/gi";
 import { AiOutlineQuestionCircle } from "react-icons/ai";
 import { GiShinyApple } from "react-icons/gi";
 export const categoryIconMap: Record<string, IconType> = {
-  "branched-flower": MdLocalFlorist,
-  "Houseplants-flowers": GiFlowerPot,
-  fruit: GiShinyApple,
-  "Seed-fertilizer-poison": GiCabbage,
-  "Vegetables-summer-vegetables": GiSummits,
+  "Branched flower": MdLocalFlorist,
+  "Indoor flower": GiFlowerPot,
+  Fruit: GiShinyApple,
+  "Fertilizer and poison": GiCabbage,
+  Vegetables: GiSummits,
 };
 
 export const getCategoryIcon = (slug?: string | null): IconType => {

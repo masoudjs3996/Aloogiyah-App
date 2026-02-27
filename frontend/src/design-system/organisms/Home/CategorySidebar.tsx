@@ -32,7 +32,7 @@ export const CategorySidebar = ({ categories, setActiveCat }: Props) => {
               setActiveCat(cat?.subCategories);
             }}
           >
-            <CategoryIcon slug={cat.slug} />
+            <CategoryIcon icon={cat?.icon} />
             <span
               className={`text-[10px] font-bold mt-2 ${
                 activeIndex === index ? "text-error" : "text-secondary-600"
