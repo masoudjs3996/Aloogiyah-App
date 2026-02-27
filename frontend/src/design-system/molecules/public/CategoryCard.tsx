@@ -1,29 +1,30 @@
-import { getImageUrl } from "@/shared/utils/getImageUrl";
-import Image from "next/image";
-import { FC } from "react";
+import type { Category } from "@/data/siteData";
+import Link from "next/link";
 
 interface CategoryCardProps {
-  name: string;
-  imageUrl: string;
+  category: Category;
 }
 
-const CategoryCard: FC<CategoryCardProps> = ({ name, imageUrl }) => {
+const CategoryCard = ({ category }: CategoryCardProps) => {
+  const Icon = category.icon;
+
   return (
-    <div className="group relative bg-white rounded-md shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer">
-      <div className="relative w-full h-20 overflow-hidden bg-gray-50">
-        <Image
-          src={getImageUrl(imageUrl)}
-          alt={"categoryImage"}
-          fill
-          className="absolute object-cover group-hover:scale-110 transition-transform duration-300"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+    <Link
+      href={`/categories/${category.slug}`}
+      className="group flex flex-col items-center gap-3 rounded-lg border border-border bg-card p-6 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-prymary_green/30 hover:shadow-md"
+    >
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent transition-colors duration-300 group-hover:bg-prymary_green group-hover:text-green_foreground">
+        <Icon className="h-7 w-7" />
       </div>
-      <div className="p-1 flex items-center gap-2 bg-secondary-300">
-        <p className="text-sm font-medium text-gray-800 truncate">{name}</p>
-      </div>
-      <div className="absolute inset-0 ring-2 ring-indigo-500 ring-inset rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-    </div>
+      <h3 className="font-heading text-base font-medium text-card_foreground">
+        {category.title}
+      </h3>
+      {category.productCount !== undefined && (
+        <span className="text-xs text-muted_foreground">
+          {category.productCount} محصول
+        </span>
+      )}
+    </Link>
   );
 };
 

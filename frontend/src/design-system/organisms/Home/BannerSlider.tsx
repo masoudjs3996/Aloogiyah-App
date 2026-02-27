@@ -1,27 +1,57 @@
 "use client";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
-import { Pagination } from "swiper/modules";
+import Image from "next/image";
 
 export default function BannerSlider() {
+  const BANNER_IMAGES = [
+    {
+      id: 1,
+      src: "/images/banner/hero-1.jpg",
+      description: "بنر تبلیغاتی برای محصول کشاورزی",
+    },
+    {
+      id: 2,
+      src: "/images/banner/hero-2.jpg",
+      description: "بنر تبلیغاتی برای محصول کشاورزی",
+    },
+    {
+      id: 3,
+      src: "/images/banner/hero-3.jpg",
+      description: "بنر تبلیغاتی برای محصول کشاورزی",
+    },
+  ];
   return (
-    <div className="w-full">
-      <Swiper
-        pagination={{ clickable: true }}
-        modules={[Pagination]}
-        className="rounded-xl overflow-hidden shadow-lg"
-        spaceBetween={10}
-        slidesPerView={1}
-      >
-        {[...Array(9)].map((_, i) => (
-          <SwiperSlide key={i}>
-            <div className="flex items-center justify-center h-48 bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-xl font-bold">
-              Slide {i + 1}
-            </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
-    </div>
+    <Swiper
+      modules={[Pagination, Autoplay]}
+      className=" mt-9 md:mt-20"
+      spaceBetween={10}
+      slidesPerView={1}
+      autoplay={{
+        delay: 2500,
+        disableOnInteraction: false,
+        pauseOnMouseEnter: true,
+      }}
+      pagination={true}
+      loop={true}
+    >
+      {BANNER_IMAGES.map((banner) => (
+        <SwiperSlide key={banner.id} className="">
+          <div className="aspect-[16/11]  w-full md:aspect-[21/9] relative">
+            <Image
+              src={banner.src}
+              alt={banner.description}
+              priority={banner.id === 1}
+              fill
+              sizes="100vw"
+              quality={90}
+              className="object-cover object-center "
+            />
+          </div>
+        </SwiperSlide>
+      ))}
+    </Swiper>
   );
 }
