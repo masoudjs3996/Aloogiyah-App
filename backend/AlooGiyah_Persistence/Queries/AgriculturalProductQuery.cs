@@ -16,78 +16,113 @@ public class AgriculturalProductQuery : BaseQuery, IAgriculturalProductQuery
 
     #region Get By Code
 
-    public async Task<AgriculturalProductDetailDto?> GetByCodeAsync(string code, string role)
+    public async Task<AgriculturalProductDetailDto?>
+    GetByCodeAsync(string code, string role)
     {
         using var conn = CreateConnection();
 
         const string sql = """
-            SELECT 
-                p."Code",
-                p."Name",
-                p."Description",
-                p."RetailPrice",
-                p."WholesalePrice",
-                p."Stock",
-                p."Slug",
-                p."DailyProductionCapacity",
-                p."MetaTitle",
-                p."MetaDescription",
-                p."MetaKeywords",
-                p."CreatedAt",
-                f."Code"  AS "FarmCode",
-                s."Code"  AS "StatusCode"
-            FROM "AgriculturalProducts" p
-            INNER JOIN "Farms" f ON p."FarmId" = f."FarmId"
-            INNER JOIN "Statuses" s ON p."StatusId" = s."StatusId"
-            WHERE p."Code" = @Code
-              AND p."IsDeleted" = false
-            LIMIT 1;
-            """;
+        SELECT 
+            p."AgriculturalProductId",
+            p."Code",
+            p."Name",
+            p."Description",
+            p."RetailPrice",
+            p."WholesalePrice",
+            p."Stock",
+            p."Slug",
+            p."DailyProductionCapacity",
+            p."MetaTitle",
+            p."MetaDescription",
+            p."MetaKeywords",
+            p."CreatedAt",
 
-        var product = await conn.QueryFirstOrDefaultAsync<AgriculturalProductDetailDto>(
-            sql, new { Code = code });
+            f."Code"  AS "FarmCode",
+            s."Code"  AS "StatusCode",
 
-        if (product == null)
+            c."Code"  AS "CategoryCode",
+
+            img."Url"        AS "ImageUrl",
+            img."IsPrimary"  AS "IsPrimary"
+
+        FROM "AgriculturalProducts" p
+        INNER JOIN "Farms" f 
+            ON p."FarmId" = f."FarmId"
+        INNER JOIN "Statuses" s 
+            ON p."StatusId" = s."StatusId"
+
+        LEFT JOIN "AgriculturalProductCategory" pc
+            ON pc."AgriculturalProductsAgriculturalProductId" = p."AgriculturalProductId"
+        LEFT JOIN "Categories" c
+            ON c."CategoryId" = pc."CategoriesCategoryId"
+
+        LEFT JOIN "Files" img
+            ON img."EntityCode" = p."Code"
+           AND img."EntityFile" = @EntityFile
+
+        WHERE p."Code" = @Code
+          AND p."IsDeleted" = false;
+        """;
+
+        var rows = await conn.QueryAsync(sql, new
+        {
+            Code = code,
+            EntityFile = (int)EntityFile.AgriculturalProduct
+        });
+
+        var grouped = rows.GroupBy(r => (int)r.AgriculturalProductId)
+                          .Select(g =>
+                          {
+                              var first = g.First();
+
+                              var dto = new AgriculturalProductDetailDto
+                              {
+                                 
+                                  Code = first.Code,
+                                  Name = first.Name,
+                                  Description = first.Description,
+                                  RetailPrice = first.RetailPrice,
+                                  WholesalePrice = first.WholesalePrice,
+                                  Stock = first.Stock,
+                                  Slug = first.Slug,
+                                  DailyProductionCapacity = first.DailyProductionCapacity,
+                                  MetaTitle = first.MetaTitle,
+                                  MetaDescription = first.MetaDescription,
+                                  MetaKeywords = first.MetaKeywords,
+                                  CreatedAt = first.CreatedAt,
+                                  FarmCode = first.FarmCode,
+                                  StatusCode = first.StatusCode,
+
+                                  CategoryCodes = g
+                                      .Where(x => x.CategoryCode != null)
+                                      .Select(x => (string)x.CategoryCode)
+                                      .Distinct()
+                                      .ToList(),
+
+                                  ImageUrls = g
+                                      .Where(x => x.ImageUrl != null)
+                                      .Select(x => (string)x.ImageUrl)
+                                      .Distinct()
+                                      .ToList()
+                              };
+
+                              dto.PrimaryImageUrl =
+                                  g.FirstOrDefault(x => x.IsPrimary == true)?.ImageUrl
+                                  ?? dto.ImageUrls.FirstOrDefault()
+                                  ?? "/images/default-product.jpg";
+
+                              return dto;
+                          })
+                          .FirstOrDefault();
+
+        if (grouped == null)
             return null;
 
-        // قیمت عمده فقط برای غیر User
-        if (role == "User")
-            product.WholesalePrice = null;
+        if (role is "User" or "Guest")
+            grouped.WholesalePrice = null;
 
-        // دسته‌بندی‌ها
-        const string categorySql = """
-            SELECT c."Code"
-            FROM "Categories" c
-            INNER JOIN "AgriculturalProductCategory" pc
-                ON pc."CategoryId" = c."CategoryId"
-            INNER JOIN "AgriculturalProducts" p
-                ON p."AgriculturalProductId" = pc."AgriculturalProductId"
-            WHERE p."Code" = @Code;
-            """;
-
-        var categories = await conn.QueryAsync<string>(categorySql, new { Code = code });
-        product.CategoryCodes = categories.ToList();
-
-        // عکس‌ها
-        const string imageSql = """
-            SELECT f."Url", f."IsPrimary"
-            FROM "Files" f
-            WHERE f."EntityCode" = @Code
-              AND f."EntityFile" = @EntityFile;
-            """;
-
-        var images = await conn.QueryAsync<(string Url, bool IsPrimary)>(
-            imageSql,
-            new { Code = code, EntityFile = (int)EntityFile.AgriculturalProduct });
-
-        product.ImageUrls = images.Select(i => i.Url).ToList();
-        product.PrimaryImageUrl =
-            images.FirstOrDefault(i => i.IsPrimary).Url
-            ?? product.ImageUrls.FirstOrDefault();
-
-        return product;
+        return grouped;
     }
-
     #endregion
 
     #region Get By Filter
