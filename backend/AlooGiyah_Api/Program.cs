@@ -162,6 +162,7 @@ builder.Services.AddScoped<IDbConnectionFactory, SqlConnectionFactory>();
 
 
 builder.Services.AddScoped<IUserQuery, UserQuery>();
+builder.Services.AddScoped<IAgriculturalProductQuery, AgriculturalProductQuery>();
 
 builder.Services.AddScoped<IEmail, Email>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
