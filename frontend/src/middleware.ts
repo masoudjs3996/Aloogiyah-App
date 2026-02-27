@@ -1,22 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { middlewareAuth } from "./shared/utils/middlewareAuth";
 
-
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const { url } = request;
 
-  const token = request.cookies.get("token");
+  if (pathname.startsWith("/dashboard")) {
+    const RoulCode = await middlewareAuth(request);
+    console.log(
+      "--------------------------------------------user is here----------------------------------------------------------------",
+    );
 
-  if (pathname.startsWith("/profile")) {
-    const user = await middlewareAuth(request);
-    if (user?.data?.roleCode !== "4D987D8C32") {
-      NextResponse.redirect(new URL(`/login`, request.nextUrl));
+    if (RoulCode.data.roleCode === "47C2D51E0F") {
+      return NextResponse.redirect(new URL("/Login", request.nextUrl));
     }
+    return NextResponse.next();
   }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/profile/:path*"],
+  matcher: ["/dashboard/:path*"],
 };

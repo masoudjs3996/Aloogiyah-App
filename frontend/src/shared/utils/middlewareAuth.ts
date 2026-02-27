@@ -8,7 +8,7 @@ export const middlewareAuth = async (request: NextRequest) => {
 
   const token = guestToken || userToken;
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}User/GetMyProfile`,
+    `${process.env.NEXT_PUBLIC_BASE_URL}User/GetRole`,
     {
       method: "GET",
       headers: {
@@ -20,8 +20,7 @@ export const middlewareAuth = async (request: NextRequest) => {
 
   const text = await res.text();
 
-  console.log(text);
-  const data: GetUserResponse = JSON.parse(text);
+  const data = JSON.parse(text);
 
   return data || null;
 };
