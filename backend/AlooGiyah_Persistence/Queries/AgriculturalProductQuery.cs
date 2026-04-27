@@ -197,8 +197,13 @@ public class AgriculturalProductQuery : BaseQuery, IAgriculturalProductQuery
                 SELECT 1
                 FROM "AgriculturalProductCategory" pc
                 INNER JOIN "Categories" c
+<<<<<<< HEAD
                     ON c."CategoryId" = pc."CategoriesCategoryId"
                 WHERE pc."AgriculturalProductsAgriculturalProductId" = p."AgriculturalProductId"
+=======
+                    ON c."CategoryId" = pc."CategoryId"
+                WHERE pc."AgriculturalProductId" = p."AgriculturalProductId"
+>>>>>>> f9b620d26db82ed1ded71f658dae6fc2ebb8f57c
                   AND c."Code" = ANY(@CategoryCodes)
             )
         """);

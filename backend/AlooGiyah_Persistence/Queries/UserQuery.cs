@@ -155,7 +155,11 @@ public class UserQuery : BaseQuery, IUserQuery
                 u."FName",
                 u."LName",
                 u."Email",
+<<<<<<< HEAD
                 u."Name",
+=======
+                u."UserName",
+>>>>>>> f9b620d26db82ed1ded71f658dae6fc2ebb8f57c
                 u."PhoneNumber",
                 r."Code" AS "RoleCode",
                 r."Name" AS "RoleName",
@@ -182,7 +186,11 @@ public class UserQuery : BaseQuery, IUserQuery
                 "u.\"CreatedAt\"",
                 "u.\"FName\"",
                 "u.\"LName\"",
+<<<<<<< HEAD
                 "u.\"Name\""
+=======
+                "u.\"UserName\""
+>>>>>>> f9b620d26db82ed1ded71f658dae6fc2ebb8f57c
             });
 
         baseSql += "\n" + orderBy;
