@@ -11,4 +11,5 @@ public enum EntityStatus
     Category = 5,
     Location = 6,
     AgriculturalProduct = 7,
+    CommentStatus = 8,
 }

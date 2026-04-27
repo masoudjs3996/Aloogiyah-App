@@ -11,7 +11,7 @@ const HomeTemplate: FC<HomeTemplateProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-secondary-0 ">
       <HomeHeader />
-      <main className="py-10">{children}</main>
+      <main className="py-24">{children}</main>
       <HomeBottomNavigation />
     </div>
   );

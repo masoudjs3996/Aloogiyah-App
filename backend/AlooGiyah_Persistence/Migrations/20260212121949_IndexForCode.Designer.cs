@@ -1852,7 +1852,7 @@ namespace AlooGiyah_Persistence.Migrations
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("UserName")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
@@ -1867,7 +1867,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.HasIndex("UserName")
+                    b.HasIndex("Name")
                         .IsUnique();
 
                     b.HasIndex("Code", "IsDeleted")

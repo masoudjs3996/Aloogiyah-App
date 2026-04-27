@@ -6,11 +6,19 @@ import { useProducts } from "@/hooks/queries/useProduct";
 import { getImageUrl } from "@/shared/utils/getImageUrl";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect } from "react";
 import { BiHeart } from "react-icons/bi";
 import { FaShoppingCart } from "react-icons/fa";
+import { useSelector } from "react-redux";
 
 export default function ProductCard() {
-  const { products, isLoading } = useProducts();
+  const { categories, search } = useSelector(
+    (state: any) => state.productFilter,
+  );
+  const { products, isLoading } = useProducts({
+    categoryCodes: [categories],
+    name: search,
+  });
   const { addCart } = useCart();
   const AddToCard = (proId: string) => {
     addCart.mutate(
@@ -29,6 +37,12 @@ export default function ProductCard() {
     );
   };
 
+  useEffect(() => {
+    console.log(categories);
+  }, []);
+  useEffect(() => {
+    console.log(products, "masoud omidi ");
+  }, [products]);
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("fa-IR").format(price) + " تومان";
   };

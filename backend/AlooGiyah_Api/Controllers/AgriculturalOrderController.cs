@@ -42,6 +42,7 @@ public class AgriculturalOrderController : ControllerBase
     }
     #endregion
 
+    #region CreateFromCart
     [HttpPost("CreateFromCart")]
     [Authorize(Policy = "NotGuest")]
     public async Task<IActionResult> CreateFromCart([FromBody] CheckoutFromCartDto dto)
@@ -57,6 +58,7 @@ public class AgriculturalOrderController : ControllerBase
             Data = result
         });
     }
+    #endregion
 
     #region GetByFilter
     [Authorize(Policy = "NotGuest")]
@@ -133,6 +135,7 @@ public class AgriculturalOrderController : ControllerBase
     }
     #endregion
 
+    #region pay
     [HttpPost("pay")]
     [Authorize(Policy = "NotGuest")]
     public async Task<IActionResult> ProceedToPayment(string orderCode)
@@ -146,5 +149,5 @@ public class AgriculturalOrderController : ControllerBase
             Data = result
         });
     }
-
+    #endregion
 }

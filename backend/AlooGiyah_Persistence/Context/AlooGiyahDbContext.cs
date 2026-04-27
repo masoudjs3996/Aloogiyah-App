@@ -14,6 +14,7 @@ public class AlooGiyahDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<AgriculturalOrder> AgriculturalOrders { get; set; }
     public DbSet<AgriculturalOrderItem> AgriculturalOrderItems { get; set; }
+    public DbSet<AgriculturalProduct> AgriculturalProducts { get; set; }
     public DbSet<Cart> Carts{ get; set; }
     public DbSet<CartItem> CartItems { get; set; }
     public DbSet<Article> Articles { get; set; }

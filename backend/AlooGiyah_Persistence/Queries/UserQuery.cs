@@ -7,48 +7,43 @@ using Dapper;
 
 namespace AlooGiyah_Persistence.Queries;
 
-public class UserQuery : IUserQuery
+public class UserQuery : BaseQuery, IUserQuery
 {
-    private readonly IDbConnectionFactory _connectionFactory;
-
-    public UserQuery(IDbConnectionFactory connectionFactory)
+    public UserQuery(IDbConnectionFactory factory)
+        : base(factory)
     {
-        _connectionFactory = connectionFactory;
     }
 
     // Persistence/Queries/UserQueryRepository.cs
     public async Task<UserDto?> GetByIdAsync(int userId, bool includeRole = true)
     {
-         using var conn = _connectionFactory.CreateConnection();
-
-        string sql = includeRole
+        var sql = includeRole
             ? """
-          SELECT 
-              u."Code", u."FName", u."LName", u."Email", u."UserName", u."PhoneNumber", 
-              u."Age", u."IsEmailConfirmed", u."CreatedAt", u."UpdatedAt",
-              r."Code" AS "RoleCode", r."Name" AS "RoleName"
-          FROM "Users" u
-          INNER JOIN "Roles" r ON u."RoleId" = r."RoleId"
-          WHERE u."UserId" = @UserId AND u."IsDeleted" = false
-          """
+              SELECT 
+                  u."Code", u."FName", u."LName", u."Email", u."UserName",
+                  u."PhoneNumber", u."Age", u."IsEmailConfirmed",
+                  u."CreatedAt", u."UpdatedAt",
+                  r."Code" AS "RoleCode",
+                  r."Name" AS "RoleName"
+              FROM "Users" u
+              INNER JOIN "Roles" r ON u."RoleId" = r."RoleId"
+              WHERE u."UserId" = @UserId AND u."IsDeleted" = false
+              """
             : """
-          SELECT 
-              u."Code", u."FName", u."LName", u."Email", u."UserName", u."PhoneNumber", 
-              u."Age", u."IsEmailConfirmed", u."CreatedAt", u."UpdatedAt"
-          FROM "Users" u
-          WHERE u."UserId" = @UserId AND u."IsDeleted" = false
-          """;
+              SELECT 
+                  u."Code", u."FName", u."LName", u."Email", u."UserName",
+                  u."PhoneNumber", u."Age", u."IsEmailConfirmed",
+                  u."CreatedAt", u."UpdatedAt"
+              FROM "Users" u
+              WHERE u."UserId" = @UserId AND u."IsDeleted" = false
+              """;
 
-        return await conn.QueryFirstOrDefaultAsync<UserDto>(
-            sql,
-            new { UserId = userId }
-        );
+        return await QueryFirstOrDefaultAsync<UserDto>(sql, new { UserId = userId });
     }
 
     public async Task<UserDto?> GetByCodeAsync(string code, bool includeRole = true)
     {
-        // بدون await using – فقط using معمولی
-        using var conn = _connectionFactory.CreateConnection();
+
 
         string sql = includeRole
             ? """
@@ -68,34 +63,45 @@ public class UserQuery : IUserQuery
           WHERE u."Code" = @Code AND u."IsDeleted" = false
           """;
 
-        return await conn.QueryFirstOrDefaultAsync<UserDto>(sql, new { Code = code });
+        return await QueryFirstOrDefaultAsync<UserDto>(sql, new { Code = code });
     }
 
 
 
     public async Task<User?> GetByUsernameAsync(string username)
     {
-        if (string.IsNullOrEmpty(username))
+        if (string.IsNullOrWhiteSpace(username))
             throw new ArgumentNullException(nameof(username));
 
-        using var conn = _connectionFactory.CreateConnection();
-
         const string sql = """
-    SELECT 
-        u."Code", u."CreatedAt", u."UpdatedAt", u."IsDeleted",
-        u."UserId", u."FName", u."LName", u."Email",
-        u."UserName", u."Password", u."PhoneNumber", u."Age",
-        u."IsEmailConfirmed",
-        r."RoleId",
-        r."Code" AS "Code",          -- ← برای Role.Code
-        r."Name" AS "Name",          -- ← دقیقاً Name برای Role.Name
-        r."Description" AS "Description"
-    FROM "Users" u
-    INNER JOIN "Roles" r ON u."RoleId" = r."RoleId"
-    WHERE u."UserName" = @UserName 
-      AND u."IsDeleted" = false
-    LIMIT 1
-""";
+        SELECT 
+            u."UserId",
+            u."Code",
+            u."CreatedAt",
+            u."UpdatedAt",
+            u."IsDeleted",
+            u."FName",
+            u."LName",
+            u."Email",
+            u."UserName",
+            u."Password",
+            u."PhoneNumber",
+            u."Age",
+            u."IsEmailConfirmed",
+
+            r."RoleId",
+            r."Code"        AS "RoleCode",
+            r."Name"        AS "RoleName",
+            r."Description" AS "RoleDescription"
+
+        FROM "Users" u
+        INNER JOIN "Roles" r ON u."RoleId" = r."RoleId"
+        WHERE u."UserName" = @UserName
+          AND u."IsDeleted" = false
+        LIMIT 1
+        """;
+
+        using var conn = CreateConnection();
 
         var result = await conn.QueryAsync<User, Role, User>(
             sql,
@@ -105,7 +111,7 @@ public class UserQuery : IUserQuery
                 return user;
             },
             new { UserName = username },
-            splitOn: "RoleId"   // یا "Code" – نقطه شروع ستون‌های Role
+            splitOn: "RoleId"
         );
 
         return result.FirstOrDefault();
@@ -113,98 +119,79 @@ public class UserQuery : IUserQuery
 
     public async Task<bool> ExistsByUsernameAsync(string username)
     {
-        using var conn = _connectionFactory.CreateConnection();
-
         const string sql = """
-        SELECT 1 
-        FROM "Users" 
-        WHERE "UserName" = @UserName 
-          AND "IsDeleted" = false
-        """;
+            SELECT 1
+            FROM "Users"
+            WHERE "UserName" = @UserName
+              AND "IsDeleted" = false
+            """;
 
-        var result = await conn.ExecuteScalarAsync<bool?>(sql, new { UserName = username });
-
-        return result == true;
+        var result = await ExecuteScalarAsync<int?>(sql, new { UserName = username });
+        return result.HasValue;
     }
 
     public async Task<PagedResult<UserDto>> GetPagedFilteredAsync(UserFilterDto filter)
     {
-        using var conn = _connectionFactory.CreateConnection();
-
-        var whereParts = new List<string> { "u.IsDeleted = 0" };
+        var whereParts = new List<string> { "u.\"IsDeleted\" = false" };
         var parameters = new DynamicParameters();
 
         if (!string.IsNullOrWhiteSpace(filter.FName))
         {
-            whereParts.Add("u.FName LIKE @FName");
+            whereParts.Add("u.\"FName\" ILIKE @FName");
             parameters.Add("FName", $"%{filter.FName}%");
-        }
-
-        if (!string.IsNullOrWhiteSpace(filter.LName))
-        {
-            whereParts.Add("u.LName LIKE @LName");
-            parameters.Add("LName", $"%{filter.LName}%");
-        }
-
-        if (!string.IsNullOrWhiteSpace(filter.UserName))
-        {
-            whereParts.Add("u.UserName LIKE @UserName");
-            parameters.Add("UserName", $"%{filter.UserName}%");
-        }
-
-        if (!string.IsNullOrWhiteSpace(filter.Email))
-        {
-            whereParts.Add("u.Email LIKE @Email");
-            parameters.Add("Email", $"%{filter.Email}%");
-        }
-
-        if (!string.IsNullOrWhiteSpace(filter.PhoneNumber))
-        {
-            whereParts.Add("u.PhoneNumber LIKE @PhoneNumber");
-            parameters.Add("PhoneNumber", $"%{filter.PhoneNumber}%");
         }
 
         if (!string.IsNullOrWhiteSpace(filter.RoleCode))
         {
-            whereParts.Add("r.Code = @RoleCode");
+            whereParts.Add("r.\"Code\" = @RoleCode");
             parameters.Add("RoleCode", filter.RoleCode);
         }
 
-        string whereClause = string.Join(" AND ", whereParts);
+        var whereClause = string.Join(" AND ", whereParts);
 
-        string querySql = $"""
+        var baseSql = $"""
             SELECT 
-                u.Code, u.FName, u.LName, u.Email, u.UserName, u.PhoneNumber,
-                r.Code AS RoleCode, r.Name AS RoleName,
-                u.CreatedAt, u.UpdatedAt
+                u."Code",
+                u."FName",
+                u."LName",
+                u."Email",
+                u."Name",
+                u."PhoneNumber",
+                r."Code" AS "RoleCode",
+                r."Name" AS "RoleName",
+                u."CreatedAt",
+                u."UpdatedAt"
             FROM "Users" u
-            INNER JOIN Roles r ON u.RoleId = r.RoleId
+            INNER JOIN "Roles" r ON u."RoleId" = r."RoleId"
             WHERE {whereClause}
-            ORDER BY u.CreatedAt DESC
-            OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY
             """;
 
-        string countSql = $"""
+        var countSql = $"""
             SELECT COUNT(*)
-            FROM Users u
-            INNER JOIN Roles r ON u.RoleId = r.RoleId
+            FROM "Users" u
+            INNER JOIN "Roles" r ON u."RoleId" = r."RoleId"
             WHERE {whereClause}
             """;
 
-        parameters.Add("Offset", (filter.PageNumber - 1) * filter.PageSize);
-        parameters.Add("PageSize", filter.PageSize);
+        var orderBy = ApplySorting(
+            defaultOrderBy: "u.\"CreatedAt\" DESC",
+            sortColumn: filter.SortColumn,
+            descending: filter.SortDescending,
+            allowedColumns: new[]
+            {
+                "u.\"CreatedAt\"",
+                "u.\"FName\"",
+                "u.\"LName\"",
+                "u.\"Name\""
+            });
 
-        using var multi = await conn.QueryMultipleAsync(querySql + ";" + countSql, parameters);
+        baseSql += "\n" + orderBy;
 
-        var items = (await multi.ReadAsync<UserDto>()).ToList();
-        var totalCount = await multi.ReadSingleAsync<int>();
-
-        return new PagedResult<UserDto>
-        {
-            Items = items,
-            TotalCount = totalCount,
-            PageNumber = filter.PageNumber,
-            PageSize = filter.PageSize
-        };
+        return await QueryPagedAsync<UserDto>(
+            baseSql,
+            countSql,
+            parameters,
+            filter.PageNumber,
+            filter.PageSize);
     }
 }

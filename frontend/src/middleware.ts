@@ -6,12 +6,9 @@ export async function middleware(request: NextRequest) {
 
   if (pathname.startsWith("/dashboard")) {
     const RoulCode = await middlewareAuth(request);
-    console.log(
-      "--------------------------------------------user is here----------------------------------------------------------------",
-    );
 
-    if (RoulCode.data.roleCode === "47C2D51E0F") {
-      return NextResponse.redirect(new URL("/Login", request.nextUrl));
+    if (RoulCode?.data?.roleCode === "47C2D51E0F") {
+      return NextResponse.redirect(new URL("/Login", request?.nextUrl));
     }
     return NextResponse.next();
   }

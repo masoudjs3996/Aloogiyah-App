@@ -11,6 +11,9 @@ interface DashboardTemplateProps {
 const DashboardTemplate = ({ children }: DashboardTemplateProps) => {
   const { roulData } = useUser();
 
+  useEffect(() => {
+    console.log(roulData);
+  }, [roulData]);
   return (
     <div className="flex h-screen  justify-end">
       {roulData?.data?.roleName && <Sidebar role={roulData?.data?.roleName} />}

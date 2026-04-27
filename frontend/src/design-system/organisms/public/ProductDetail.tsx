@@ -1,5 +1,7 @@
 "use client";
 
+import Button from "@/design-system/atoms/Button";
+import { useCommentsTree } from "@/hooks/queries/useComments";
 import { useProduct } from "@/hooks/queries/useProduct";
 import { getImageUrl } from "@/shared/utils/getImageUrl";
 import {
@@ -9,6 +11,9 @@ import {
   StarIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import Modal from "./Modal";
+import AddCommentForm from "../Home/AddCommentForm";
 
 type Review = {
   id: number;
@@ -18,32 +23,18 @@ type Review = {
   isStoreReply?: boolean;
 };
 
-const reviews: Review[] = [
-  {
-    id: 1,
-    name: "علی حسینی",
-    date: "۲ روز پیش",
-    text: "محصول تازه و با کیفیت بود، بسته‌بندی هم عالی 👍",
-  },
-  {
-    id: 2,
-    name: "فروشگاه",
-    date: "۱ روز پیش",
-    text: "ممنون از خریدتون 🌱 خوشحالیم راضی بودید",
-    isStoreReply: true,
-  },
-  {
-    id: 3,
-    name: "فاطمه کریمی",
-    date: "۵ روز پیش",
-    text: "طعمش خوب بود ولی یکم کوچیک‌تر از انتظارم بود",
-  },
-];
-
 const ProductDetail = ({ productId }: { productId: string }) => {
   const { product, isLoading } = useProduct(productId);
   const { name, retailPrice, wholesalePrice, description, primaryImageUrl } =
     product.data ?? {};
+  const { data: comments } = useCommentsTree();
+  const formatDate = (isoDate: string) =>
+    new Date(isoDate).toLocaleDateString("fa-IR");
+  const [openCommentForm, setOpenCommentForm] = useState(false);
+  const [parentCode, setParentCode] = useState<string | null>(null);
+  useEffect(() => {
+    console.log(parentCode);
+  }, [parentCode]);
   return (
     <div className="mx-auto max-w-md min-h-screen bg-white">
       <div className="p-4 flex items-center justify-between">
@@ -70,7 +61,14 @@ const ProductDetail = ({ productId }: { productId: string }) => {
           <span>۴.۸</span>
           <span className="text-gray-400">(۳۸۸)</span>
         </div>
-
+        <Button
+          onClick={() => {
+            setParentCode(null);
+            setOpenCommentForm(true);
+          }}
+        >
+          افزودن کامنت{" "}
+        </Button>
         <h1 className="mt-2 text-base font-semibold">{name}</h1>
 
         <p className="mt-1 text-xs text-gray-400">{description}</p>
@@ -102,23 +100,54 @@ const ProductDetail = ({ productId }: { productId: string }) => {
       <div className="p-4 mt-6">
         <h2 className="font-medium text-sm mb-4">نظرات دیگر کاربران</h2>
 
-        <div className="space-y-4">
-          {reviews.map((review) => (
-            <div
-              key={review.id}
-              className={`max-w-[85%] text-xs p-3 rounded-2xl leading-relaxed ${
-                review.isStoreReply
-                  ? "bg-emerald-50 mr-auto border border-emerald-200"
-                  : "bg-gray-100 ml-auto"
-              }`}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-medium">{review.name}</span>
-                <span className="text-[10px] text-gray-400">{review.date}</span>
+        <div className="space-y-4 ">
+          {comments &&
+            comments?.map((comment: any) => (
+              <div key={comment.code} className="space-y-2">
+                {/* Comment */}
+                <div className="max-w-[85%] text-xs p-3 rounded-2xl leading-relaxed bg-gray-100 ml-auto">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-medium">{comment.name}</span>
+                    <span className="text-[10px] text-gray-400">
+                      {formatDate(comment.createdAt)}
+                    </span>
+                  </div>
+                  <p>{comment.content}</p>
+                  <Button
+                    onClick={() => {
+                      setParentCode(comment?.parentCode);
+                      setOpenCommentForm(true);
+                    }}
+                  >
+                    پاسخ
+                  </Button>
+                </div>
+
+                {/* Replies */}
+                {comment.subComments?.map((reply: any) => (
+                  <div
+                    key={reply.code}
+                    className="max-w-[85%] text-xs p-3 rounded-2xl leading-relaxed bg-emerald-50 mr-auto border border-emerald-200"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-medium">{reply.name}</span>
+                      <span className="text-[10px] text-gray-400">
+                        {formatDate(reply.createdAt)}
+                      </span>
+                    </div>
+                    <p>{reply.content}</p>
+                    <Button
+                      onClick={() => {
+                        setParentCode(reply?.parentCode);
+                        setOpenCommentForm(true);
+                      }}
+                    >
+                      پاسخ
+                    </Button>
+                  </div>
+                ))}
               </div>
-              <p>{review.text}</p>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
 
@@ -128,6 +157,13 @@ const ProductDetail = ({ productId }: { productId: string }) => {
           افزودن به سبد خرید
         </button>
       </div>
+      <Modal
+        open={openCommentForm}
+        onClose={() => setOpenCommentForm(false)}
+        title="فرم ارسال کامنت"
+      >
+        <AddCommentForm productID={productId} parentCode={parentCode} />
+      </Modal>
     </div>
   );
 };

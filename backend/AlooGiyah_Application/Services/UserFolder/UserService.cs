@@ -2,21 +2,17 @@
 using AlooGiyah_Application.DTOs.Users;
 using AlooGiyah_Application.Interfaces.Query;
 using AlooGiyah_Application.Interfaces.Service;
-using AlooGiyah_Application.Interfaces.Service.Store;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
-using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Entities.UserFolder;
 using AlooGiyah_Domain.Enums;
 using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Domain.Pagination;
 using AlooGiyah_Shared.Exceptions;
 using AutoMapper;
-using LinqKit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Text;
 
@@ -29,12 +25,9 @@ public class UserService : IUserService
     private readonly IGenericRepository<User> _userRepository;
     private readonly IUserRepository _userRepositorySpecific;
     private readonly ICurrentUserService _currentUserService;
-    private readonly ICartService _cartService;
-    private readonly IAuthService _authService;
     private readonly IFileService _fileService;
     private readonly IHttpContextAccessor _httpContextAccessor;     // اضافه شد
     private readonly IConfiguration _config;                        // اضافه شد
-    private readonly IGenericRepository<Cart> _cartRepository;      // اضافه شد (برای سبد مهمان)
     private readonly IMapper _mapper;
     private readonly IUserQuery _userQuery;
 
@@ -44,13 +37,10 @@ public class UserService : IUserService
         IGenericRepository<User> userRepository,
         IUserRepository userRepositorySpecific,
         ICurrentUserService currentUserService,
-        ICartService cartService,
-        IAuthService authService,
         IFileService fileService,
         IMapper mapper,
         IHttpContextAccessor httpContextAccessor,      // تزریق شد
             IConfiguration config,                          // تزریق شد
-            IGenericRepository<Cart> cartRepository,
             IUserQuery userQuery
         )
     {
@@ -58,13 +48,10 @@ public class UserService : IUserService
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _userRepositorySpecific = userRepositorySpecific ?? throw new ArgumentNullException(nameof(userRepositorySpecific));
         _currentUserService = currentUserService ?? throw new ArgumentNullException(nameof(currentUserService));
-        _cartService = cartService ?? throw new ArgumentNullException(nameof(cartService));
-        _authService = authService ?? throw new ArgumentNullException(nameof(authService));
         _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _httpContextAccessor = httpContextAccessor;
         _config = config;
-        _cartRepository = cartRepository ?? throw new ArgumentNullException(nameof(cartRepository));
         _userQuery = userQuery;
     }
     #endregion
@@ -87,7 +74,7 @@ public class UserService : IUserService
     #region Get By Code
     public async Task<UserDto> GetUserByCode(string code)
     {
-        var user = await _userRepositorySpecific.GetByCodeAsync(code);
+        var user = await _userQuery.GetByCodeAsync(code);
         if (user == null) throw new NotFoundException("کاربر پیدا پیدا نشد");
 
         var dto = _mapper.Map<UserDto>(user);
@@ -101,49 +88,17 @@ public class UserService : IUserService
     #region Get By Filter
     public async Task<PagedResult<UserDto>> GetUserByFilterAsync(UserFilterDto filter)
     {
-        Expression<Func<User, bool>> predicate = u => !u.IsDeleted;
+        var result = await _userQuery.GetPagedFilteredAsync(filter);
 
-        if (!string.IsNullOrEmpty(filter.FName))
-            predicate = predicate.And(u => u.FName.Contains(filter.FName));
-
-        if (!string.IsNullOrEmpty(filter.LName))
-            predicate = predicate.And(u => u.LName!.Contains(filter.LName));
-
-        if (!string.IsNullOrEmpty(filter.UserName))
-            predicate = predicate.And(u => u.UserName.Contains(filter.UserName));
-
-        if (!string.IsNullOrEmpty(filter.Email))
-            predicate = predicate.And(u => u.Email!.Contains(filter.Email));
-
-        if (!string.IsNullOrEmpty(filter.PhoneNumber))
-            predicate = predicate.And(u => u.PhoneNumber.Contains(filter.PhoneNumber));
-
-        if (!string.IsNullOrEmpty(filter.RoleCode))
-            predicate = predicate.And(u => u.Role.Code == filter.RoleCode);
-
-        var result = await _userRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: u => new UserDto
-            {
-                Code = u.Code,
-                FName = u.FName,
-                LName = u.LName,
-                Email = u.Email,
-                UserName = u.UserName,
-                PhoneNumber = u.PhoneNumber,
-                RoleCode = u.Role.Code,
-                RoleName = u.Role.Name,
-                CreatedAt = u.CreatedAt,
-                UpdatedAt = u.UpdatedAt
-            },
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: u => u.CreatedAt
-        );
+        // اضافه کردن ProfileImageUrl
         foreach (var item in result.Items)
         {
-            item.ProfileImageUrl = await _fileService.GetPrimaryFileUrlAsync(EntityFile.Profile, item.Code);
+            item.ProfileImageUrl =
+                await _fileService.GetPrimaryFileUrlAsync(
+                    EntityFile.Profile,
+                    item.Code);
         }
+
         return result;
     }
     #endregion
@@ -213,13 +168,26 @@ public class UserService : IUserService
 
     #endregion
 
+    #region Get Current User Role
     public CurrentUserRoleDto GetCurrentUserRole()
     {
+
+
         var principal = _httpContextAccessor.HttpContext?.User
             ?? throw new UnauthorizedAccessException("کاربر احراز هویت نشده است.");
 
         var roleName = principal.FindFirst(ClaimTypes.Role)?.Value;
+
+        if (string.IsNullOrEmpty(roleName))
+            throw new BadRequestException("توکن مشکل دارد");
+        
         var roleCode = principal.FindFirst("RoleCode")?.Value;
+
+        if (string.IsNullOrEmpty(roleCode))
+            throw new BadRequestException("توکن مشکل دارد");
+
+
+
 
         return new CurrentUserRoleDto
         {
@@ -227,7 +195,7 @@ public class UserService : IUserService
             RoleCode = roleCode,
         };
     }
-
+    #endregion
 
     #region Update
     public async Task<UserDto> UpdateProfileAsync(UpdateProfileDto userDto)

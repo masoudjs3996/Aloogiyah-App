@@ -64,9 +64,7 @@ const CartPage = () => {
     }
   }, [data]);
 
-  useEffect(() => {
-    console.log(data?.data);
-  }, [data]);
+
 
   const handleQuantityChange = (
     storeId: string,

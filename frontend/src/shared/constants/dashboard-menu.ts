@@ -1,6 +1,4 @@
-import { BsBarChart } from "react-icons/bs";
 import { FaHome, FaUser } from "react-icons/fa";
-import { FiSettings } from "react-icons/fi";
 import { GiFarmer } from "react-icons/gi";
 import {
   IoPricetagOutline,
@@ -9,18 +7,23 @@ import {
 } from "react-icons/io5";
 
 export const dashboardMenu = [
-  { path: "/", icon: FaHome, label: "خانه", roles: ["Admin", "User","Buyer","Manager","Farmer"] },
+  {
+    path: "/",
+    icon: FaHome,
+    label: "خانه",
+    roles: ["Admin", "User", "Buyer", "Manager", "Farmer"],
+  },
   {
     path: "/dashboard/farm/myFarms",
     icon: GiFarmer,
     label: "مزرعه ها ",
-    roles: ["Admin", "User","Farmer"],
+    roles: ["Admin", "User", "Farmer"],
   },
   {
     path: "/dashboard/profile",
     icon: FaUser,
     label: "حساب کاربری",
-    roles: ["Admin","Farmer"],
+    roles: ["Admin", "Farmer"],
   },
   {
     path: "/dashboard/farm/registerFarm",
@@ -32,7 +35,7 @@ export const dashboardMenu = [
     label: "تخفیف های شما",
     icon: IoPricetagOutline,
     path: "/dashboard/profile/rewards",
-    roles: ["Admin", "Buyer","User"],
+    roles: ["Admin", "Buyer", "User"],
   },
 
   {

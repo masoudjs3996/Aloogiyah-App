@@ -17,6 +17,9 @@ public class Comment : BaseEntity
     [Required]
     public int UserId { get; set; }
 
+    [Required]
+    public int StatusId { get; set; }
+
     public int? ParentCommentId { get; set; }
 
     [Range(1, 5)]
@@ -30,6 +33,10 @@ public class Comment : BaseEntity
     #endregion
 
     #region Relations
+
+    [ForeignKey(nameof(StatusId))]
+    public Status Status { get; set; } = null!;
+
     [ForeignKey(nameof(UserId))]
     public User User { get; set; } = null!;
 
