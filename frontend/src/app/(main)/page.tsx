@@ -6,12 +6,14 @@ import {
 } from "@/design-system/molecules/public";
 import { BannerSlider } from "@/design-system/organisms/Home";
 import { GetFarmsByFilter } from "@/lib/actions/farm";
+import { getSlider } from "@/lib/actions/slider";
 
 export default async function Home() {
   const categoRes = await getFeaturedCategories();
   const categories = categoRes?.data;
   const farmRes = await GetFarmsByFilter();
   const farms = farmRes?.data;
+  const slider = await getSlider();
 
   if (!categories || categories.length === 0 || !farms || farms?.length === 0) {
     return <p>مشکل در بارگیری دیتا </p>;
@@ -19,7 +21,8 @@ export default async function Home() {
 
   return (
     <>
-      <BannerSlider />
+      {slider?.data && <BannerSlider slider={slider?.data} />}
+
       <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-10 lg:grid-cols-12 gap-4 p-4  my-10 ">
         {categories.map((cat) => {
           return <CategoryCard category={cat} key={cat.code} />;

@@ -1,7 +1,6 @@
 ﻿using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.Wallet;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
-using AlooGiyah_Application.Services.UserFolder;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +15,7 @@ namespace AlooGiyah_Api.Controllers
         {
             _walletService = walletService;
         }
-        [Authorize]
+        [Authorize(Policy = "NotGuest")]
         [HttpGet("MyWallet")]
         public async Task<IActionResult> GetMyWallet()
         {
@@ -28,7 +27,7 @@ namespace AlooGiyah_Api.Controllers
                 Data = wallet
             });
         }
-        [Authorize]
+        [Authorize(Policy = "NotGuest")]
         [HttpPost("Deposit")]
         public async Task<IActionResult> Deposit([FromBody] DepositWalletDto dto)
         {

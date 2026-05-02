@@ -148,6 +148,7 @@ builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<ISliderService, SliderService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 
 
