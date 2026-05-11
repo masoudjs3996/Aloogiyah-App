@@ -150,8 +150,8 @@ const ProductDetail = ({ productId }: { productId: string }) => {
             ))}
         </div>
       </div>
-
       {/* Add to Cart */}
+      <Button variant="secondary">افزودن به سبد خرید</Button>
       <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-white border-t">
         <button className="w-full bg-emerald-500 text-white py-3 rounded-xl text-sm font-medium">
           افزودن به سبد خرید

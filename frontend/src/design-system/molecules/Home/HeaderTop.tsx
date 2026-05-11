@@ -64,10 +64,10 @@ const handleAuthClick = async () => {
             <Link
               key={link.id}
               href={link.href}
-              className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+              className={`rounded-md px-3 py-2 text-sm font-medium duration-200 transition-colors ${
                 pathname === link.href
-                  ? "bg-accent text-accent_foreground"
-                  : "text-muted_foreground hover:bg-accent hover:text-accent_foreground"
+                  ? "bg-secondary-700 text-white"
+                  : "text-muted_foreground hover:bg-secondary-700 hover:text-white"
               }`}
             >
               {link.label}
@@ -77,7 +77,7 @@ const handleAuthClick = async () => {
          <SearchInput />
         <Link
           href="/checkout/card"
-          className=" rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-primary/90 inline-flex"
+          className="rounded-lg bg-primary px-5 py-2.5 text-sm text-secondary-700 font-semibold transition-colors hover:bg-primary/90 inline-flex"
         >
           <IconButton icon={<TiShoppingCart className="w-6 h-7 " />} />
         </Link>

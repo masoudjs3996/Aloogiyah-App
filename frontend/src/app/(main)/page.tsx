@@ -21,41 +21,43 @@ export default async function Home() {
 
   return (
     <>
-      {slider?.data && <BannerSlider slider={slider?.data} />}
-
-      <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-10 lg:grid-cols-12 gap-4 p-4  my-10 ">
-        {categories.map((cat) => {
-          return <CategoryCard category={cat} key={cat.code} />;
-        })}
-
-        {/* {Array.from({ length: 10 }).map((_, i) => (
-          <CategoryCard
-            key={i}
-            name={categories[i % categories.length]?.name}
-            imageUrl={categories[i % categories.length]?.imageUrl}
+    {slider?.data && <BannerSlider slider={slider?.data}/>}
+      <div className="mx-2">
+        <h2 className="headlines-main">دسته‌بندی‌های‌ اصلی</h2>
+        <div className="flex justify-between flex-wrap p-4  my-10">
+          {categories.map((cat) => {
+            return <CategoryCard
+            key={cat.code}
+            category={cat}
           />
-        ))} */}
-      </div>
-      <div className="flex items-center justify-between w-full">
-        <h2 className="text-base sm:text-lg font-bold text-gray-900">
-          مزرعه‌ها
-        </h2>
-        <span className="text-xs sm:text-sm text-gray-500">مشاهده همه</span>
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4  my-10">
-        {Array.from({ length: 4 }, (_, i) => {
-          const farm = farms[i % farms?.length];
-          return <FarmCard key={`${farm.code}-${i}`} farm={farm} />;
-        })}
-      </div>
-      <div className="flex items-center justify-between w-full">
-        <h2 className="text-base sm:text-lg font-bold text-gray-900">
-          محصولات برتر
-        </h2>
-        <span className="text-xs sm:text-sm text-gray-500">مشاهده همه</span>
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 my-10 w-full">
-        <ProductCard />
+          })}
+          {/* {Array.from({ length: 10 }).map((_, i) => (
+            <CategoryCard
+              key={i}
+              name={categories[i % categories.length]?.name}
+              imageUrl={categories[i % categories.length]?.imageUrl}
+            />
+          ))} */}
+        </div>
+        <div className="flex items-center justify-between w-full">
+          <h2 className="headlines-main">مزرعه‌ها</h2>
+
+          {/* این معلوم نیس چیه ؟؟ */}
+          {/* <span className="text-xs sm:text-sm text-gray-500">مشاهده همه</span> */}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4  my-10">
+          {Array.from({ length: 4 }, (_, i) => {
+            const farm = farms[i % farms?.length];
+            return <FarmCard key={`${farm.code}-${i}`} farm={farm} />;
+          })}
+        </div>
+        <div className="flex items-center justify-between w-full">
+          <h2 className="headlines-main">محصولات برتر</h2>
+          <span className="text-xs sm:text-sm text-gray-500">مشاهده همه</span>
+        </div>
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 my-10 w-full">
+          <ProductCard />
+        </div>
       </div>
     </>
   );

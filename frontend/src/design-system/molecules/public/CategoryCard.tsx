@@ -41,7 +41,7 @@ const CategoryCard: FC<CategoryCardProps> = ({ category }) => {
           {category?.name}
         </p>
       </div>
-      <div className="absolute inset-0 ring-2 ring-indigo-500 ring-inset rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+      <div className="absolute rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
     </div>
   );
 };

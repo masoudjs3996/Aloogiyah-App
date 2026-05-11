@@ -33,7 +33,7 @@ export default function ProductCard() {
         onError: (err) => {
           console.log(err);
         },
-      },
+      }
     );
   };
 
@@ -106,36 +106,36 @@ export default function ProductCard() {
                   {product.name}
                 </h3>
 
-                <p className="text-xs text-gray-500 line-clamp-2">
+                <p className="text-xs line-clamp-2 h-14 my-4">
                   {product.description || "گل تازه و معطر"}
                 </p>
 
-                <div className="flex items-end justify-between">
+                <div className="flex flex-col justify-between">
                   <div>
                     <span className="text-lg font-bold text-green-600">
                       {formatPrice(product.retailPrice)}
                     </span>
-                    {hasDiscount && (
-                      <div className="text-xs text-gray-400 line-through">
-                        {formatPrice(product.wholesalePrice)}
-                      </div>
-                    )}
                   </div>
 
-                  {hasDiscount && (
-                    <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full">
-                      تخفیف
-                    </span>
-                  )}
-                </div>
-                <Button
-                  onClick={() => AddToCard(product.code)}
-                  variant="success"
-                >
-                  <div className="flex items-center justify-center p-1">
-                    <FaShoppingCart className="w-4 h-4" />
-                    {product.stock > 0 ? "افزودن" : "ناموجود"}
+                  <div className="flex justify-between mt-1 h-6">
+                    {hasDiscount ? (
+                      <span className="text-xs text-gray-400 line-through">
+                        {formatPrice(product.wholesalePrice)}
+                      </span>
+                    ) : (
+                      <div className="mt-1 h-6 invisible">بدون تخفیف</div>
+                    )}
+
+                    {hasDiscount && (
+                      <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                        تخفیف
+                      </span>
+                    )}
                   </div>
+                </div>
+                <Button onClick={() => AddToCard(product.code)}>
+                  <FaShoppingCart className="w-4 h-4" />
+                  <span>{product.stock > 0 ? "افزودن" : "ناموجود"}</span>
                 </Button>
               </div>
             </div>
