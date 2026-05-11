@@ -13,9 +13,6 @@ interface Props {
 export const CategorySidebar = ({ categories, setActiveCat }: Props) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  useEffect(() => {
-    console.log(categories);
-  }, [categories]);
   return (
     <div className="flex flex-col items-start border-l w-36 ">
       {categories.map((cat, index) => (

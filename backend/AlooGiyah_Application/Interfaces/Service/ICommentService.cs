@@ -10,5 +10,6 @@ namespace AlooGiyah_Application.Interfaces.Service
         Task<bool> DeleteAsync(string code);
         Task<CommentDto?> GetByCodeAsync(string code);
         Task<PagedResult<CommentDto>> GetByFilterAsync(CommentFilterDto filter);
+        Task<List<CommentDto>> GetTreeCommentsAsync(CommentTreeFilterDto filter);
     }
 }

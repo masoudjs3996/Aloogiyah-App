@@ -81,9 +81,6 @@ public class AgriculturalProductController : ControllerBase
     {
         var result = await _agriculturalProductService.GetByFilterAsync(filterDto);
 
-        if (result == null || !result.Items.Any())
-            throw new NotFoundException(ErrorMessages.ErrorNullAgriculturalProduct);
-
         return Ok(new ApiResponse<object>
         {
             IsSuccess = true,
@@ -99,8 +96,6 @@ public class AgriculturalProductController : ControllerBase
     public async Task<IActionResult> GetByCodeAsync([FromQuery] string code)
     {
         var result = await _agriculturalProductService.GetByCodeAsync(code);
-        if (result == null)
-            throw new NotFoundException(ErrorMessages.ErrorNullAgriculturalProduct);
 
         return Ok(new ApiResponse<object>
         {

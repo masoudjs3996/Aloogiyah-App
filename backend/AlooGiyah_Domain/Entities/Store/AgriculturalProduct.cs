@@ -43,8 +43,10 @@ public class AgriculturalProduct : BaseEntity
     #endregion
 
     #region Relations
+
     [ForeignKey(nameof(FarmId))]
     public Farm Farm { get; set; } = null!;
+
     [ForeignKey(nameof(StatusId))]
     public Status Status { get; set; } = null!;
 

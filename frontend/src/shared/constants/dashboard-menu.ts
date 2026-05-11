@@ -1,6 +1,4 @@
-import { BsBarChart } from "react-icons/bs";
 import { FaHome, FaUser } from "react-icons/fa";
-import { FiSettings } from "react-icons/fi";
 import { GiFarmer } from "react-icons/gi";
 import {
   IoPricetagOutline,
@@ -9,36 +7,54 @@ import {
 } from "react-icons/io5";
 
 export const dashboardMenu = [
-  { path: "/", icon: FaHome, label: "خانه", roles: ["Admin", "User","Buyer","Manager","Farmer"] },
+  {
+    path: "/",
+    icon: FaHome,
+    label: "خانه",
+    roles: ["Admin", "User", "Buyer", "Manager", "Farmer"],
+  },
+  {
+    path: "/",
+    icon: FaHome,
+    label: "خانه",
+    roles: ["Admin", "User", "Manager", "Farmer", "Buyer"],
+  },
   {
     path: "/dashboard/farm/myFarms",
     icon: GiFarmer,
     label: "مزرعه ها ",
-    roles: ["Admin", "User","Farmer"],
+    roles: ["Admin", "User", "Farmer"],
   },
   {
     path: "/dashboard/profile",
     icon: FaUser,
     label: "حساب کاربری",
-    roles: ["Admin","Farmer"],
+
+    roles: ["Admin", "User", "Manager", "Farmer", "Buyer"],
   },
   {
     path: "/dashboard/farm/registerFarm",
     icon: IoStorefrontSharp,
     label: "ثبت مزرعه ",
-    roles: ["Admin", "Manager"],
+    roles: ["Admin", "Manager", "Farmer"],
   },
   {
     label: "تخفیف های شما",
     icon: IoPricetagOutline,
     path: "/dashboard/profile/rewards",
-    roles: ["Admin", "Buyer","User"],
+    roles: ["Admin", "Buyer", "User"],
   },
 
   {
     path: "/dashboard/profile/wallet",
     icon: IoWalletOutline,
     label: "کیف پول",
-    roles: ["Admin", "User"],
+    roles: ["Admin", "Manager", "Farmer", "User", "Buyer"],
+  },
+  {
+    path: "",
+    icon: IoWalletOutline,
+    label: "فاکتور ها",
+    roles: ["Admin", "Manager", "Farmer", "Buyer"],
   },
 ];

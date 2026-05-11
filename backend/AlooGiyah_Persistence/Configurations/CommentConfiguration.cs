@@ -20,6 +20,9 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
         builder.Property(c => c.UserId)
             .IsRequired();
 
+        builder.Property(c => c.StatusId)
+            .IsRequired();
+
         builder.Property(c => c.EntityCode)
             .IsRequired();
 
@@ -36,6 +39,12 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
         builder.HasOne(c => c.User)
             .WithMany(u => u.Comments)
             .HasForeignKey(c => c.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+
+        builder.HasOne(c => c.Status)
+            .WithMany(u => u.Comments)
+            .HasForeignKey(c => c.StatusId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(c => new { c.EntityCode, c.EntityComment });

@@ -1,19 +1,17 @@
 ﻿using AlooGiyah_Application.DTOs.AgriculturalProduct;
 using AlooGiyah_Application.DTOs.File;
+using AlooGiyah_Application.Interfaces.Query;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Application.Interfaces.Service.Store;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.Store;
-using AlooGiyah_Domain.Entities.UserFolder;
 using AlooGiyah_Domain.Enums;
 using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Domain.Pagination;
-using AlooGiyah_Shared.Commons;
 using AlooGiyah_Shared.Exceptions;
 using AlooGiyah_Shared.Seo;
 using AutoMapper;
-using System.Linq.Expressions;
 
 namespace AlooGiyah_Application.Services.Store;
 
@@ -25,6 +23,7 @@ public class AgriculturalProductService : IAgriculturalProductService
     private readonly IGenericRepository<Status> _statusRepository;
     private readonly IGenericRepository<Category> _categoryRepository;
     private readonly IGenericRepository<Files> _fileRepo;
+    private readonly IAgriculturalProductQuery _productQuery;
     private readonly ICurrentUserService _currentUserService;
     private readonly IFileService _fileService;
     private readonly IUnitOfWork _unitOfWork;
@@ -36,6 +35,7 @@ public class AgriculturalProductService : IAgriculturalProductService
         IGenericRepository<Status> statusRepository,
         IGenericRepository<Category> categoryRepository,
         IGenericRepository<Files> fileRepo,
+        IAgriculturalProductQuery productQuery,
     IFileService fileService,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
@@ -46,6 +46,7 @@ public class AgriculturalProductService : IAgriculturalProductService
         _statusRepository = statusRepository;
         _categoryRepository = categoryRepository;
         _fileRepo = fileRepo;
+        _productQuery = productQuery;
         _fileService = fileService;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
@@ -342,172 +343,22 @@ public class AgriculturalProductService : IAgriculturalProductService
     #region Get By Code
     public async Task<AgriculturalProductDetailDto> GetByCodeAsync(string code)
     {
-        if (string.IsNullOrEmpty(code))
-            throw new ArgumentNullException(nameof(code));
+        var role = _currentUserService.Roles.FirstOrDefault() ?? "User";
 
-       
+        var result = await _productQuery.GetByCodeAsync(code, role)
+                     ?? throw new NotFoundException("محصول یافت نشد");
 
-        var Role = _currentUserService.Roles.FirstOrDefault() ?? "User";
-
-        var entity = await _agriculturalProductRepository.GetByCodeWithIncludeAsync(
-            code: code,
-            includes: new Expression<Func<AgriculturalProduct, object>>[] { p => p.Categories!,f => f.Farm }
-        );
-
-        if (entity == null)
-            throw new NotFoundException("محصول یافت نشد");
-
-        var productDto = _mapper.Map<AgriculturalProductDetailDto>(entity);
-
-        // مقادیر اضافی که ممکنه مپ نشن
-        productDto.RetailPrice = entity.RetailPrice;
-        productDto.WholesalePrice = Role == "User" ? null : entity.WholesalePrice;
-        productDto.FarmCode = entity.Farm?.Code ?? ""; 
-        productDto.StatusCode = await _statusRepository.GetCodeByIdAsync(entity.StatusId) ?? "";
-        productDto.CategoryCodes = entity.Categories?.Select(c => c.Code).ToList() ?? new List<string>();
-
-        //  بخش عکس‌ها — کاملاً ایمن 
-        productDto.ImageUrls = new List<string>();
-        productDto.PrimaryImageUrl = null; // پیش‌فرض
-
-        if (_fileRepo != null)
-        {
-            try
-            {
-                // عکس اصلی
-                var primaryFile = await _fileRepo.FirstOrDefaultAsync(f =>
-                    f.EntityCode == code &&
-                    f.EntityFile == EntityFile.AgriculturalProduct &&
-                    f.IsPrimary);
-
-                if (primaryFile != null && !string.IsNullOrEmpty(primaryFile.Url))
-                {
-                    productDto.PrimaryImageUrl = primaryFile.Url;
-                }
-
-                // همه عکس‌ها
-                var allFilesResult = await _fileRepo.GetPagedAsync(
-                    filter: f => f.EntityCode == code && f.EntityFile == EntityFile.AgriculturalProduct,
-                    pageNumber: 1,
-                    pageSize: 50
-                );
-
-                productDto.ImageUrls = allFilesResult.Items
-                    .Where(f => !string.IsNullOrEmpty(f.Url))
-                    .Select(f => f.Url!)
-                    .ToList();
-
-                // اگر اصلی نبود، اولین عکس رو اصلی در نظر بگیر
-                if (string.IsNullOrEmpty(productDto.PrimaryImageUrl) && productDto.ImageUrls.Any())
-                {
-                    productDto.PrimaryImageUrl = productDto.ImageUrls.First();
-                }
-            }
-            catch (Exception ex)
-            {
-                // لاگ کن ولی کرش نکن
-                // _logger.LogWarning(ex, "خطا در بارگذاری عکس‌های محصول {Code}", code);
-            }
-        }
-
-        return productDto;
+        return result;
     }
     #endregion
 
     #region Get By Filter
-    public async Task<PagedResult<AgriculturalProductListItemDto>> GetByFilterAsync(AgriculturalProductFilterDto filter)
+    public async Task<PagedResult<AgriculturalProductListItemDto>>
+      GetByFilterAsync(AgriculturalProductFilterDto filter)
     {
+        var role = _currentUserService.Roles.FirstOrDefault() ?? "User";
 
-        Expression<Func<AgriculturalProduct, bool>> predicate = p => !p.IsDeleted;
-
-        var role = _currentUserService.Roles.FirstOrDefault()?? "User" ;
-
-        if (!string.IsNullOrEmpty(filter.Name))
-            predicate = predicate.And(p => p.Name.Contains(filter.Name));
-
-        if (!string.IsNullOrEmpty(filter.FarmCode)) // به‌جای FarmerCode
-            predicate = predicate.And(p => p.Farm.Code == filter.FarmCode);
-
-        if (!string.IsNullOrEmpty(filter.StatusCode))
-            predicate = predicate.And(p => p.Status.Code == filter.StatusCode);
-
-        if (role == "User")
-        {
-            if (filter.MinPrice.HasValue)
-                predicate = predicate.And(p => p.RetailPrice >= filter.MinPrice.Value);
-
-            if (filter.MaxPrice.HasValue)
-                predicate = predicate.And(p => p.RetailPrice <= filter.MaxPrice.Value);
-        }
-        else
-        {
-            if (filter.MinPrice.HasValue)
-                predicate = predicate.And(p => p.WholesalePrice >= filter.MinPrice.Value);
-
-            if (filter.MaxPrice.HasValue)
-                predicate = predicate.And(p => p.WholesalePrice <= filter.MaxPrice.Value);
-        }
-
-        if (filter.MinStock.HasValue)
-            predicate = predicate.And(p => p.Stock >= filter.MinStock.Value);
-
-        if (filter.MaxStock.HasValue)
-            predicate = predicate.And(p => p.Stock <= filter.MaxStock.Value);
-
-
-
-        if (filter.CategoryCodes?.Any() ?? false)
-            predicate = predicate.And(p => p.Categories.Any(c => filter.CategoryCodes.Contains(c.Code)));
-
-        var pagedProducts = await _agriculturalProductRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: p => new AgriculturalProductListItemDto
-            {
-                Code = p.Code,
-                Name = p.Name,
-                Description = p.Description,
-                Stock = p.Stock,
-                Slug = p.Slug,
-                StatusCode = p.Status.Code,
-                CreatedAt = p.CreatedAt,
-                RetailPrice = p.RetailPrice,
-                WholesalePrice = role == "User" ? null : p.WholesalePrice,
-                PrimaryImageUrl = "" // موقتاً خالی — بعداً پر میشه
-            },
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: p => p.CreatedAt
-        );
-        if (!pagedProducts.Items.Any())
-            return pagedProducts;
-
-        // قدم ۲: جمع‌آوری کدهای محصول در این صفحه
-        var productCodes = pagedProducts.Items.Select(x => x.Code).ToList();
-
-        // قدم ۳: استفاده از GetPagedAsync روی Files — فقط عکس‌های اصلی محصولات این صفحه
-        var primaryFilesResult = await _fileRepo.GetPagedAsync(
-            filter: f => productCodes.Contains(f.EntityCode!) &&
-                         f.EntityFile == EntityFile.AgriculturalProduct &&
-                         f.IsPrimary,
-            pageNumber: 1,
-            pageSize: productCodes.Count // حداکثر به تعداد محصولات این صفحه
-        );
-
-        // قدم ۴: ساخت دیکشنری برای دسترسی سریع
-        var primaryImageDict = primaryFilesResult.Items
-            .ToDictionary(
-                f => f.EntityCode!,
-                f => f.Url ?? "/images/default-product.jpg"
-            );
-
-        // قدم ۵: پر کردن PrimaryImageUrl هر محصول
-        foreach (var item in pagedProducts.Items)
-        {
-            item.PrimaryImageUrl = primaryImageDict.GetValueOrDefault(item.Code, "/images/default-product.jpg");
-        }
-
-        return pagedProducts;
-
+        return await _productQuery.GetByFilterAsync(filter, role);
     }
     #endregion
 

@@ -9,6 +9,7 @@ public class CommentFilterDto : BaseFilterDto
     public EntityComment? EntityComment { get; set; }
     public int? MinRating { get; set; }
     public int? MaxRating { get; set; }
+    public string? StatusCode { get; set; }
     public DateTimeOffset? StartDate { get; set; }
     public DateTimeOffset? EndDate { get; set; }
 

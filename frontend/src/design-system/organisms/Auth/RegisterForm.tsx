@@ -70,7 +70,7 @@ const RegisterForm = () => {
         }
       },
       onError: (err) => {
-        console.log(err);
+
         toast.error("خطا در ارسال فرم ");
       },
     });

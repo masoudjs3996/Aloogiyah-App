@@ -25,10 +25,11 @@ public class Status : BaseEntity
     #region Relations
     public List<Order> Orders { get; set; } = null!;
     public List<AgriculturalOrder> AgriculturalOrders { get; set; } = null!;
-    public List<AgriculturalProduct> AgriculturalProducts {  get; set; } = null!;
+    public List<AgriculturalProduct> AgriculturalProducts { get; set; } = null!;
     public List<ServiceRequest> ServiceRequests { get; set; } = null!;
     public List<Auction> Auctions { get; set; } = null!;
     public List<StatusChangeLog> OldStatusChangeLogs { get; set; } = null!;
     public List<StatusChangeLog> NewStatusChangeLogs { get; set; } = null!;
+    public List<Comment> Comments { get; set; } = null!;
     #endregion
 }

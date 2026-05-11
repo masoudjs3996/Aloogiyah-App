@@ -3,7 +3,6 @@ import { useMutation } from "@tanstack/react-query";
 export const useRegisterUser = () => {
   const registeruser = useMutation({
     mutationFn: (data: any) => {
-      console.log("📨 داده ارسالی به API:", data);
       return RegisterUser(data);
     },
   });

@@ -24,15 +24,19 @@ export async function getProducts(
         params.append("MinStock", filters.minStock.toString());
       if (filters.maxStock !== undefined)
         params.append("MaxStock", filters.maxStock.toString());
+      const validCategoryCodes =
+        filters.categoryCodes?.filter(
+          (code) => code !== undefined && code !== null && code !== "",
+        ) ?? [];
 
-      if (filters.categoryCodes?.length) {
-        filters.categoryCodes.forEach((code) =>
-          params.append("CategoryCodes", code),
-        );
+      if (validCategoryCodes.length > 0) {
+        validCategoryCodes.forEach((code) => {
+          params.append("CategoryCodes", code);
+        });
       }
 
       params.append("PageNumber", (filters.pageNumber ?? 1).toString());
-      params.append("PageSize", (filters.pageSize ?? 50).toString());
+      params.append("PageSize", (filters.pageSize ?? 3).toString());
     }
 
     const url = `/AgriculturalProduct/GetByFilter?${params.toString()}`;
@@ -43,8 +47,6 @@ export async function getProducts(
       console.warn("API returned unsuccessful response:", data?.message);
       return null;
     }
-
-    console.log(data);
 
     return data.data ?? [];
   } catch (error: any) {

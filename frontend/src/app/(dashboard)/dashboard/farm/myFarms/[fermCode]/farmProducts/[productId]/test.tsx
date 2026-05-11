@@ -19,7 +19,7 @@ const ProductDetailUI = ({ productId }: { productId: string }) => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
-  console.log(product);
+
 
   useEffect(() => {
     const get = async () => {

@@ -278,6 +278,9 @@ namespace AlooGiyah_Persistence.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("CheckConstraint", "Rating BETWEEN 1 AND 5");
 
+                    b.Property<int>("StatusId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -287,6 +290,8 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasKey("CommentId");
 
                     b.HasIndex("ParentCommentId");
+
+                    b.HasIndex("StatusId");
 
                     b.HasIndex("UserId");
 
@@ -2224,6 +2229,12 @@ namespace AlooGiyah_Persistence.Migrations
                         .WithMany("SubComments")
                         .HasForeignKey("ParentCommentId");
 
+                    b.HasOne("AlooGiyah_Domain.Entities.Status", "Status")
+                        .WithMany("Comments")
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("AlooGiyah_Domain.Entities.UserFolder.User", "User")
                         .WithMany("Comments")
                         .HasForeignKey("UserId")
@@ -2231,6 +2242,8 @@ namespace AlooGiyah_Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("ParentComment");
+
+                    b.Navigation("Status");
 
                     b.Navigation("User");
                 });
@@ -2860,6 +2873,8 @@ namespace AlooGiyah_Persistence.Migrations
                     b.Navigation("AgriculturalProducts");
 
                     b.Navigation("Auctions");
+
+                    b.Navigation("Comments");
 
                     b.Navigation("NewStatusChangeLogs");
 

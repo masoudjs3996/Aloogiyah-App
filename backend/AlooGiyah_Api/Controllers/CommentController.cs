@@ -23,7 +23,7 @@ public class CommentController : ControllerBase
 
 
     #region CreateComment
-    [Authorize]
+    [Authorize(Policy = "NotGuest")]
     [HttpPost("Create")]
     public async Task<IActionResult> CreateComment(CommentCreateDto createDto)
     {
@@ -60,8 +60,27 @@ public class CommentController : ControllerBase
     }
     #endregion
 
+    #region GetTreeComments
+    [AllowAnonymous]
+    [HttpGet("GetTreeComments")]
+    public async Task<IActionResult> GetTreeCommentsAsync([FromQuery] CommentTreeFilterDto filterDto)
+    {
+        var result = await _commentService.GetTreeCommentsAsync(filterDto);
+
+        if (result == null || !result.Any())
+            throw new NotFoundException(ErrorMessages.ErrorNullComment);
+
+        return Ok(new ApiResponse<object>
+        {
+            IsSuccess = true,
+            Message = "لیست نظرات با موفقیت دریافت شد",
+            Data = result
+        });
+    }
+    #endregion
+
     #region GetByCode
-    [Authorize]
+    [AllowAnonymous]
     [HttpGet("GetByCode")]
     public async Task<IActionResult> GetByCodeAsync([FromQuery] string code)
     {
@@ -79,7 +98,7 @@ public class CommentController : ControllerBase
     #endregion
 
     #region UpdateComment
-    [Authorize]
+    [Authorize(Policy = "NotGuest")]
     [HttpPut("Update")]
     public async Task<IActionResult> UpdateComment(CommentUpdateDto updateDto)
     {
@@ -98,8 +117,8 @@ public class CommentController : ControllerBase
     #endregion
 
     #region DeleteComment
-    [Authorize]
     [HttpDelete("Delete")]
+    [Authorize(Policy = "NotGuest")]
     public async Task<IActionResult> DeleteComment([FromQuery] string code)
     {
         var result = await _commentService.DeleteAsync(code);

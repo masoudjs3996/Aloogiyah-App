@@ -13,7 +13,7 @@ public class CommentCreateDto
     public int? Rating { get; set; }
 
     [Required]
-    public string EntityCode { get; set; } = string.Empty;
+    public string EntityCode { get; set; } = string.Empty; 
 
     public string? ParentCode { get; set; }
 

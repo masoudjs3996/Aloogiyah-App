@@ -34,14 +34,14 @@ const LoginForm = () => {
   });
 
   const onSubmit = (valuse: LogFormValues) => {
-    console.log(valuse);
+
     const data = {
       userName: valuse?.userName,
       password: valuse?.password,
     };
     loginuser.mutate(data, {
       onSuccess: (date) => {
-        console.log(data);
+
         if (date?.data?.token && date?.data?.refreshToken) {
           queryClient.invalidateQueries({
             queryKey: ["userProfile"],
@@ -62,8 +62,7 @@ const LoginForm = () => {
         router.push("/");
       },
       onError: (err) => {
-        console.log(err);
-        console.log(err);
+
         toast.error("خطا در ارسال فرم ");
       },
     });

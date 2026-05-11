@@ -91,8 +91,7 @@ namespace AlooGiyah_API.Controllers
 
 
 
-        // PUT: api/User/UpdateProfile
-        [Authorize] // فقط کاربر لاگین‌شده (نه مهمان)
+        [Authorize(Policy = "NotGuest")] 
         [HttpPut("UpdateProfile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto userDto)
         {
@@ -109,8 +108,7 @@ namespace AlooGiyah_API.Controllers
             });
         }
 
-        // POST: api/User/UploadProfileImage
-        [Authorize] // فقط کاربر لاگین‌شده
+        [Authorize(Policy = "NotGuest")] 
         [HttpPost("UploadProfileImage")]
         public async Task<IActionResult> UploadProfileImage([FromForm] ChangeProfilePhotoDto dto)
         {

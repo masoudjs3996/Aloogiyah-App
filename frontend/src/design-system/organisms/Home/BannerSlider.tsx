@@ -4,8 +4,14 @@ import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import Image from "next/image";
+import { useEffect } from "react";
+import { getSlider } from "@/lib/actions/slider";
+import { ISlider } from "@/shared/types/slider";
 
-export default function BannerSlider() {
+export default function BannerSlider({ slider }: { slider: ISlider[] }) {
+  useEffect(() => {
+    console.log(slider);
+  }, []);
   const BANNER_IMAGES = [
     {
       id: 1,
@@ -52,6 +58,21 @@ export default function BannerSlider() {
           </div>
         </SwiperSlide>
       ))}
+      {/* {slider?.map((banner: ISlider) => (
+        <SwiperSlide key={banner?.code} className="">
+          <div className="aspect-[16/11]  w-full md:aspect-[21/9] relative">
+            <Image
+              src={banner?.imageUrl}
+              alt={banner?.description}
+              priority={banner.order === 1}
+              fill
+              sizes="100vw"
+              quality={90}
+              className="object-cover object-center "
+            />
+          </div>
+        </SwiperSlide>
+      ))} */}
     </Swiper>
   );
 }

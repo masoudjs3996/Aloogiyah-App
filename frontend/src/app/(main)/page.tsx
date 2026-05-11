@@ -6,12 +6,14 @@ import {
 } from "@/design-system/molecules/public";
 import { BannerSlider } from "@/design-system/organisms/Home";
 import { GetFarmsByFilter } from "@/lib/actions/farm";
+import { getSlider } from "@/lib/actions/slider";
 
 export default async function Home() {
   const categoRes = await getFeaturedCategories();
   const categories = categoRes?.data;
   const farmRes = await GetFarmsByFilter();
   const farms = farmRes?.data;
+  const slider = await getSlider();
 
   if (!categories || categories.length === 0 || !farms || farms?.length === 0) {
     return <p>مشکل در بارگیری دیتا </p>;
@@ -19,17 +21,23 @@ export default async function Home() {
 
   return (
     <>
-      <BannerSlider />
+    {slider?.data && <BannerSlider slider={slider?.data}/>}
       <div className="mx-2">
         <h2 className="headlines-main">دسته‌بندی‌های‌ اصلی</h2>
         <div className="flex justify-between flex-wrap p-4  my-10">
-          {Array.from({ length: 10 }).map((_, i) => (
+          {categories.map((cat) => {
+            return <CategoryCard
+            key={cat.code}
+            category={cat}
+          />
+          })}
+          {/* {Array.from({ length: 10 }).map((_, i) => (
             <CategoryCard
               key={i}
               name={categories[i % categories.length]?.name}
               imageUrl={categories[i % categories.length]?.imageUrl}
             />
-          ))}
+          ))} */}
         </div>
         <div className="flex items-center justify-between w-full">
           <h2 className="headlines-main">مزرعه‌ها</h2>
