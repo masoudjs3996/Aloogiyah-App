@@ -7,7 +7,7 @@ const FarmCard = ({ farm }: { farm: ICreateFarmResponse }) => {
 
   return (
     <Link href={`/farm/${farm?.code}`}>
-      <div className="space-y-4 p-4">
+      <div className="space-y-4 p-4 hover:scale-105 duration-500">
         <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
           <div className="relative h-28 w-full overflow-hidden rounded-t-2xl">
             {farm?.imageUrl && (

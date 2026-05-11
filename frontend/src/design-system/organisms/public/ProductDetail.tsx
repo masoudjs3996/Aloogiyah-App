@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/design-system/atoms/Button";
 import { useProduct } from "@/hooks/queries/useProduct";
 import { getImageUrl } from "@/shared/utils/getImageUrl";
 import {
@@ -121,13 +122,8 @@ const ProductDetail = ({ productId }: { productId: string }) => {
           ))}
         </div>
       </div>
-
       {/* Add to Cart */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-white border-t">
-        <button className="w-full bg-emerald-500 text-white py-3 rounded-xl text-sm font-medium">
-          افزودن به سبد خرید
-        </button>
-      </div>
+      <Button variant="secondary">افزودن به سبد خرید</Button>
     </div>
   );
 };
