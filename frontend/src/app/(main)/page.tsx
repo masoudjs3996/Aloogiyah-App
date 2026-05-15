@@ -20,16 +20,13 @@ export default async function Home() {
   }
 
   return (
-    <>
-    {slider?.data && <BannerSlider slider={slider?.data}/>}
+    <div className="mt-[-15px]">
+      {slider?.data && <BannerSlider slider={slider?.data} />}
       <div className="mx-2">
         <h2 className="headlines-main">دسته‌بندی‌های‌ اصلی</h2>
-        <div className="flex justify-between flex-wrap p-4  my-10">
+        <div className="flex justify-around flex-wrap p-4  my-10">
           {categories.map((cat) => {
-            return <CategoryCard
-            key={cat.code}
-            category={cat}
-          />
+            return <CategoryCard key={cat.code} category={cat} />;
           })}
           {/* {Array.from({ length: 10 }).map((_, i) => (
             <CategoryCard
@@ -59,6 +56,6 @@ export default async function Home() {
           <ProductCard />
         </div>
       </div>
-    </>
+    </div>
   );
 }

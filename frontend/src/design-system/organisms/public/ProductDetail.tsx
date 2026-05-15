@@ -36,7 +36,7 @@ const ProductDetail = ({ productId }: { productId: string }) => {
     console.log(parentCode);
   }, [parentCode]);
   return (
-    <div className="mx-auto max-w-md min-h-screen bg-white">
+    <div className="mx-auto max-w-md mb-2 p-2 rounded-lg min-h-screen bg-white">
       <div className="p-4 flex items-center justify-between">
         <ArrowRightIcon className="w-4 h-4" />
       </div>
@@ -152,11 +152,7 @@ const ProductDetail = ({ productId }: { productId: string }) => {
       </div>
       {/* Add to Cart */}
       <Button variant="secondary">افزودن به سبد خرید</Button>
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-white border-t">
-        <button className="w-full bg-emerald-500 text-white py-3 rounded-xl text-sm font-medium">
-          افزودن به سبد خرید
-        </button>
-      </div>
+    
       <Modal
         open={openCommentForm}
         onClose={() => setOpenCommentForm(false)}

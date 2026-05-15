@@ -7,11 +7,11 @@ const HomeHeader: FC = () => {
   const user = useSelector((state: any) => state.user.data);;
 
   return (
-    <>
+    <div className="mb-24">
       {" "}
       <HeaderTop />
       
-    </>
+    </div>
   );
 };
 

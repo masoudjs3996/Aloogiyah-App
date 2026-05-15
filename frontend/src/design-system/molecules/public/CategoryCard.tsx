@@ -24,7 +24,7 @@ const CategoryCard: FC<CategoryCardProps> = ({ category }) => {
 
   return (
     <div
-      className="group relative bg-white rounded-md shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer"
+      className="group relative mb-5 min-w-36 bg-white rounded-md shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer"
       onClick={() => handlerClick(category?.code)}
     >
       <div className="relative w-full h-20 overflow-hidden bg-gray-50">
@@ -37,7 +37,7 @@ const CategoryCard: FC<CategoryCardProps> = ({ category }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
       <div className="p-1 flex items-center gap-2 bg-secondary-300">
-        <p className="text-sm font-medium text-gray-800 truncate">
+        <p className="text-sm font-medium text-gray-800 truncate mx-auto">
           {category?.name}
         </p>
       </div>
