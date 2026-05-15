@@ -39,7 +39,7 @@ const handleAuthClick = async () => {
       <div className="container-custom flex h-16 items-center justify-between md:h-20">
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="rounded-md p-2 text-foreground md:hidden"
+          className="rounded-md p-2 text-foreground lg:hidden"
           aria-label="Toggle menu"
         >
           {isMenuOpen ? (
@@ -59,7 +59,7 @@ const handleAuthClick = async () => {
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-1 lg:flex">
           {navLinks.map((link) => (
             <Link
               key={link.id}
@@ -85,7 +85,7 @@ const handleAuthClick = async () => {
       </div>
       {/* mobile nav */}
       {isMenuOpen && (
-        <div className="border-t border-border bg-card md:hidden">
+        <div className="border-t border-border bg-card lg:hidden">
 
           <nav className="container-custom flex flex-col gap-1 py-4">
             <p

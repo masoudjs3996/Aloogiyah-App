@@ -7,6 +7,7 @@ import { getImageUrl } from "@/shared/utils/getImageUrl";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
+import toast from "react-hot-toast";
 import { BiHeart } from "react-icons/bi";
 import { FaShoppingCart } from "react-icons/fa";
 import { useSelector } from "react-redux";
@@ -28,12 +29,12 @@ export default function ProductCard() {
       },
       {
         onSuccess: (data) => {
-          console.log(data);
+          toast.success(data?.message);
         },
         onError: (err) => {
           console.log(err);
         },
-      }
+      },
     );
   };
 

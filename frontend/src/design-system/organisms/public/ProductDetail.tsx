@@ -100,7 +100,7 @@ const ProductDetail = ({ productId }: { productId: string }) => {
       <div className="p-4 mt-6">
         <h2 className="font-medium text-sm mb-4">نظرات دیگر کاربران</h2>
 
-        <div className="space-y-4 ">
+        <div className="space-y-4  ">
           {comments &&
             comments?.map((comment: any) => (
               <div key={comment.code} className="space-y-2">
@@ -115,7 +115,7 @@ const ProductDetail = ({ productId }: { productId: string }) => {
                   <p>{comment.content}</p>
                   <Button
                     onClick={() => {
-                      setParentCode(comment?.parentCode);
+                      setParentCode(comment?.code);
                       setOpenCommentForm(true);
                     }}
                   >
@@ -136,14 +136,14 @@ const ProductDetail = ({ productId }: { productId: string }) => {
                       </span>
                     </div>
                     <p>{reply.content}</p>
-                    <Button
+                    {/* <Button
                       onClick={() => {
-                        setParentCode(reply?.parentCode);
+                        setParentCode(reply?.code);
                         setOpenCommentForm(true);
                       }}
                     >
                       پاسخ
-                    </Button>
+                    </Button> */}
                   </div>
                 ))}
               </div>
