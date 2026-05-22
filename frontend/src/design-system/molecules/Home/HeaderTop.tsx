@@ -9,6 +9,9 @@ import { BiMenu, BiX } from "react-icons/bi";
 import { useSelector } from "react-redux";
 import useLogout from "@/shared/hooks/useLogout";
 import SearchInput from "@/design-system/atoms/SearchInput";
+import { IoNotificationsOutline } from "react-icons/io5";
+import NotificationIcon from "@/design-system/atoms/NotificationIcon";
+import NotificationDropdown from "@/design-system/organisms/Home/NotificationDropdown";
 
 const HeaderTop: FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,6 +19,7 @@ const HeaderTop: FC = () => {
   const user = useSelector((state: any) => state.user.data);
   const logout = useLogout();
   const pathname = usePathname();
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const navLinks = [
     { id: 1, href: "/", label: "خانه" },
     { id: 2, href: "/categories", label: "دسته بندی" },
@@ -23,9 +27,8 @@ const HeaderTop: FC = () => {
     { id: 4, href: "/farm", label: "مزارع" },
     { id: 6, href: "/dashboard", label: "داشبورد" },
     { id: 5, href: "/contact", label: "تماس با ما" },
-   
   ];
-const handleAuthClick = async () => {
+  const handleAuthClick = async () => {
     setIsMenuOpen(false);
 
     if (user) {
@@ -49,14 +52,27 @@ const handleAuthClick = async () => {
           )}
         </button>
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green">
-            <FaLeaf className="h-6 w-6 text-green_foreground " />
+        <div className="flex gap-x-1 items-center ">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green">
+              <FaLeaf className="h-6 w-6 text-green_foreground " />
+            </div>
+            <span className="font-heading text-xl font-bold text-foreground">
+              الو گیاه
+            </span>
+          </Link>
+          <div className="relative">
+            <NotificationIcon
+              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+            />
+
+            {isNotificationOpen && (
+              <NotificationDropdown
+                onClose={() => setIsNotificationOpen(false)}
+              />
+            )}
           </div>
-          <span className="font-heading text-xl font-bold text-foreground">
-            الو گیاه
-          </span>
-        </Link>
+        </div>
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-1 lg:flex">
@@ -74,26 +90,24 @@ const handleAuthClick = async () => {
             </Link>
           ))}
         </nav>
-         <SearchInput />
+        <SearchInput />
         <Link
           href="/checkout/card"
           className="rounded-lg bg-primary px-5 py-2.5 text-sm text-secondary-700 font-semibold transition-colors hover:bg-primary/90 inline-flex"
         >
           <IconButton icon={<TiShoppingCart className="w-6 h-7 " />} />
         </Link>
-        
       </div>
       {/* mobile nav */}
       {isMenuOpen && (
         <div className="border-t border-border bg-card lg:hidden">
-
           <nav className="container-custom flex flex-col gap-1 py-4">
             <p
-          onClick={handleAuthClick}
-          className="rounded-md px-4 py-3 text-base font-medium transition-colors text-muted_foreground hover:bg-accent"
-        >
-          {user ? "خروج" : "ورود"}
-        </p>
+              onClick={handleAuthClick}
+              className="rounded-md px-4 py-3 text-base font-medium transition-colors text-muted_foreground hover:bg-accent"
+            >
+              {user ? "خروج" : "ورود"}
+            </p>
             {navLinks.map((link) => (
               <Link
                 key={link.id}
