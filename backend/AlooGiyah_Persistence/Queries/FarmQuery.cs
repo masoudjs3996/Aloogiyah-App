@@ -21,7 +21,6 @@ public class FarmQuery : BaseQuery, IFarmQuery
 
         var where = new StringBuilder();
         where.AppendLine("WHERE 1=1");
-
         where.AppendLine("AND f.\"IsDeleted\" = FALSE");
 
         if (!string.IsNullOrWhiteSpace(filter.Name))
@@ -34,6 +33,12 @@ public class FarmQuery : BaseQuery, IFarmQuery
         {
             where.AppendLine("AND u.\"Code\" = @UserCode");
             parameters.Add("UserCode", filter.UserCode);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.StatusCode))
+        {
+            where.AppendLine("AND s.\"Code\" = @StatusCode");
+            parameters.Add("StatusCode", filter.StatusCode);
         }
 
         parameters.Add("FarmEntity", (int)EntityFile.Farm);
@@ -50,15 +55,27 @@ SELECT
 
     farmFile.""Url"" AS ""FarmImageUrl"",
     userFile.""Url"" AS ""UserImageUrl""
+
 FROM ""Farms"" f
 INNER JOIN ""Users"" u ON u.""UserId"" = f.""OwnerId""
-LEFT JOIN ""Files"" farmFile ON farmFile.""EntityCode"" = f.""Code"" AND farmFile.""EntityFile"" = @FarmEntity AND farmFile.""IsPrimary"" = TRUE
-LEFT JOIN ""Files"" userFile ON userFile.""EntityCode"" = u.""Code"" AND userFile.""EntityFile"" = @UserEntity AND userFile.""IsPrimary"" = TRUE
+INNER JOIN ""Statuses"" s ON s.""StatusId"" = f.""StatusId""
+
+LEFT JOIN ""Files"" farmFile
+    ON farmFile.""EntityCode"" = f.""Code""
+    AND farmFile.""EntityFile"" = @FarmEntity
+    AND farmFile.""IsPrimary"" = TRUE
+
+LEFT JOIN ""Files"" userFile
+    ON userFile.""EntityCode"" = u.""Code""
+    AND userFile.""EntityFile"" = @UserEntity
+    AND userFile.""IsPrimary"" = TRUE
 ";
+
         var countSql = @"
 SELECT COUNT(*)
 FROM ""Farms"" f
 INNER JOIN ""Users"" u ON u.""UserId"" = f.""OwnerId""
+INNER JOIN ""Statuses"" s ON s.""StatusId"" = f.""StatusId""
 ";
 
         return await QueryPagedAsync<FarmListDto>(

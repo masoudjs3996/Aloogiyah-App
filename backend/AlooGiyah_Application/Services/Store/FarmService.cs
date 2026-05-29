@@ -130,12 +130,14 @@ public class FarmService : IFarmService
                 // ← اینجا SaveChanges نزن!
             }
 
+            
+
             var farmEntity = _mapper.Map<Farm>(dto);
             farmEntity.OwnerId = currentUserId;
             farmEntity.Address = addressEntity; // ← رابطه رو مستقیم ست کن (نه AddressId)
-
+            farmEntity.StatusId = 91; // پیشفرض برای مزرعه معمولی
             await _farmRepository.AddAsync(farmEntity);
-            // ← اینجا هم SaveChanges نزن!
+    
 
             // فقط یک بار SaveChanges — همه چیز با هم ذخیره میشه
             await _unitOfWork.SaveChangesAsync();
@@ -446,9 +448,9 @@ public class FarmService : IFarmService
     #endregion
 
     #region GetByFilterAsync
-    public Task<PagedResult<FarmListDto>> GetByFilterAsync(FarmFilterDto filter)
+    public async Task<PagedResult<FarmListDto>> GetByFilterAsync(FarmFilterDto filter)
     {
-        return _farmQuery.GetByFilterAsync(filter);
+        return await _farmQuery.GetByFilterAsync(filter);
     }
     #endregion
 }
