@@ -10,6 +10,6 @@ public interface IFarmService
     Task<bool> DeleteAsync(string code);
     Task<FarmDto?> GetByCodeAsync(string code);
     Task<PagedResult<MyFarmlistDto>> GetMyFarmsAsync(GetMyFarmDto filter);
-    Task<PagedResult<FarmDto>> GetByFilterAsync(FarmFilterDto filter);
+    Task<PagedResult<FarmListDto>> GetByFilterAsync(FarmFilterDto filter);
     Task<string> ChangeFarmImageAsync(UploadFarmImageDto upload);
 }
