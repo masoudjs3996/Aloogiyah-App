@@ -28,7 +28,7 @@ export const Sidebar = ({ role }: SidebarProps) => {
       >
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className={`mb-6 p-2 rounded hover:bg-slate-700 transition `}
+          className={`mb-6 p-2 rounded hover:bg-secondary-900 text-secondary-700 duration-200 `}
         >
           <FiMenu size={20} />
         </button>

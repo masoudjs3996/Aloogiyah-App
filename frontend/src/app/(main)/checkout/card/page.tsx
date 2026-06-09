@@ -205,7 +205,7 @@ const CartPage = () => {
             ))}
           </div>
 
-          <div className="bg-gray-100 w-[90%] lg:w-[35%] p-4 rounded-lg h-fit mx-auto mb-5 lg:mb-0">
+          <div className="sticky bottom-12 lg:top-24 bg-gray-100 shadow w-[90%] lg:w-[35%] p-4 rounded-lg h-fit mx-auto mb-5 lg:mb-0">
             <h2 className="text-gray-800 text-xl border-b-2 border-gray-300 pb-4 mb-8">
               قیمت کالا‌ها
             </h2>
