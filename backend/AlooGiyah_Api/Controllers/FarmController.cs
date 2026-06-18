@@ -80,7 +80,7 @@ public class FarmController : ControllerBase
     #endregion
 
     #region GetByCode
-    [Authorize]
+    [AllowAnonymous]
     [HttpGet("GetByCode")]
     public async Task<IActionResult> GetByCodeAsync([FromQuery] string code)
     {

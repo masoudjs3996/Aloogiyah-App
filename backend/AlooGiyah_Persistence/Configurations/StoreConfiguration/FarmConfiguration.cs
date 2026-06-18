@@ -34,6 +34,12 @@ public class FarmConfiguration : IEntityTypeConfiguration<Farm>
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired(false);
 
+        builder.HasOne(g => g.Status)
+            .WithMany()
+            .HasForeignKey(g => g.StatusId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(true);
+
         builder.HasMany(g => g.AgriculturalProduct)
             .WithOne(p => p.Farm) 
             .HasForeignKey(p => p.FarmId)

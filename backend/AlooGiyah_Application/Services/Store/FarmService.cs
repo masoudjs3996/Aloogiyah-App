@@ -1,6 +1,7 @@
 ﻿using AlooGiyah_Application.DTOs.Address;
 using AlooGiyah_Application.DTOs.Farm;
 using AlooGiyah_Application.DTOs.File;
+using AlooGiyah_Application.Interfaces.Query;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Application.Interfaces.Service.Store;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
@@ -31,6 +32,7 @@ public class FarmService : IFarmService
     private readonly IGenericRepository<Village> _villageRepo;
     private readonly IGenericRepository<Files> _fileRepo;
     private readonly IFileService _fileService;
+    private readonly IFarmQuery _farmQuery;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
@@ -45,6 +47,7 @@ public class FarmService : IFarmService
         IGenericRepository<Village> villageRepo,
         IGenericRepository<Files> fileRepo,
     IFileService fileService,
+    IFarmQuery farmQuery,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
         IMapper mapper)
@@ -58,6 +61,7 @@ public class FarmService : IFarmService
         _villageRepo = villageRepo;
         _fileRepo = fileRepo;
         _fileService = fileService;
+        _farmQuery = farmQuery;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
@@ -126,12 +130,14 @@ public class FarmService : IFarmService
                 // ← اینجا SaveChanges نزن!
             }
 
+            
+
             var farmEntity = _mapper.Map<Farm>(dto);
             farmEntity.OwnerId = currentUserId;
             farmEntity.Address = addressEntity; // ← رابطه رو مستقیم ست کن (نه AddressId)
-
+            farmEntity.StatusId = 91; // پیشفرض برای مزرعه معمولی
             await _farmRepository.AddAsync(farmEntity);
-            // ← اینجا هم SaveChanges نزن!
+    
 
             // فقط یک بار SaveChanges — همه چیز با هم ذخیره میشه
             await _unitOfWork.SaveChangesAsync();
@@ -413,6 +419,7 @@ public class FarmService : IFarmService
     }
     #endregion
 
+    #region GetMyFarmsAsync
     public async Task<PagedResult<MyFarmlistDto>> GetMyFarmsAsync(GetMyFarmDto filter)
     {
         var predicate = LinqKit.PredicateBuilder.True<Farm>()
@@ -438,65 +445,12 @@ public class FarmService : IFarmService
 
         return result;
     }
+    #endregion
 
-    public async Task<PagedResult<FarmDto>> GetByFilterAsync(FarmFilterDto filter)
+    #region GetByFilterAsync
+    public async Task<PagedResult<FarmListDto>> GetByFilterAsync(FarmFilterDto filter)
     {
-        var predicate = LinqKit.PredicateBuilder.True<Farm>()
-            .And(f => !f.IsDeleted);
-
-        if (!string.IsNullOrWhiteSpace(filter.UserCode))
-        {
-            predicate = predicate.And(f => f.Owner.Code == filter.UserCode);
-        }
-
-        if (!string.IsNullOrWhiteSpace(filter.Name))
-            predicate = predicate.And(f => f.Name.Contains(filter.Name));
-
-        var result = await _farmRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: f => new FarmDto
-            {
-                Code = f.Code,
-                Name = f.Name,
-                Description = f.Description,
-                Capacity = f.Capacity,
-                MinPurchase = f.MinPurchase,
-                OwnerCode = f.Owner.Code,
-                CreatedAt = f.CreatedAt,
-                Address = f.Address != null ? new AddressDto
-                {
-                    Code = f.Address.Code,
-                    Street = f.Address.Street,
-                    PostalCode = f.Address.PostalCode,
-                    Latitude = f.Address.Latitude,
-                    Longitude = f.Address.Longitude,
-                    IsDefault = f.Address.IsDefault,
-                    ProvinceCode = f.Address.Province.Code,
-                    ProvinceName = f.Address.Province.Name,
-                    CountyCode = f.Address.County.Code,
-                    CountyName = f.Address.County.Name,
-                    CityCode = f.Address.City != null ? f.Address.City.Code : null,
-                    CityName = f.Address.City != null ? f.Address.City.Name : null,
-                    VillageCode = f.Address.Village != null ? f.Address.Village.Code : null,
-                    VillageName = f.Address.Village != null ? f.Address.Village.Name : null
-                } : null
-            },
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: f => f.CreatedAt,
-            expressionIncludes: new Expression<Func<Farm, object>>[]
-            {
-            f => f.Owner!,
-            f => f.Address!.Province!,
-            f => f.Address!.County!,
-            f => f.Address!.City!,
-            f => f.Address!.Village!
-            }
-        );
-
-        foreach (var item in result.Items)
-            item.ImageUrl = await _fileService.GetPrimaryFileUrlAsync(EntityFile.Farm, item.Code);
-
-        return result;
+        return await _farmQuery.GetByFilterAsync(filter);
     }
+    #endregion
 }
