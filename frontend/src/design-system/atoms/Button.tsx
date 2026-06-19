@@ -13,7 +13,8 @@ const Button: FC<ButtonProps> = ({
   onClick,
   ...rest
 }) => {
-  const base = "px-2 flex justify-center items-center gap-x-1 py-1 rounded-md font-bold  shadow-lg w-full";
+  const base =
+    "px-2 h-12 flex justify-center items-center gap-x-1 py-1 rounded-md font-bold  shadow-lg w-full";
 
   const styles = {
     primary: "bg-primary-900 text-white hover:bg-primary-800",

@@ -17,7 +17,7 @@ const SidebarItem = ({ icon, label, collapsed, href }: SidebarItemProps) => {
       <motion.div
         animate={{ width: collapsed ? 36 : 136 }}
         transition={{ duration: 0.3 }}
-        className="flex gap-3 p-2 rounded hover:bg-slate-700 cursor-pointer overflow-hidden"
+        className="flex gap-3  p-2 rounded hover:bg-secondary-900 text-secondary-700 duration-200 cursor-pointer overflow-hidden"
       >
         <div>{icon}</div>
 
