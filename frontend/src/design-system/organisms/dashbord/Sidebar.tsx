@@ -37,15 +37,13 @@ export const Sidebar = ({ role }: SidebarProps) => {
       <nav className={`flex flex-col gap-4`}>
         {filteredMenu.map((menu) => {
           return (
-            <>
-              <SidebarItem
-                icon={<menu.icon size={20} />}
-                label={menu.label}
-                key={menu.label}
-                collapsed={collapsed}
-                href={menu.path}
-              />
-            </>
+            <SidebarItem
+              icon={<menu.icon size={20} />}
+              label={menu.label}
+              key={`${menu.path}-${menu.label}`}
+              collapsed={collapsed}
+              href={menu.path}
+            />
           );
         })}
       </nav>

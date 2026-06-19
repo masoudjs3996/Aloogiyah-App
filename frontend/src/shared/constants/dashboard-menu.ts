@@ -13,12 +13,12 @@ export const dashboardMenu = [
     label: "خانه",
     roles: ["Admin", "User", "Buyer", "Manager", "Farmer"],
   },
-  {
-    path: "/",
-    icon: FaHome,
-    label: "خانه",
-    roles: ["Admin", "User", "Manager", "Farmer", "Buyer"],
-  },
+  // {
+  //   path: "/",
+  //   icon: FaHome,
+  //   label: "خانه",
+  //   roles: ["Admin", "User", "Manager", "Farmer", "Buyer"],
+  // },
   {
     path: "/dashboard/farm/myFarms",
     icon: GiFarmer,

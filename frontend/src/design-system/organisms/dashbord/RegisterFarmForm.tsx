@@ -8,8 +8,10 @@ import { useLocationData } from "@/hooks/queries/useCounties";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import useCreateFarm from "@/hooks/mutations/useCreateFarm";
 import toast from "react-hot-toast";
-import { FaTrash, FaUpload } from "react-icons/fa";
-import { useState } from "react";
+import { FaUpload } from "react-icons/fa";
+import { useEffect, useState } from "react";
+import Map from "./ExportMap";
+
 type RegisterFarmFormProps = {
   provinces: IProvinces[] | null | undefined;
 };
@@ -41,11 +43,17 @@ const RegisterFarmForm = ({ provinces }: RegisterFarmFormProps) => {
   const { data: counties } = useLocationData("counties", selectedProvinceCode);
   const { data: cities } = useLocationData(
     "cityAndVillage",
-    selectedCountyCode
+    selectedCountyCode,
   );
-
+  const [location, setLocation] = useState({
+    lat: 35.6892,
+    lng: 51.389,
+  });
   const { createFarm } = useCreateFarm();
 
+  useEffect(() => {
+    console.log(location);
+  }, [location]);
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -65,8 +73,8 @@ const RegisterFarmForm = ({ provinces }: RegisterFarmFormProps) => {
     formData.append("Capacity", "0");
     formData.append("Address.Street", data.address?.trim());
     formData.append("Address.PostalCode", data.postalCode?.trim());
-    formData.append("Address.Latitude", "0");
-    formData.append("Address.Longitude", "0");
+    formData.append("Address.Latitude", String(location?.lat));
+    formData.append("Address.Longitude", String(location?.lng));
     formData.append("Address.IsDefault", "false");
     formData.append("Address.ProvinceCode", data.province || "");
     formData.append("Address.CountyCode", data.county || "");
@@ -81,7 +89,7 @@ const RegisterFarmForm = ({ provinces }: RegisterFarmFormProps) => {
     } else if (selectedLocation?.type === "City" || selectedLocation) {
       formData.append(
         "Address.CityCode",
-        selectedLocation?.code || data.city || ""
+        selectedLocation?.code || data.city || "",
       );
       formData.append("Address.VillageCode", "");
     } else {
@@ -219,14 +227,16 @@ const RegisterFarmForm = ({ provinces }: RegisterFarmFormProps) => {
           onChange: (e) => {
             const clean = e.target.value.replace(
               /[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g,
-              ""
+              "",
             );
             e.target.value = clean;
           },
         })}
         className="w-full p-2 rounded-md border-2"
       />
-
+      <div className="w-[400px] h-[400px] overflow-hidden bg-white p-5 relative">
+        <Map position={location} updatePosition={setLocation} isAdvertiseView />
+      </div>
       <Button variant="success" className="w-full" type="submit">
         ثبت نهایی مزرعه
       </Button>

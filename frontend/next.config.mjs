@@ -9,7 +9,7 @@ const nextConfig = {
       },
     ],
   },
-  reactStrictMode: true,
+  reactStrictMode: false,
   // output: "export",
   ///////////////////// this is for corse error /////////////////////////////////////////////
   async rewrites() {
