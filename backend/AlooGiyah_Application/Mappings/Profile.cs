@@ -325,10 +325,9 @@ namespace AlooGiyah_Application.Mappings
 
             #region Cart
             CreateMap<Cart, CartDto>()
-            .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.CartItems.Sum(i => i.Quantity)))
-            .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.CartItems.Sum(i => i.Quantity * i.Price)))
-            .ForMember(dest => dest.IsGuest, opt => opt.MapFrom(src => src.UserId == null));
-
+                .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.CartItems.Sum(i => i.Quantity)))
+                .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.CartItems.Sum(i => i.Quantity * i.Price)))
+                .ForMember(dest => dest.IsGuest, opt => opt.MapFrom(src => src.UserId == null));
 
             CreateMap<CartItem, CartItemDto>()
                 .ForMember(d => d.Code, o => o.MapFrom(s => s.Code))
@@ -339,8 +338,28 @@ namespace AlooGiyah_Application.Mappings
                 .ForMember(d => d.UnitPrice,
                     o => o.MapFrom(s =>
                         s.Quantity == 0 ? 0 : s.Price / s.Quantity))
-                .ForMember(d => d.TotalPrice, o => o.Ignore());
+                .ForMember(d => d.TotalPrice, o => o.Ignore())
+                .ForMember(d => d.PrimaryImageUrl, o => o.Ignore()); // ← برای تصویر محصول
 
+            // مپ جدید برای Farm → FarmCartDto
+            CreateMap<Farm, FarmCartDto>()
+                .ForMember(d => d.FarmCode, o => o.MapFrom(s => s.Code))
+                .ForMember(d => d.FarmName, o => o.MapFrom(s => s.Name))
+                .ForMember(d => d.TotalPrice, o => o.Ignore()) // در سرویس محاسبه می‌شود
+                .ForMember(d => d.DiscountAmount, o => o.Ignore())
+                .ForMember(d => d.ImageUrl, o => o.Ignore()) // از سرویس دریافت می‌شود
+                .ForMember(d => d.Province, o => o.MapFrom(s =>
+                    s.Address != null && s.Address.City != null &&
+                    s.Address.City.County != null && s.Address.City.County.Province != null
+                        ? s.Address.City.County.Province.Name
+                        : null))
+                .ForMember(d => d.County, o => o.MapFrom(s =>
+                    s.Address != null && s.Address.City != null &&
+                    s.Address.City.County != null
+                        ? s.Address.City.County.Name
+                        : null))
+                .ForMember(d => d.Items, o => o.MapFrom(s => s.AgriculturalProduct.SelectMany(p => p.CartItems)));
+            // توجه: این ممکن است همه آیتم‌های محصولات را بیاورد، پس بهتر است در سرویس مدیریت شود
             #endregion
 
             #region Notification

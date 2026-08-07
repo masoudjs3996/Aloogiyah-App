@@ -1,8 +1,10 @@
 {
   "ExpandedNodes": [
     "",
-    "\\backend"
+    "\\backend",
+    "\\backend\\AlooGiyah_Persistence",
+    "\\backend\\AlooGiyah_Persistence\\Migrations"
   ],
-  "SelectedNode": "\\backend\\AlooGiyah.sln",
+  "SelectedNode": "\\backend\\AlooGiyah_Persistence\\Migrations\\20260529171840_AddStatusCodeForFarm.cs",
   "PreviewInSolutionExplorer": false
 }

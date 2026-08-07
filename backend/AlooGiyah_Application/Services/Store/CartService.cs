@@ -2,7 +2,9 @@
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Application.Interfaces.Service.Store;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
+using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.Store;
+using AlooGiyah_Domain.Enums;
 using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Shared.Exceptions;
 using AutoMapper;
@@ -17,15 +19,18 @@ public class CartService : ICartService
     private readonly IGenericRepository<Cart> _cartRepo;
     private readonly IGenericRepository<CartItem> _cartItemRepo;
     private readonly IGenericRepository<AgriculturalProduct> _productRepo;
+    private readonly IGenericRepository<Files> _fileRepo;
     private readonly ICartRepository _cartRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
     private readonly IPriceCalculatorService _priceCalculator;
     private readonly IMapper _mapper;
+
     public CartService(
     IGenericRepository<Cart> cartRepo,
     IGenericRepository<CartItem> cartItemRepo,
     IGenericRepository<AgriculturalProduct> productRepo,
+    IGenericRepository<Files> failRepo,
     ICartRepository cartRepository,
     IUnitOfWork unitOfWork,
     ICurrentUserService currentUserService,
@@ -35,6 +40,7 @@ public class CartService : ICartService
         _cartRepo = cartRepo;
         _cartItemRepo = cartItemRepo;
         _productRepo = productRepo;
+        _fileRepo = failRepo;
         _cartRepository = cartRepository;
         _unitOfWork = unitOfWork;
         _currentUserService = currentUserService;
@@ -55,11 +61,14 @@ public class CartService : ICartService
     public async Task<CartDto?> GetCartAsync()
     {
         var cartQuery = _cartRepo.GetAll()
-            .Include(c => c.CartItems)
-                .ThenInclude(i => i.AgriculturalProduct)
-                    .ThenInclude(p => p.Farm)
-            .Where(c => !c.IsDeleted);
-
+        .Include(c => c.CartItems)
+            .ThenInclude(i => i.AgriculturalProduct)
+                .ThenInclude(p => p.Farm)
+                    .ThenInclude(f => f.Address)
+                        .ThenInclude(a => a.City)
+                            .ThenInclude(c => c.County)
+                                .ThenInclude(co => co.Province)
+        .Where(c => !c.IsDeleted);
         Cart? cart;
 
         if (_currentUserService.IsGuest)
@@ -90,11 +99,15 @@ public class CartService : ICartService
     public async Task<CartDto?> GetCartByIdAsync(Guid cartId)
     {
         var cart = await _cartRepo.GetAll()
-            .Include(c => c.CartItems)
-                .ThenInclude(ci => ci.AgriculturalProduct)
-                    .ThenInclude(p => p.Farm)   // اگر نیاز به اطلاعات مزرعه داری
-            .Include(c => c.Farm)
-            .FirstOrDefaultAsync(c => c.CartId == cartId && !c.IsDeleted);
+        .Include(c => c.CartItems)
+            .ThenInclude(ci => ci.AgriculturalProduct)
+                .ThenInclude(p => p.Farm)
+                    .ThenInclude(f => f.Address)
+                        .ThenInclude(a => a.City)
+                            .ThenInclude(c => c.County)
+                                .ThenInclude(co => co.Province)
+        .Include(c => c.Farm)
+        .FirstOrDefaultAsync(c => c.CartId == cartId && !c.IsDeleted);
 
         if (cart == null)
         {
@@ -317,33 +330,82 @@ public class CartService : ICartService
 
     private CartDto BuildCartDto(Cart cart)
     {
+        // استخراج کدهای منحصربه‌فرد
+        var farmCodes = cart.CartItems
+            .Select(i => i.AgriculturalProduct.Farm.Code)
+            .Distinct()
+            .ToList();
+
+        var productCodes = cart.CartItems
+            .Select(i => i.AgriculturalProduct.Code)
+            .Distinct()
+            .ToList();
+
+        // دریافت تصاویر اصلی مزرعه‌ها
+        var farmImages = _fileRepo.GetAll()
+            .Where(f => !f.IsDeleted && f.IsPrimary &&
+                        f.EntityFile == EntityFile.Farm &&
+                        farmCodes.Contains(f.EntityCode))
+            .ToDictionary(f => f.EntityCode, f => f.Url);
+
+        // دریافت تصاویر اصلی محصولات کشاورزی
+        var productImages = _fileRepo.GetAll()
+            .Where(f => !f.IsDeleted && f.IsPrimary &&
+                        f.EntityFile == EntityFile.AgriculturalProduct &&
+                        productCodes.Contains(f.EntityCode))
+            .ToDictionary(f => f.EntityCode, f => f.Url);
+
         return new CartDto
         {
             CartId = cart.CartId,
             Code = cart.Code,
             IsGuest = cart.UserId == null,
-
             Farms = cart.CartItems
-                .GroupBy(i => i.AgriculturalProduct.Farm)
-                .Select(g => new FarmCartDto
-                {
-                    FarmCode = g.Key.Code,
-                    FarmName = g.Key.Name,
+           .GroupBy(i => i.AgriculturalProduct.Farm)
+           .Select(g =>
+           {
+               var farm = g.Key;
+               var address = farm.Address;
+               var city = address?.City;
+               var county = city?.County;
+               var province = county?.Province;
 
-                    TotalPrice = g.Sum(i => i.Price),
-
-                    Items = g.Select(i => _mapper.Map<CartItemDto>(i)).ToList()
-                }).ToList()
+               return new FarmCartDto
+               {
+                   FarmCode = farm.Code,
+                   FarmName = farm.Name,
+                   TotalPrice = g.Sum(i => i.Price),
+                   ImageUrl = farmImages.GetValueOrDefault(farm.Code),
+                   Province = province?.Name,   // ← نام استان
+                   County = county?.Name,       // ← نام شهرستان
+                   Items = g.Select(i => new CartItemDto
+                   {
+                       Code = i.Code,
+                       ProductCode = i.AgriculturalProduct.Code,
+                       ProductName = i.AgriculturalProduct.Name,
+                       ProductSlug = i.AgriculturalProduct.Slug,
+                       Quantity = i.Quantity,
+                       UnitPrice = i.Price,
+                       AvailableStock = i.AgriculturalProduct.Stock,
+                       PrimaryImageUrl = productImages.GetValueOrDefault(i.AgriculturalProduct.Code)
+                   }).ToList()
+               };
+           }).ToList()
         };
     }
+    
 
     private async Task<Cart> GetCurrentCartAsync()
     {
         var query = _cartRepo.GetAll()
-            .Include(c => c.CartItems)
-                .ThenInclude(i => i.AgriculturalProduct)
-                    .ThenInclude(p => p.Farm)
-            .Where(c => !c.IsDeleted);
+    .Include(c => c.CartItems)
+        .ThenInclude(i => i.AgriculturalProduct)
+            .ThenInclude(p => p.Farm)
+                .ThenInclude(f => f.Address)
+                    .ThenInclude(a => a.City)
+                        .ThenInclude(c => c.County)
+                            .ThenInclude(co => co.Province)
+    .Where(c => !c.IsDeleted);
 
         Cart? cart;
 

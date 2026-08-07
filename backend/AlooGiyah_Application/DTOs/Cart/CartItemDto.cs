@@ -15,6 +15,8 @@ namespace AlooGiyah_Application.DTOs.Cart
         public decimal TotalPrice => Quantity * UnitPrice;
 
         public int AvailableStock { get; set; }
+        public string? PrimaryImageUrl { get; set; }
+
     }
 
 
