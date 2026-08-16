@@ -43,10 +43,13 @@ export default async function Home() {
           {/* <span className="text-xs sm:text-sm text-gray-500">مشاهده همه</span> */}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4  my-10">
-          {Array.from({ length: 4 }, (_, i) => {
+          {farms.map((farm: any) => {
+            return <FarmCard key={farm.description} farm={farm} />;
+          })}
+          {/* {Array.from({ length: 4 }, (_, i) => {
             const farm = farms[i % farms?.length];
             return <FarmCard key={`${farm.code}-${i}`} farm={farm} />;
-          })}
+          })} */}
         </div>
         <div className="flex items-center justify-between w-full">
           <h2 className="headlines-main">محصولات برتر</h2>

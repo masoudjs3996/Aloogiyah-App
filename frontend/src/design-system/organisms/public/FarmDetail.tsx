@@ -10,6 +10,7 @@ import { truncateText } from "@/shared/utils/truncateText";
 import SearchInput from "@/design-system/atoms/SearchInput";
 import useDebounce from "@/shared/hooks/useDebounce";
 import AnimatedSearchInput from "@/design-system/atoms/AnimatedSearchInput";
+import Map from "../dashbord/ExportMap";
 type Product = {
   id: number;
   name: string;
@@ -19,7 +20,7 @@ type Product = {
 };
 const TABS = ["همه", "بالاترین قیمت", "بیشترین موجودی", "کمترین موجودی"];
 const FarmDetail = ({ farmId }: { farmId: string }) => {
-  const { farmDetail, farmDetailLoading,} = useMyFarm(farmId);
+  const { farmDetail, farmDetailLoading } = useMyFarm(farmId);
   const [activeTab, setActiveTab] = useState("همه");
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
@@ -132,6 +133,15 @@ const FarmDetail = ({ farmId }: { farmId: string }) => {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="w-[400px] h-[400px] overflow-hidden bg-white p-5 relative">
+        <Map
+          position={{
+            lat: address?.latitude,
+            lng: address?.longitude,
+          }}
+        />
       </div>
 
       {/* Bottom Quantity Bar */}
