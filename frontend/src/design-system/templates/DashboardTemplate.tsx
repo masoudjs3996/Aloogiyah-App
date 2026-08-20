@@ -1,8 +1,9 @@
 "use client";
-import { ReactNode, useEffect } from "react";
+
+import { ReactNode, useEffect, useState } from "react";
 import { Sidebar } from "../organisms/dashbord/Sidebar";
-import Notification from "../molecules/dashbord/NotificationItem";
 import { useUser } from "@/hooks/queries/useUser";
+import Header from "../organisms/dashbord/Header";
 
 interface DashboardTemplateProps {
   children: ReactNode;
@@ -11,43 +12,60 @@ interface DashboardTemplateProps {
 const DashboardTemplate = ({ children }: DashboardTemplateProps) => {
   const { roulData } = useUser();
 
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
   useEffect(() => {
-    console.log(roulData);
-  }, [roulData]);
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768; // md breakpoint
+      setIsMobile(mobile);
+
+      if (!mobile) {
+        setMobileOpen(false);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
   return (
-    <div className="flex h-screen  justify-end">
-      {roulData?.data?.roleName && <Sidebar role={roulData?.data?.roleName} />}
-      <main className="flex-1 p-8 overflow-y-auto">{children}</main>
-      {/* <aside className="w-36 bg-white border-l p-6 hidden lg:block">
-        <h3 className="text-lg font-semibold mb-4">Notifications</h3>
-        <Notification text="New message" />
-        <Notification text="Server updated" />
-      </aside> */}
+    <div className="flex h-screen justify-end py-2 gap-x-10">
+      {roulData?.data?.roleName && (
+        <Sidebar
+          role={roulData?.data?.roleName}
+          collapsed={collapsed}
+          isMobile={isMobile}
+          mobileOpen={mobileOpen}
+          setMobileOpen={setMobileOpen}
+        />
+      )}
+
+      <div className="flex flex-col w-full min-w-0">
+        <Header
+          setCollapsed={setCollapsed}
+          collapsed={collapsed}
+          isMobile={isMobile}
+          mobileOpen={mobileOpen}
+          setMobileOpen={setMobileOpen}
+        />
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto">{children}</main>
+      </div>
     </div>
   );
 };
+
 export default DashboardTemplate;
-
-// ---------- Components ----------
-
-// import { TextField } from "../molecules/public";
-// import { DashboardBottomNavigation } from "../organisms/dashbord";
-// import { ProfileHeader } from "../organisms/dashbord/ProfileHeader";
-
-// interface DashboardTemolateProps {
-//   children: React.ReactNode;
-// }
-
-// const DashboardTemolate = ({ children }: DashboardTemolateProps) => {
-//   return (
-//     <>
-//       <div className="fixed top-0 w-full z-10">
-//         <ProfileHeader />
-//       </div>
-//       <main className="p-4 mt-10 pb-20">{children}</main>
-//       <DashboardBottomNavigation />
-//     </>
-//   );
-// };
-
-// export default DashboardTemolate;
