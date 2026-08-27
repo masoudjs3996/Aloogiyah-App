@@ -1,14 +1,15 @@
-'use client'
+"use client";
 
-import { ReactNode } from "react"
-import { motion } from "framer-motion"
-import Link from "next/link"
+import { ReactNode } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+
 
 interface SidebarItemProps {
-  icon: ReactNode
-  label: string
-  collapsed: boolean
-  href: string
+  icon: ReactNode;
+  label: string;
+  collapsed: boolean;
+  href: string;
 }
 
 const SidebarItem = ({ icon, label, collapsed, href }: SidebarItemProps) => {
@@ -33,7 +34,7 @@ const SidebarItem = ({ icon, label, collapsed, href }: SidebarItemProps) => {
         )}
       </motion.div>
     </Link>
-  )
-}
+  );
+};
 
-export default SidebarItem
+export default SidebarItem;

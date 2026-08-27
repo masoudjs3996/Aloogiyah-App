@@ -4,7 +4,7 @@ import { getProvinces } from "@/lib/actions/city";
 const RegisterFarm = async () => {
   const provinces = await getProvinces();
   return (
-    <div className="max-w-md mx-auto p-4 space-y-6 w-full">
+    <div className=" mx-auto p-4 space-y-6 w-full">
       <RegisterFarmForm provinces={provinces} />
     </div>
   );

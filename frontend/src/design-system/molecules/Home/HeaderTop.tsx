@@ -12,6 +12,7 @@ import SearchInput from "@/design-system/atoms/SearchInput";
 import { IoNotificationsOutline } from "react-icons/io5";
 import NotificationIcon from "@/design-system/atoms/NotificationIcon";
 import NotificationDropdown from "@/design-system/organisms/Home/NotificationDropdown";
+import { useNotifications } from "@/hooks/queries/useNotifications";
 
 const HeaderTop: FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -20,6 +21,7 @@ const HeaderTop: FC = () => {
   const logout = useLogout();
   const pathname = usePathname();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const { data: NotifData } = useNotifications();
   const navLinks = [
     { id: 1, href: "/", label: "خانه" },
     { id: 2, href: "/categories", label: "دسته بندی" },
@@ -68,6 +70,7 @@ const HeaderTop: FC = () => {
 
             {isNotificationOpen && (
               <NotificationDropdown
+                data={NotifData}
                 onClose={() => setIsNotificationOpen(false)}
               />
             )}

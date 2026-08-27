@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { dashboardMenu } from "@/shared/constants/dashboard-menu";
 import SidebarItem from "@/design-system/molecules/dashbord/SidebarItem";
 import { FiX } from "react-icons/fi";
+import { FaLeaf } from "react-icons/fa";
 
 interface SidebarProps {
   role: string;
@@ -58,7 +59,7 @@ export const Sidebar = ({
                 </button>
               </div>
 
-              <nav className="flex flex-col gap-3">
+              <nav className="flex flex-col gap-3 ">
                 {filteredMenu.map((menu) => (
                   <div
                     key={`${menu.path}-${menu.label}`}
@@ -86,7 +87,18 @@ export const Sidebar = ({
       transition={{ duration: 0.3 }}
       className="text-primary-700 flex flex-col p-2 overflow-hidden shrink-0 bg-white rounded-xl"
     >
-      <nav className="flex flex-col gap-4">
+      <nav className="flex flex-col gap-4 ">
+        <div className="flex items-center gap-2">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green">
+            <FaLeaf className="h-6 w-6 shrink-0 text-green_foreground" />
+          </div>
+
+          {!collapsed && (
+            <span className="whitespace-nowrap font-heading text-xl font-bold text-foreground">
+              الو گیاه
+            </span>
+          )}
+        </div>
         {filteredMenu.map((menu) => (
           <SidebarItem
             icon={<menu.icon size={20} />}
