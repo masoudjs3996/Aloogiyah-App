@@ -30,8 +30,12 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
@@ -55,8 +59,7 @@
               "RelativeToolTip": "backend\\AlooGiyah_Domain\\Entities\\Files.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-06T17:42:07.793Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-06T17:42:07.793Z"
             },
             {
               "$type": "Document",
@@ -68,8 +71,7 @@
               "RelativeToolTip": "backend\\AlooGiyah_Domain\\Entities\\Store\\AgriculturalProduct.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAADwAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-06T17:21:40.815Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-06T17:21:40.815Z"
             },
             {
               "$type": "Document",
@@ -81,8 +83,7 @@
               "RelativeToolTip": "backend\\AlooGiyah_Domain\\Entities\\Store\\Farm.cs",
               "ViewState": "AgIAAAYAAAAAAAAAAAAYwCsAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-06T17:21:19.361Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-06T17:21:19.361Z"
             },
             {
               "$type": "Document",
@@ -94,8 +95,7 @@
               "RelativeToolTip": "backend\\AlooGiyah_Application\\Services\\Store\\CartService.cs",
               "ViewState": "AgIAABcAAAAAAAAAAAAYwDYAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-06T11:58:28.148Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-08-06T11:58:28.148Z"
             }
           ]
         }

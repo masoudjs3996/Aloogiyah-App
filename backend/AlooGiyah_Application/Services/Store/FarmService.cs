@@ -422,28 +422,9 @@ public class FarmService : IFarmService
     #region GetMyFarmsAsync
     public async Task<PagedResult<MyFarmlistDto>> GetMyFarmsAsync(GetMyFarmDto filter)
     {
-        var predicate = LinqKit.PredicateBuilder.True<Farm>()
-            .And(f => !f.IsDeleted)
-            .And(f => f.OwnerId == CurrentUserId);
+       // یا هر روشی که دارید
 
-        if (!string.IsNullOrWhiteSpace(filter.Name))
-            predicate = predicate.And(f => f.Name.Contains(filter.Name));
-
-        var result = await _farmRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: f => new MyFarmlistDto
-            {
-                Code = f.Code,
-                Name = f.Name,
-                Description = f.Description,
-            },
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: f => f.CreatedAt
-
-        );
-
-        return result;
+        return await _farmQuery.GetMyFarmsAsync(filter, CurrentUserId);
     }
     #endregion
 
