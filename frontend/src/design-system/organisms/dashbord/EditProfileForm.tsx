@@ -1,14 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { ProfileImageUploader } from "@/design-system/molecules/dashbord/ProfileImageUploader";
 import { TextField } from "@/design-system/molecules/public";
 import Button from "@/design-system/atoms/Button";
 import useUpdateProfile from "@/hooks/mutations/useUpdateProfile";
 import toast from "react-hot-toast";
+import { FaRegUser } from "react-icons/fa6";
+import { MdDriveFileRenameOutline } from "react-icons/md";
+import { MdOutlineMailOutline } from "react-icons/md";
+import { AiOutlinePhone } from "react-icons/ai";
+import { MdOutlineManageSearch } from "react-icons/md";
+import { useEffect } from "react";
 
 const schema = yup.object().shape({
   firstName: yup.string().required("نام الزامی است"),
@@ -24,21 +28,44 @@ const schema = yup.object().shape({
     .required("سن لازم است")
     .min(18, "سن نباید کمتر از ۱۸ باشد")
     .max(99, "سن نباید بیشتر از ۹۹ باشد"),
-  profileImage: yup.mixed().notRequired(),
 });
 
-export const EditProfileForm = () => {
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+export const EditProfileForm = ({
+  file,
+  user,
+}: {
+  file: File | null;
+  user: any;
+}) => {
   const { editUser, uploadImage } = useUpdateProfile();
 
   const {
-    register,
+    control,
     handleSubmit,
-    setValue,
     formState: { errors },
+    reset,
   } = useForm({
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      age: "",
+    },
     resolver: yupResolver(schema),
   });
+
+  useEffect(() => {
+    if (user) {
+      reset({
+        firstName: user?.fName || "",
+        lastName: user?.lName || "",
+        email: user?.email || "",
+        phone: user?.phoneNumber || "",
+        age: user?.age || "",
+      });
+    }
+  }, [user, reset]);
 
   const onSubmit = (data: any) => {
     editUser.mutate(
@@ -57,57 +84,118 @@ export const EditProfileForm = () => {
           console.error("Upload failed:", err);
           toast.error("خطا در ارسال فرم ");
         },
-      }
+      },
     );
-    uploadImage.mutate(data.profileImage, {
-      onSuccess: (data) => {
-        toast.success(data?.message || "فرم با موفقیت ارسال شد ");
-      },
-      onError: (err) => {
-        console.error("Upload failed:", err);
-        toast.error("خطا در ارسال فرم ");
-      },
-    });
-  };
-
-  const handleImage = (file: File) => {
-    const preview = URL.createObjectURL(file);
-    setImagePreview(preview);
-    setValue("profileImage", file);
+    file &&
+      uploadImage.mutate(file, {
+        onSuccess: (data) => {
+          toast.success(data?.message || "فرم با موفقیت ارسال شد ");
+        },
+        onError: (err) => {
+          console.error("Upload failed:", err);
+          toast.error("خطا در ارسال فرم ");
+        },
+      });
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="p-4 space-y-5">
-      <ProfileImageUploader image={imagePreview} onChange={handleImage} />
-      <TextField
-        placeholder="نام را وارد کنید"
-        {...register("firstName")}
-        error={errors.firstName?.message}
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <Controller
+          name="firstName"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              label="نام :"
+              placeholder="نام را وارد کنید"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.firstName?.message}
+              icon={<FaRegUser size={24} className="text-slate-700" />}
+              className="w-full"
+            />
+          )}
+        />
 
-      <TextField
-        placeholder="نام خانوادگی را وارد کنید"
-        {...register("lastName")}
-        error={errors.lastName?.message}
-      />
-      <TextField
-        placeholder=" ایمیل را وارد کنید "
-        {...register("email")}
-        error={errors.email?.message}
-      />
-      <TextField
-        placeholder="شماره همراه را وارد کنید "
-        {...register("phone")}
-        error={errors.phone?.message}
-      />
-      <TextField
-        placeholder=" سن خود را وارد کنید "
-        {...register("age")}
-        error={errors.age?.message}
-      />
-      <Button type="submit" variant="success">
-        ذخیره تغییرات
-      </Button>
+        <Controller
+          name="lastName"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              placeholder="نام خانوادگی را وارد کنید"
+              label="نام خانوادگی"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.lastName?.message}
+              icon={
+                <MdDriveFileRenameOutline
+                  size={24}
+                  className="text-slate-700"
+                />
+              }
+              className="w-full"
+            />
+          )}
+        />
+
+        <Controller
+          name="email"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              placeholder=" ایمیل را وارد کنید "
+              label="ایمیل :"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.email?.message}
+              icon={
+                <MdOutlineMailOutline size={24} className="text-slate-700" />
+              }
+            />
+          )}
+        />
+
+        <Controller
+          name="phone"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              placeholder="شماره همراه را وارد کنید "
+              label="شماره همراه :"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.phone?.message}
+              icon={<AiOutlinePhone size={24} className="text-slate-700" />}
+            />
+          )}
+        />
+
+        <Controller
+          name="age"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              placeholder=" سن خود را وارد کنید "
+              label=" سن :"
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.age?.message}
+              icon={
+                <MdOutlineManageSearch size={24} className="text-slate-700" />
+              }
+            />
+          )}
+        />
+
+        <div className="flex items-end">
+          <Button type="submit">ذخیره تغییرات</Button>
+        </div>
+      </div>
     </form>
   );
 };

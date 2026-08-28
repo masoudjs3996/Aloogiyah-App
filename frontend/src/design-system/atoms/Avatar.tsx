@@ -8,7 +8,7 @@ export const Avatar = ({ src, size = 90 }: { src?: string; size?: number }) => {
       alt="avatar"
       width={size}
       height={size}
-      className="rounded-full object-cover"
+      className={`rounded-full object-cover max-w-[90px] max-h-[90px] min-w-[90px] min-h-[90px]`}
     />
   );
 };

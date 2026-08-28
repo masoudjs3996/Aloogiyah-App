@@ -7,6 +7,7 @@ import { FiChevronDown, FiBell, FiMenu } from "react-icons/fi";
 import { useSelector } from "react-redux";
 import NotificationDropdown from "../Home/NotificationDropdown";
 import { useNotifications } from "@/hooks/queries/useNotifications";
+import { getPersianRole } from "@/shared/utils/roleUtils";
 
 interface HeaderProps {
   setCollapsed: (value: boolean) => void;
@@ -54,7 +55,7 @@ export default function Header({
               {user?.fName}
             </span>
             <span className="text-xs text-gray-500 leading-tight">
-              {user?.roleName}
+              {getPersianRole(user?.roleName || "نامشخص")}
             </span>
           </div>
 
