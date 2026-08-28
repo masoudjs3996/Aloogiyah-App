@@ -85,4 +85,87 @@ INNER JOIN ""Statuses"" s ON s.""StatusId"" = f.""StatusId""
             filter.PageNumber,
             filter.PageSize);
     }
+
+    public async Task<PagedResult<MyFarmlistDto>> GetMyFarmsAsync(GetMyFarmDto filter, int currentUserId)
+    {
+        var whereParts = new List<string>
+        {
+            "f.\"IsDeleted\" = false",
+            "f.\"OwnerId\" = @OwnerId"
+        };
+
+        var parameters = new DynamicParameters();
+        parameters.Add("OwnerId", currentUserId);
+        parameters.Add("FarmEntity", (int)EntityFile.Farm);
+
+        if (!string.IsNullOrWhiteSpace(filter.Name))
+        {
+            whereParts.Add("f.\"Name\" ILIKE @Name");
+            parameters.Add("Name", $"%{filter.Name}%");
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.AddressCode))
+        {
+            whereParts.Add("(prov.\"Code\" = @AddressCode OR county.\"Code\" = @AddressCode)");
+            parameters.Add("AddressCode", filter.AddressCode);
+        }
+
+        var whereClause = string.Join(" AND ", whereParts);
+
+        var baseSql = $"""
+            SELECT
+                f."Code" AS "Code",
+                f."Name" AS "Name",
+                f."Description" AS "Description",
+                f."Capacity" AS "Capacity",
+                
+                COALESCE(prov."Name", '') AS "ProvinceName",
+                COALESCE(county."Name", '') AS "CountyName",
+                
+                COALESCE(farmFile."Url", '') AS "FarmImageUrl",
+                
+                COALESCE(s."Code", '') AS "StatusCode",
+                COALESCE(s."Name", '') AS "StatusName",
+                
+                (
+                    SELECT ap."Name"
+                    FROM "AgriculturalProducts" ap
+                    WHERE ap."FarmId" = f."FarmId"
+                        AND ap."IsDeleted" = FALSE
+                    ORDER BY ap."CreatedAt" ASC, ap."AgriculturalProductId" ASC
+                    LIMIT 1
+                ) AS "FirstProductName"
+                
+            FROM "Farms" f
+            LEFT JOIN "Addresses" addr ON addr."AddressId" = f."AddressId"
+            LEFT JOIN "Provinces" prov ON prov."ProvinceId" = addr."ProvinceId"
+            LEFT JOIN "Countys" county ON county."CountyId" = addr."CountyId"
+            LEFT JOIN "Statuses" s ON s."StatusId" = f."StatusId"
+            LEFT JOIN "Files" farmFile
+                ON farmFile."EntityCode" = f."Code"
+                AND farmFile."EntityFile" = @FarmEntity
+                AND farmFile."IsPrimary" = TRUE
+                AND farmFile."IsDeleted" = FALSE
+            WHERE {whereClause}
+            """;
+
+        var countSql = $"""
+            SELECT COUNT(*)
+            FROM "Farms" f
+            LEFT JOIN "Addresses" addr ON addr."AddressId" = f."AddressId"
+            LEFT JOIN "Provinces" prov ON prov."ProvinceId" = addr."ProvinceId"
+            LEFT JOIN "Countys" county ON county."CountyId" = addr."CountyId"
+            WHERE {whereClause}
+            """;
+
+        var orderBy = "ORDER BY f.\"CreatedAt\" DESC";
+        baseSql += "\n" + orderBy;
+
+        return await QueryPagedAsync<MyFarmlistDto>(
+            baseSql,
+            countSql,
+            parameters,
+            filter.PageNumber,
+            filter.PageSize);
+    }
 }

@@ -2,9 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\backend",
-    "\\backend\\AlooGiyah_Persistence",
-    "\\backend\\AlooGiyah_Persistence\\Migrations"
+    "\\backend\\AlooGiyah_Domain",
+    "\\backend\\AlooGiyah_Domain\\Enums"
   ],
-  "SelectedNode": "\\backend\\AlooGiyah_Persistence\\Migrations\\20260529171840_AddStatusCodeForFarm.cs",
+  "SelectedNode": "\\backend\\AlooGiyah_Domain\\Enums\\EntityFile.cs",
   "PreviewInSolutionExplorer": false
 }
