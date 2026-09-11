@@ -3,24 +3,32 @@
   "WorkspaceRootPath": "G:\\f\\poroge\\Aloogiyah-App\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Domain\\Enums\\EntityFile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:backend\\AlooGiyah_Domain\\Enums\\EntityFile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\frontend\\src\\shared\\constants\\dashboard-menu.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\src\\shared\\constants\\dashboard-menu.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Domain\\Entities\\Files.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:backend\\AlooGiyah_Domain\\Entities\\Files.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\frontend\\src\\shared\\utils\\roleUtils.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\src\\shared\\utils\\roleUtils.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Domain\\Entities\\Store\\Farm.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:backend\\AlooGiyah_Domain\\Entities\\Store\\Farm.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\frontend\\src\\shared\\utils\\truncateText.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\src\\shared\\utils\\truncateText.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Application\\Services\\Store\\CartService.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:backend\\AlooGiyah_Application\\Services\\Store\\CartService.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\frontend\\src\\shared\\utils\\middlewareAuth.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\src\\shared\\utils\\middlewareAuth.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Domain\\Entities\\Store\\AgriculturalProduct.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:backend\\AlooGiyah_Domain\\Entities\\Store\\AgriculturalProduct.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\frontend\\src\\shared\\utils\\getImageUrl.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\src\\shared\\utils\\getImageUrl.ts||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\frontend\\src\\shared\\utils\\categoryIconMap.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\src\\shared\\utils\\categoryIconMap.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|G:\\f\\poroge\\Aloogiyah-App\\frontend\\postcss.config.mjs||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:frontend\\postcss.config.mjs||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     }
   ],
   "DocumentGroupContainers": [
@@ -30,72 +38,98 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
-            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "EntityFile.cs",
-              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Domain\\Enums\\EntityFile.cs",
-              "RelativeDocumentMoniker": "backend\\AlooGiyah_Domain\\Enums\\EntityFile.cs",
-              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Domain\\Enums\\EntityFile.cs",
-              "RelativeToolTip": "backend\\AlooGiyah_Domain\\Enums\\EntityFile.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-06T17:42:22.843Z",
+              "Title": "dashboard-menu.ts",
+              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\frontend\\src\\shared\\constants\\dashboard-menu.ts",
+              "RelativeDocumentMoniker": "frontend\\src\\shared\\constants\\dashboard-menu.ts",
+              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\frontend\\src\\shared\\constants\\dashboard-menu.ts",
+              "RelativeToolTip": "frontend\\src\\shared\\constants\\dashboard-menu.ts",
+              "ViewState": "AgIAABoAAAAAAAAAAAAAACwAAAA7AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-09-04T17:28:18.296Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "truncateText.ts",
+              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\frontend\\src\\shared\\utils\\truncateText.ts",
+              "RelativeDocumentMoniker": "frontend\\src\\shared\\utils\\truncateText.ts",
+              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\frontend\\src\\shared\\utils\\truncateText.ts",
+              "RelativeToolTip": "frontend\\src\\shared\\utils\\truncateText.ts",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-09-04T17:27:33.893Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "Files.cs",
-              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Domain\\Entities\\Files.cs",
-              "RelativeDocumentMoniker": "backend\\AlooGiyah_Domain\\Entities\\Files.cs",
-              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Domain\\Entities\\Files.cs",
-              "RelativeToolTip": "backend\\AlooGiyah_Domain\\Entities\\Files.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACoAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-06T17:42:07.793Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "AgriculturalProduct.cs",
-              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Domain\\Entities\\Store\\AgriculturalProduct.cs",
-              "RelativeDocumentMoniker": "backend\\AlooGiyah_Domain\\Entities\\Store\\AgriculturalProduct.cs",
-              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Domain\\Entities\\Store\\AgriculturalProduct.cs",
-              "RelativeToolTip": "backend\\AlooGiyah_Domain\\Entities\\Store\\AgriculturalProduct.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAADwAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-06T17:21:40.815Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "Farm.cs",
-              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Domain\\Entities\\Store\\Farm.cs",
-              "RelativeDocumentMoniker": "backend\\AlooGiyah_Domain\\Entities\\Store\\Farm.cs",
-              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Domain\\Entities\\Store\\Farm.cs",
-              "RelativeToolTip": "backend\\AlooGiyah_Domain\\Entities\\Store\\Farm.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAYwCsAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-06T17:21:19.361Z"
+              "Title": "roleUtils.ts",
+              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\frontend\\src\\shared\\utils\\roleUtils.ts",
+              "RelativeDocumentMoniker": "frontend\\src\\shared\\utils\\roleUtils.ts",
+              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\frontend\\src\\shared\\utils\\roleUtils.ts",
+              "RelativeToolTip": "frontend\\src\\shared\\utils\\roleUtils.ts",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-09-04T17:27:24.987Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "CartService.cs",
-              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Application\\Services\\Store\\CartService.cs",
-              "RelativeDocumentMoniker": "backend\\AlooGiyah_Application\\Services\\Store\\CartService.cs",
-              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\backend\\AlooGiyah_Application\\Services\\Store\\CartService.cs",
-              "RelativeToolTip": "backend\\AlooGiyah_Application\\Services\\Store\\CartService.cs",
-              "ViewState": "AgIAABcAAAAAAAAAAAAYwDYAAAAdAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-06T11:58:28.148Z"
+              "Title": "middlewareAuth.ts",
+              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\frontend\\src\\shared\\utils\\middlewareAuth.ts",
+              "RelativeDocumentMoniker": "frontend\\src\\shared\\utils\\middlewareAuth.ts",
+              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\frontend\\src\\shared\\utils\\middlewareAuth.ts",
+              "RelativeToolTip": "frontend\\src\\shared\\utils\\middlewareAuth.ts",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-09-04T17:27:21.128Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "getImageUrl.ts",
+              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\frontend\\src\\shared\\utils\\getImageUrl.ts",
+              "RelativeDocumentMoniker": "frontend\\src\\shared\\utils\\getImageUrl.ts",
+              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\frontend\\src\\shared\\utils\\getImageUrl.ts",
+              "RelativeToolTip": "frontend\\src\\shared\\utils\\getImageUrl.ts",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-09-04T17:27:18.925Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "categoryIconMap.tsx",
+              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\frontend\\src\\shared\\utils\\categoryIconMap.tsx",
+              "RelativeDocumentMoniker": "frontend\\src\\shared\\utils\\categoryIconMap.tsx",
+              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\frontend\\src\\shared\\utils\\categoryIconMap.tsx",
+              "RelativeToolTip": "frontend\\src\\shared\\utils\\categoryIconMap.tsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2026-09-04T17:27:16.332Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "postcss.config.mjs",
+              "DocumentMoniker": "G:\\f\\poroge\\Aloogiyah-App\\frontend\\postcss.config.mjs",
+              "RelativeDocumentMoniker": "frontend\\postcss.config.mjs",
+              "ToolTip": "G:\\f\\poroge\\Aloogiyah-App\\frontend\\postcss.config.mjs",
+              "RelativeToolTip": "frontend\\postcss.config.mjs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-09-04T17:26:53.336Z",
+              "EditorCaption": ""
             }
           ]
         }

@@ -13,11 +13,11 @@ namespace AlooGiyah_Api.Controllers;
 public class FarmController : ControllerBase
 {
     #region Constructor
-    private readonly IFarmService _greenhouseService;
+    private readonly IFarmService _farmService;
 
-    public FarmController(IFarmService greenhouseService)
+    public FarmController(IFarmService farmService)
     {
-        _greenhouseService = greenhouseService;
+        _farmService = farmService;
     }
     #endregion
 
@@ -30,7 +30,7 @@ public class FarmController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var result = await _greenhouseService.CreateWithImageAsync(createDto);
+        var result = await _farmService.CreateWithImageAsync(createDto);
 
         return Ok(new ApiResponse<object>
         {
@@ -46,7 +46,7 @@ public class FarmController : ControllerBase
     [HttpGet("GetMyFarm")]
     public async Task<IActionResult> GetMyGreenhouse([FromQuery] GetMyFarmDto greenhouseFilterDto)
     {
-        var result = await _greenhouseService.GetMyFarmsAsync(greenhouseFilterDto);
+        var result = await _farmService.GetMyFarmsAsync(greenhouseFilterDto);
 
         if (result == null || !result.Items.Any())
             throw new NotFoundException(ErrorMessages.ErrorNullFarm);
@@ -65,7 +65,7 @@ public class FarmController : ControllerBase
     [HttpGet("GetByFilter")]
     public async Task<IActionResult> GetByFilter([FromQuery] FarmFilterDto greenhouseFilterDto)
     {
-        var result = await _greenhouseService.GetByFilterAsync(greenhouseFilterDto);
+        var result = await _farmService.GetByFilterAsync(greenhouseFilterDto);
 
         if (result == null || !result.Items.Any())
             throw new NotFoundException(ErrorMessages.ErrorNullFarm);
@@ -84,7 +84,7 @@ public class FarmController : ControllerBase
     [HttpGet("GetByCode")]
     public async Task<IActionResult> GetByCodeAsync([FromQuery] string code)
     {
-        var result = await _greenhouseService.GetByCodeAsync(code);
+        var result = await _farmService.GetByCodeAsync(code);
         if (result == null)
             throw new NotFoundException(ErrorMessages.ErrorNullFarm);
 
@@ -102,7 +102,7 @@ public class FarmController : ControllerBase
     [HttpPut("Update")]
     public async Task<IActionResult> UpdateGreenhouse(FarmUpdateDto updateDto)
     {
-        var result = await _greenhouseService.UpdateAsync(updateDto);
+        var result = await _farmService.UpdateAsync(updateDto);
 
         if (result == null )
             throw new NotFoundException(ErrorMessages.ErrorFarmUpdate);
@@ -121,7 +121,7 @@ public class FarmController : ControllerBase
     [HttpPatch("UploadImage")]
     public async Task<IActionResult> ChangeFarmImagAsinc(UploadFarmImageDto upload)
     {
-        var result = await _greenhouseService.ChangeFarmImageAsync(upload);
+        var result = await _farmService.ChangeFarmImageAsync(upload);
 
         return Ok(new ApiResponse<object>
         {
@@ -137,7 +137,7 @@ public class FarmController : ControllerBase
     [HttpDelete("Delete")]
     public async Task<IActionResult> DeleteGreenhouse(string code)
     {
-        var result = await _greenhouseService.DeleteAsync(code);
+        var result = await _farmService.DeleteAsync(code);
 
         return Ok(new ApiResponse<string>
         {

@@ -266,4 +266,125 @@ public class AgriculturalProductQuery : BaseQuery, IAgriculturalProductQuery
             filter.PageSize);
     }
     #endregion
+
+    public async Task<PagedResult<AgriculturalProductSimilarDto>> GetSimilarAsync(
+       AgriculturalProductSimilarFilterDto filter)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("CurrentProductCode", filter.ProductCode);
+        parameters.Add("ProductEntity", (int)EntityFile.AgriculturalProduct);
+        parameters.Add("ProductStatus", (int)EntityStatus.AgriculturalProduct);
+
+        var baseSql = $"""
+            WITH CurrentProduct AS (
+                SELECT 
+                    ap."AgriculturalProductId",
+                    ap."FarmId"
+                FROM "AgriculturalProducts" ap
+                WHERE ap."Code" = @CurrentProductCode
+                    AND ap."IsDeleted" = FALSE
+                LIMIT 1
+            ),
+            CurrentCategories AS (
+                SELECT apc."CategoriesCategoryId"
+                FROM "AgriculturalProductCategory" apc
+                INNER JOIN CurrentProduct cp 
+                    ON apc."AgriculturalProductsAgriculturalProductId" = cp."AgriculturalProductId"
+            )
+            SELECT DISTINCT ON (ap."AgriculturalProductId")
+                ap."Code" AS "Code",
+                ap."Name" AS "Name",
+                ap."Description" AS "Description",
+                ap."RetailPrice" AS "RetailPrice",
+                ap."WholesalePrice" AS "WholesalePrice",
+                COALESCE(file."Url", '') AS "ProductImageUrl",
+                CASE 
+                    WHEN ap."FarmId" = cp."FarmId" 
+                         AND EXISTS (
+                             SELECT 1 
+                             FROM "AgriculturalProductCategory" apc2
+                             WHERE apc2."AgriculturalProductsAgriculturalProductId" = ap."AgriculturalProductId"
+                                 AND apc2."CategoriesCategoryId" IN (SELECT "CategoriesCategoryId" FROM CurrentCategories)
+                         )
+                    THEN 3  -- هم مزرعه و هم دسته‌بندی
+                    
+                    WHEN ap."FarmId" = cp."FarmId" 
+                    THEN 2  -- فقط همان مزرعه
+                    
+                    WHEN EXISTS (
+                        SELECT 1 
+                        FROM "AgriculturalProductCategory" apc3
+                        WHERE apc3."AgriculturalProductsAgriculturalProductId" = ap."AgriculturalProductId"
+                            AND apc3."CategoriesCategoryId" IN (SELECT "CategoriesCategoryId" FROM CurrentCategories)
+                    )
+                    THEN 1  -- فقط همان دسته‌بندی
+                    
+                    ELSE 0
+                END AS "SimilarityScore"
+                
+            FROM "AgriculturalProducts" ap
+            CROSS JOIN CurrentProduct cp
+            
+            LEFT JOIN "Files" file
+                ON file."EntityCode" = ap."Code"
+                AND file."EntityFile" = @ProductEntity
+                AND file."IsPrimary" = TRUE
+                AND file."IsDeleted" = FALSE
+            
+            WHERE ap."IsDeleted" = FALSE
+                AND ap."Code" != @CurrentProductCode
+                AND ap."StatusId" IN (
+                    SELECT "StatusId" 
+                    FROM "Statuses" 
+                    WHERE "EntityStatus" = @ProductStatus 
+                        AND "IsDeleted" = FALSE
+                )
+                AND (
+                    ap."FarmId" = cp."FarmId"
+                    OR EXISTS (
+                        SELECT 1 
+                        FROM "AgriculturalProductCategory" apc4
+                        WHERE apc4."AgriculturalProductsAgriculturalProductId" = ap."AgriculturalProductId"
+                            AND apc4."CategoriesCategoryId" IN (SELECT "CategoriesCategoryId" FROM CurrentCategories)
+                    )
+                )
+            
+            ORDER BY ap."AgriculturalProductId", "SimilarityScore" DESC
+            """;
+
+        var countSql = $"""
+            SELECT COUNT(DISTINCT ap."AgriculturalProductId")
+            FROM "AgriculturalProducts" ap
+            CROSS JOIN (
+                SELECT "FarmId", "AgriculturalProductId"
+                FROM "AgriculturalProducts"
+                WHERE "Code" = @CurrentProductCode
+                    AND "IsDeleted" = FALSE
+                LIMIT 1
+            ) cp
+            
+            WHERE ap."IsDeleted" = FALSE
+                AND ap."Code" != @CurrentProductCode
+                AND (
+                    ap."FarmId" = cp."FarmId"
+                    OR EXISTS (
+                        SELECT 1 
+                        FROM "AgriculturalProductCategory" apc
+                        WHERE apc."AgriculturalProductsAgriculturalProductId" = ap."AgriculturalProductId"
+                            AND apc."CategoriesCategoryId" IN (
+                                SELECT apc2."CategoriesCategoryId"
+                                FROM "AgriculturalProductCategory" apc2
+                                WHERE apc2."AgriculturalProductsAgriculturalProductId" = cp."AgriculturalProductId"
+                            )
+                    )
+                )
+            """;
+
+        return await QueryPagedAsync<AgriculturalProductSimilarDto>(
+            baseSql,
+            countSql,
+            parameters,
+            filter.PageNumber,
+            filter.PageSize);
+    }
 }

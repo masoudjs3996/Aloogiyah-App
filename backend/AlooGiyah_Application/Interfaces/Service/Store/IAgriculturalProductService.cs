@@ -11,6 +11,7 @@ public interface IAgriculturalProductService
     Task<bool> DeleteAsync(string code);
     Task<AgriculturalProductDetailDto?> GetByCodeAsync(string code);
     Task<PagedResult<AgriculturalProductListItemDto>> GetByFilterAsync(AgriculturalProductFilterDto filter);
+    Task<PagedResult<AgriculturalProductSimilarDto>> GetSimilarAsync(AgriculturalProductSimilarFilterDto filter);
     Task<List<string>> AddProductImagesAsync(AddProductImagesDto dto);
     Task<string> SetPrimaryProductImageAsync(string productCode, string fileCode);
     Task RemoveProductImageAsync(string productCode, string fileCode);

@@ -23,7 +23,7 @@ export const dashboardMenu = [
     path: "/dashboard/farm/myFarms",
     icon: GiFarmer,
     label: "مزرعه ها ",
-    roles: ["Admin", "User", "Farmer"],
+      roles: ["Admin", "Manager", "Farmer"],
   },
   {
     path: "/dashboard/profile",
@@ -42,7 +42,7 @@ export const dashboardMenu = [
     label: "تخفیف های شما",
     icon: IoPricetagOutline,
     path: "/dashboard/profile/rewards",
-    roles: ["Admin", "Buyer", "User"],
+      roles: ["Admin", "User", "Manager", "Farmer", "Buyer"],
   },
 
   {

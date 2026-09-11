@@ -362,6 +362,15 @@ public class AgriculturalProductService : IAgriculturalProductService
     }
     #endregion
 
+    public async Task<PagedResult<AgriculturalProductSimilarDto>> GetSimilarAsync(
+      AgriculturalProductSimilarFilterDto filter)
+    {
+        if (string.IsNullOrWhiteSpace(filter.ProductCode))
+            throw new ArgumentException("ProductCode is required");
+
+        return await _productQuery.GetSimilarAsync(filter);
+    }
+
     #region اضافه کردن چند عکس به محصول (برای کالای موجود)
     public async Task<List<string>> AddProductImagesAsync(AddProductImagesDto dto)
     {
