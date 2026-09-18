@@ -1,4 +1,8 @@
-import { GetDetailProduct, getProducts } from "@/lib/actions/product";
+import {
+  GetDetailProduct,
+  getProducts,
+  GetSimilar,
+} from "@/lib/actions/product";
 import { ProductFilter } from "@/shared/types/product";
 import { useQuery } from "@tanstack/react-query";
 // this is alocather api
@@ -55,6 +59,28 @@ export const useProduct = (productId?: string) => {
 
   return {
     product: data ?? {},
+    isLoading,
+    isSuccess,
+  };
+};
+
+export const useSimilarProduct = (payload?: {
+  ProductCode: string;
+  PageNumber: number;
+  PageSize: number;
+  SortColumn: string;
+  SortDescending: boolean;
+}) => {
+  const { data, isLoading, isSuccess } = useQuery({
+    queryKey: ["similarProduct", payload],
+    queryFn: () => GetSimilar(payload),
+    enabled: !!payload?.ProductCode,
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+  });
+
+  return {
+    similarProduct: data ?? {},
     isLoading,
     isSuccess,
   };

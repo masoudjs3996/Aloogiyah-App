@@ -28,28 +28,14 @@ export default async function Home() {
           {categories.map((cat) => {
             return <CategoryCard key={cat.code} category={cat} />;
           })}
-          {/* {Array.from({ length: 10 }).map((_, i) => (
-            <CategoryCard
-              key={i}
-              name={categories[i % categories.length]?.name}
-              imageUrl={categories[i % categories.length]?.imageUrl}
-            />
-          ))} */}
         </div>
         <div className="flex items-center justify-between w-full">
           <h2 className="headlines-main">مزرعه‌ها</h2>
-
-          {/* این معلوم نیس چیه ؟؟ */}
-          {/* <span className="text-xs sm:text-sm text-gray-500">مشاهده همه</span> */}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4  my-10">
-          {farms.map((farm: any) => {
+          {farms.slice(0, 3).map((farm: any) => {
             return <FarmCard key={farm.description} farm={farm} />;
           })}
-          {/* {Array.from({ length: 4 }, (_, i) => {
-            const farm = farms[i % farms?.length];
-            return <FarmCard key={`${farm.code}-${i}`} farm={farm} />;
-          })} */}
         </div>
         <div className="flex items-center justify-between w-full">
           <h2 className="headlines-main">محصولات برتر</h2>

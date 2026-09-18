@@ -113,3 +113,31 @@ export async function GetDetailProduct(payload?: string) {
     throw error;
   }
 }
+
+export async function GetSimilar(payload?: {
+  ProductCode: string;
+  PageNumber: number;
+  PageSize: number;
+  SortColumn: string;
+  SortDescending: boolean;
+}) {
+  try {
+    const { data } = await axiosInstance.get(
+      `/AgriculturalProduct/GetSimilar`,
+      {
+        params: {
+          ProductCode: payload?.ProductCode,
+          PageNumber: payload?.PageNumber,
+          PageSize: payload?.PageSize,
+          SortColumn: payload?.SortColumn,
+          SortDescending: payload?.SortDescending,
+        },
+      },
+    );
+
+    return data;
+  } catch (error) {
+    console.error("Error creating product:", error);
+    throw error;
+  }
+}

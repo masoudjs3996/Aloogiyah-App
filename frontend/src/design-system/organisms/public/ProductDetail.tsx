@@ -2,7 +2,7 @@
 
 import Button from "@/design-system/atoms/Button";
 import { useCommentsTree } from "@/hooks/queries/useComments";
-import { useProduct } from "@/hooks/queries/useProduct";
+import { useProduct, useSimilarProduct } from "@/hooks/queries/useProduct";
 import { getImageUrl } from "@/shared/utils/getImageUrl";
 import { useState } from "react";
 import Modal from "./Modal";
@@ -28,6 +28,9 @@ import {
   TruckIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
+import { CommentCard } from "./CommentCard";
+import Link from "next/link";
+import SimilarProducts from "./SimilarProducts";
 
 type ProductImage = {
   id: number;
@@ -55,6 +58,16 @@ const ProductDetail = ({ productId }: { productId: string }) => {
 
   const apiProduct = product.data ?? {};
 
+  // farmCode
+  const { similarProduct } = useSimilarProduct({
+    ProductCode: productId,
+    PageNumber: 1,
+    PageSize: 15,
+    SortColumn: "ksajd",
+    SortDescending: true,
+  });
+
+  console.log(similarProduct);
   /*
    * ---------------------------------------------------------
    * Hard coded data
@@ -231,76 +244,6 @@ const ProductDetail = ({ productId }: { productId: string }) => {
 
   return (
     <div dir="rtl" className="min-h-screen bg-[#f7f8f7] text-gray-800">
-      {/* =====================================================
-          HEADER
-      ====================================================== */}
-
-      {/* <header className="sticky top-0 z-50 border-b border-gray-100 bg-white shadow-sm">
-        <div className="mx-auto flex h-[72px] max-w-[1450px] items-center justify-between px-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-50">
-              <LeafIcon className="h-8 w-8 text-green-600" />
-            </div>
-
-            <div>
-              <h1 className="text-xl font-bold text-gray-800">خلفونه مزرعه</h1>
-
-              <p className="text-[10px] text-gray-400">
-                محصولات تازه از مزرعه تا سفره
-              </p>
-            </div>
-          </div>
-
-          <nav className="hidden items-center gap-10 text-sm text-gray-700 lg:flex">
-            <a className="cursor-pointer transition hover:text-green-600">
-              خانه
-            </a>
-
-            <a className="cursor-pointer transition hover:text-green-600">
-              مزارع
-            </a>
-
-            <a className="cursor-pointer transition hover:text-green-600">
-              محصولات
-            </a>
-
-            <a className="cursor-pointer transition hover:text-green-600">
-              وبلاگ
-            </a>
-
-            <a className="cursor-pointer transition hover:text-green-600">
-              درباره ما
-            </a>
-
-            <a className="cursor-pointer transition hover:text-green-600">
-              تماس با ما
-            </a>
-          </nav>
-
-          <div className="flex items-center gap-4">
-            <button className="relative rounded-full p-2 transition hover:bg-gray-100">
-              <ShoppingCartIcon className="h-6 w-6 text-gray-700" />
-
-              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-green-600 text-[10px] text-white">
-                ۲
-              </span>
-            </button>
-
-            <button className="rounded-full p-2 transition hover:bg-gray-100">
-              <UserIcon className="h-6 w-6 text-gray-700" />
-            </button>
-
-            <Button className="hidden !rounded-xl bg-green-600 px-7 py-3 text-sm md:block">
-              بازگشت به فروشگاه
-            </Button>
-          </div>
-        </div>
-      </header> */}
-
-      {/* =====================================================
-          CONTENT
-      ====================================================== */}
-
       <main className="mx-auto max-w-[1350px] px-4 py-6 md:px-6">
         {/* Breadcrumb */}
 
@@ -798,46 +741,25 @@ const ProductDetail = ({ productId }: { productId: string }) => {
 
           {/* Related Products */}
 
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <div className="mb-5 flex items-center justify-between">
-              <h2 className="font-semibold">محصولات مرتبط</h2>
-
-              <button className="text-xs text-green-600">مشاهده همه</button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              {relatedProducts.map((item) => (
-                <div
-                  key={item.id}
-                  className="group overflow-hidden rounded-xl border border-gray-100 bg-white transition hover:-translate-y-1 hover:shadow-md"
-                >
-                  <div className="h-32 overflow-hidden bg-gray-100">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                    />
-                  </div>
-
-                  <div className="p-3">
-                    <h3 className="line-clamp-1 text-xs font-medium">
-                      {item.name}
-                    </h3>
-
-                    <div className="mt-3 flex items-center justify-between">
-                      <span className="text-xs font-bold text-green-700">
-                        {item.price} تومان
-                      </span>
-
-                      <button className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-50 text-green-600">
-                        <ShoppingCartIcon className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <SimilarProducts
+            products={similarProduct?.data ?? []}
+            // onAddToCart={(productCode) => {
+            //   addCart.mutate(
+            //     {
+            //       productCode,
+            //       quantity: 1,
+            //     },
+            //     {
+            //       onSuccess: (data) => {
+            //         toast.success(data?.message);
+            //       },
+            //       onError: () => {
+            //         toast.error("افزودن محصول به سبد خرید انجام نشد");
+            //       },
+            //     },
+            //   );
+            // }}
+          />
         </section>
       </main>
 
@@ -899,74 +821,6 @@ const InfoRow = ({
 /* ============================================================
    COMMENT CARD
 ============================================================ */
-
-const CommentCard = ({
-  comment,
-  formatDate,
-  onReply,
-}: {
-  comment: Comment;
-  formatDate: (date: string) => string;
-  onReply: () => void;
-}) => {
-  return (
-    <div className="space-y-3">
-      {/* Main comment */}
-
-      <div className="rounded-2xl bg-gray-50 p-4">
-        <div className="mb-2 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-100">
-              <UserIcon className="h-5 w-5 text-green-600" />
-            </div>
-
-            <span className="text-xs font-semibold">{comment.name}</span>
-          </div>
-
-          <span className="text-[10px] text-gray-400">
-            {formatDate(comment.createdAt)}
-          </span>
-        </div>
-
-        <p className="text-xs leading-7 text-gray-600">{comment.content}</p>
-
-        <button
-          onClick={onReply}
-          className="mt-3 text-[11px] font-medium text-green-600"
-        >
-          پاسخ
-        </button>
-      </div>
-
-      {/* Replies */}
-
-      {comment.subComments?.map((reply) => (
-        <div
-          key={reply.code}
-          className="mr-8 rounded-2xl border border-green-100 bg-green-50 p-4"
-        >
-          <div className="mb-2 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
-                {/* <LeafIcon className="h-4 w-4 text-green-600" /> */}
-              </div>
-
-              <span className="text-xs font-semibold text-green-800">
-                {reply.name}
-              </span>
-            </div>
-
-            <span className="text-[10px] text-gray-400">
-              {formatDate(reply.createdAt)}
-            </span>
-          </div>
-
-          <p className="text-xs leading-6 text-gray-600">{reply.content}</p>
-        </div>
-      ))}
-    </div>
-  );
-};
 
 export default ProductDetail;
 
@@ -1137,3 +991,79 @@ export default ProductDetail;
 // };
 
 // export default ProductDetail;
+
+{
+  /* =====================================================
+          HEADER
+      ====================================================== */
+}
+
+{
+  /* <header className="sticky top-0 z-50 border-b border-gray-100 bg-white shadow-sm">
+        <div className="mx-auto flex h-[72px] max-w-[1450px] items-center justify-between px-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-50">
+              <LeafIcon className="h-8 w-8 text-green-600" />
+            </div>
+
+            <div>
+              <h1 className="text-xl font-bold text-gray-800">خلفونه مزرعه</h1>
+
+              <p className="text-[10px] text-gray-400">
+                محصولات تازه از مزرعه تا سفره
+              </p>
+            </div>
+          </div>
+
+          <nav className="hidden items-center gap-10 text-sm text-gray-700 lg:flex">
+            <a className="cursor-pointer transition hover:text-green-600">
+              خانه
+            </a>
+
+            <a className="cursor-pointer transition hover:text-green-600">
+              مزارع
+            </a>
+
+            <a className="cursor-pointer transition hover:text-green-600">
+              محصولات
+            </a>
+
+            <a className="cursor-pointer transition hover:text-green-600">
+              وبلاگ
+            </a>
+
+            <a className="cursor-pointer transition hover:text-green-600">
+              درباره ما
+            </a>
+
+            <a className="cursor-pointer transition hover:text-green-600">
+              تماس با ما
+            </a>
+          </nav>
+
+          <div className="flex items-center gap-4">
+            <button className="relative rounded-full p-2 transition hover:bg-gray-100">
+              <ShoppingCartIcon className="h-6 w-6 text-gray-700" />
+
+              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-green-600 text-[10px] text-white">
+                ۲
+              </span>
+            </button>
+
+            <button className="rounded-full p-2 transition hover:bg-gray-100">
+              <UserIcon className="h-6 w-6 text-gray-700" />
+            </button>
+
+            <Button className="hidden !rounded-xl bg-green-600 px-7 py-3 text-sm md:block">
+              بازگشت به فروشگاه
+            </Button>
+          </div>
+        </div>
+      </header> */
+}
+
+{
+  /* =====================================================
+          CONTENT
+      ====================================================== */
+}

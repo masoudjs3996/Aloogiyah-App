@@ -14,6 +14,7 @@ import {
 import { GiWheat, GiGrapes } from "react-icons/gi";
 import { MdOutlineAgriculture } from "react-icons/md";
 import { useMyFarm } from "@/hooks/queries/useFarm";
+import { getImageUrl } from "@/shared/utils/getImageUrl";
 
 const farmExtras: Record<
   string,
@@ -104,6 +105,8 @@ const AllFarm = () => {
   const { farms } = useMyFarm();
   const myFarms = farms?.data ?? [];
 
+  console.log(myFarms);
+
   return (
     <div className="w-full h-full p-4 md:p-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -119,7 +122,7 @@ const AllFarm = () => {
               <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                 <div className="relative h-44 w-full overflow-hidden">
                   <Image
-                    src={extra.image}
+                    src={getImageUrl(farm.farmImageUrl)}
                     alt={farm.name}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -141,7 +144,9 @@ const AllFarm = () => {
 
                   <div className="flex items-center gap-1.5 text-gray-500 text-sm">
                     <FiMapPin className="w-3.5 h-3.5 shrink-0" />
-                    <span className="truncate">{extra.location}</span>
+                    <span className="truncate">
+                      {farm?.countyName}.{farm?.provinceName}
+                    </span>
                   </div>
 
                   <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-50">
@@ -150,7 +155,7 @@ const AllFarm = () => {
                       <div className="flex items-center justify-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         <span className="text-xs font-medium text-emerald-600">
-                          {extra.status}
+                          {farm.statusName}
                         </span>
                       </div>
                     </div>
@@ -162,17 +167,17 @@ const AllFarm = () => {
                       <div className="flex items-center justify-center gap-1">
                         {extra.productIcon}
                         <span className="text-xs font-medium text-gray-700">
-                          {extra.product}
+                          {farm?.firstProductName}
                         </span>
                       </div>
                     </div>
 
                     <div className="text-center">
-                      <p className="text-[11px] text-gray-400 mb-1">مساحت</p>
+                      <p className="text-[11px] text-gray-400 mb-1">ظرفیت تولید </p>
                       <div className="flex items-center justify-center gap-1">
                         <FiGrid className="w-3.5 h-3.5 text-gray-500" />
                         <span className="text-xs font-medium text-gray-700">
-                          {extra.area}
+                          {farm?.capacity}
                         </span>
                       </div>
                     </div>

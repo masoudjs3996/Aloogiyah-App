@@ -6,7 +6,6 @@ import { useProducts } from "@/hooks/queries/useProduct";
 import { getImageUrl } from "@/shared/utils/getImageUrl";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { BiHeart } from "react-icons/bi";
 import { FaShoppingCart } from "react-icons/fa";
@@ -16,41 +15,39 @@ export default function ProductCard() {
   const { categories, search } = useSelector(
     (state: any) => state.productFilter,
   );
+
   const { products, isLoading } = useProducts({
     categoryCodes: [categories],
     name: search,
   });
+
   const { addCart } = useCart();
-  const AddToCard = (proId: string) => {
+
+  const addToCart = (productCode: string) => {
     addCart.mutate(
       {
-        productCode: proId,
+        productCode,
         quantity: 1,
       },
       {
         onSuccess: (data) => {
           toast.success(data?.message);
         },
-        onError: (err) => {
-          console.log(err);
+        onError: (error) => {
+          console.error(error);
+          toast.error("افزودن محصول به سبد خرید انجام نشد");
         },
       },
     );
   };
 
-  useEffect(() => {
-    console.log(categories);
-  }, []);
-  useEffect(() => {
-    console.log(products, "masoud omidi ");
-  }, [products]);
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("fa-IR").format(price) + " تومان";
+    return `${new Intl.NumberFormat("fa-IR").format(price)} تومان`;
   };
 
   if (isLoading) {
     return (
-      <div className="text-center py-10 text-gray-500">
+      <div className="py-10 text-center text-gray-500">
         در حال بارگذاری محصولات...
       </div>
     );
@@ -58,7 +55,7 @@ export default function ProductCard() {
 
   if (!products || products.length === 0) {
     return (
-      <div className="text-center py-10 text-gray-700">محصولی یافت نشد.</div>
+      <div className="py-10 text-center text-gray-700">محصولی یافت نشد.</div>
     );
   }
 
@@ -67,80 +64,115 @@ export default function ProductCard() {
       {products.map((product) => {
         const hasDiscount = product.wholesalePrice < product.retailPrice;
 
+        const isOutOfStock = product.stock === 0;
+
         return (
-          <Link href={`/product/${product.code}`} key={product.code}>
-            <div className="group relative bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100">
-              <div className="relative aspect-square overflow-hidden bg-gray-500 min-h-[250px]">
-                {product?.primaryImageUrl && (
-                  <Image
-                    src={
-                      getImageUrl(product?.primaryImageUrl) ??
-                      "/images/default-product.jpg"
-                    }
-                    alt={product.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                )}
+          <article
+            key={product.code}
+            className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-md"
+          >
+            {/* با کلیک روی هر قسمت کارت، وارد جزئیات محصول می‌شود */}
+            <Link
+              href={`/product/${product.code}`}
+              aria-label={`مشاهده جزئیات ${product.name}`}
+              className="absolute inset-0 z-10"
+            />
 
-                {product.stock < 20 && product.stock > 0 && (
-                  <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold shadow">
-                    فقط {product.stock}
-                  </div>
-                )}
+            <div className="relative aspect-square min-h-[250px] overflow-hidden bg-gray-500">
+              {product.primaryImageUrl ? (
+                <Image
+                  src={
+                    getImageUrl(product.primaryImageUrl) ??
+                    "/images/default-product.jpg"
+                  }
+                  alt={product.name}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              ) : (
+                <Image
+                  src="/images/default-product.jpg"
+                  alt={product.name}
+                  fill
+                  className="object-cover"
+                />
+              )}
 
-                {product.stock === 0 && (
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                    <span className="text-white text-sm font-bold">
-                      ناموجود
-                    </span>
-                  </div>
-                )}
+              {product.stock < 20 && product.stock > 0 && (
+                <div className="absolute right-2 top-2 rounded-full bg-red-500 px-2 py-1 text-xs font-bold text-white shadow">
+                  فقط {product.stock}
+                </div>
+              )}
 
-                <button className="absolute top-2 left-2 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow hover:bg-white transition">
-                  <BiHeart className="w-4 h-4 text-gray-600" />
-                </button>
-              </div>
+              {isOutOfStock && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+                  <span className="text-sm font-bold text-white">ناموجود</span>
+                </div>
+              )}
 
-              <div className="p-3 space-y-2">
-                <h3 className="font-bold text-base text-gray-900 line-clamp-2 leading-tight">
-                  {product.name}
-                </h3>
+              {/* این دکمه بالاتر از لینک کارت قرار دارد */}
+              <button
+                type="button"
+                aria-label="افزودن به علاقه‌مندی‌ها"
+                className="absolute left-2 top-2 z-20 rounded-full bg-white/80 p-2 shadow backdrop-blur-sm transition hover:bg-white"
+              >
+                <BiHeart className="h-4 w-4 text-gray-600" />
+              </button>
+            </div>
 
-                <p className="text-xs line-clamp-2 h-14 my-4">
-                  {product.description || "گل تازه و معطر"}
-                </p>
+            <div className="space-y-2 p-3">
+              <h3 className="line-clamp-2 text-base font-bold leading-tight text-gray-900">
+                {product.name}
+              </h3>
 
-                <div className="flex flex-col justify-between">
-                  <div>
-                    <span className="text-lg font-bold text-green-600">
-                      {formatPrice(product.retailPrice)}
-                    </span>
-                  </div>
+              <p className="my-4 h-14 line-clamp-2 text-xs">
+                {product.description || "گل تازه و معطر"}
+              </p>
 
-                  <div className="flex justify-between mt-1 h-6">
-                    {hasDiscount ? (
+              <div className="flex flex-col justify-between">
+                <span className="text-lg font-bold text-green-600">
+                  {formatPrice(product.retailPrice)}
+                </span>
+
+                <div className="mt-1 flex h-6 items-center justify-between">
+                  {hasDiscount ? (
+                    <>
                       <span className="text-xs text-gray-400 line-through">
                         {formatPrice(product.wholesalePrice)}
                       </span>
-                    ) : (
-                      <div className="mt-1 h-6 invisible">بدون تخفیف</div>
-                    )}
 
-                    {hasDiscount && (
-                      <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">
                         تخفیف
                       </span>
-                    )}
-                  </div>
+                    </>
+                  ) : (
+                    <span className="invisible text-xs">بدون تخفیف</span>
+                  )}
                 </div>
-                <Button onClick={() => AddToCard(product.code)}>
-                  <FaShoppingCart className="w-4 h-4" />
-                  <span>{product.stock > 0 ? "افزودن" : "ناموجود"}</span>
+              </div>
+
+              {/* چون از Link جداست، باعث نویگیت نمی‌شود */}
+              <div className="relative z-20">
+                <Button
+                  onClick={() => {
+                    if (!isOutOfStock) {
+                      addToCart(product.code);
+                    }
+                  }}
+                >
+                  <FaShoppingCart className="h-4 w-4" />
+
+                  <span>
+                    {isOutOfStock
+                      ? "ناموجود"
+                      : addCart.isPending
+                        ? "در حال افزودن..."
+                        : "افزودن"}
+                  </span>
                 </Button>
               </div>
             </div>
-          </Link>
+          </article>
         );
       })}
     </>
