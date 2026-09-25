@@ -219,6 +219,14 @@ const FarmInfo = ({ fermCode }: FarmInfoProps) => {
 
               <ArrowLeftIcon className="h-4 w-4" />
             </Button>
+            <Button
+              variant="success"
+              className="flex w-full items-center justify-center gap-2 !rounded-xl px-7 py-3.5 shadow-lg shadow-green-600/15 sm:w-auto"
+            >
+              <span>ادیت فارم </span>
+
+              <ArrowLeftIcon className="h-4 w-4" />
+            </Button>
           </Link>
         </div>
       </div>

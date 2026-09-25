@@ -31,6 +31,8 @@ import {
 import { CommentCard } from "./CommentCard";
 import Link from "next/link";
 import SimilarProducts from "./SimilarProducts";
+import useCart from "@/hooks/mutations/useCart";
+import toast from "react-hot-toast";
 
 type ProductImage = {
   id: number;
@@ -55,7 +57,7 @@ type Comment = {
 const ProductDetail = ({ productId }: { productId: string }) => {
   const { product } = useProduct(productId);
   const { data: comments } = useCommentsTree();
-
+  const { addCart } = useCart();
   const apiProduct = product.data ?? {};
 
   // farmCode
@@ -66,8 +68,26 @@ const ProductDetail = ({ productId }: { productId: string }) => {
     SortColumn: "ksajd",
     SortDescending: true,
   });
-
-  console.log(similarProduct);
+ console.log(product);
+  const addToCart = (productCode: string) => {
+   
+    
+    addCart.mutate(
+      {
+        productCode,
+        quantity: 1,
+      },
+      {
+        onSuccess: (data) => {
+          toast.success(data?.message);
+        },
+        onError: (error) => {
+          console.error(error);
+          toast.error("افزودن محصول به سبد خرید انجام نشد");
+        },
+      },
+    );
+  };
   /*
    * ---------------------------------------------------------
    * Hard coded data
@@ -179,7 +199,7 @@ const ProductDetail = ({ productId }: { productId: string }) => {
   const retailPrice = apiProduct.retailPrice || "۴۵,۰۰۰";
 
   const wholesalePrice = apiProduct.wholesalePrice || "۸۰,۰۰۰";
-
+  const isOutOfStock = product.stock === 0;
   const apiImage = apiProduct.primaryImageUrl
     ? getImageUrl(apiProduct.primaryImageUrl)
     : null;
@@ -365,6 +385,11 @@ const ProductDetail = ({ productId }: { productId: string }) => {
             <div className="mt-5 flex gap-3">
               <Button
                 variant="secondary"
+                onClick={() => {
+                  if (!isOutOfStock) {
+                    addToCart(product?.data?.code);
+                  }
+                }}
                 className="flex h-12 flex-1 items-center justify-center gap-2 !rounded-xl bg-green-600 text-white hover:bg-green-700"
               >
                 <ShoppingCartIcon className="h-5 w-5" />
