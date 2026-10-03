@@ -52,9 +52,9 @@ export const dashboardMenu = [
     roles: ["Admin", "Manager", "Farmer", "User", "Buyer"],
   },
   {
-    path: "",
+    path: "/dashboard/orders",
     icon: IoWalletOutline,
-    label: "فاکتور ها",
+    label: "سفارش ها",
     roles: ["Admin", "Manager", "Farmer", "Buyer"],
   },
 ];

@@ -1,26 +1,48 @@
 "use client";
 
+import { useState } from "react";
+import type { ChangeEvent } from "react";
+import { Controller, useForm } from "react-hook-form";
+import type { SubmitHandler } from "react-hook-form";
+import toast from "react-hot-toast";
+
 import Button from "@/design-system/atoms/Button";
 import Input from "@/design-system/atoms/Input";
-import { SelectBox } from "@/design-system/atoms/SelectBox";
-import { IProvinces } from "@/shared/types/city";
-import { useLocationData } from "@/hooks/queries/useCounties";
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
-import useCreateFarm from "@/hooks/mutations/useCreateFarm";
-import toast from "react-hot-toast";
-import { FaUpload } from "react-icons/fa";
-import { useEffect, useState } from "react";
-import Map from "./ExportMap";
 import Textarea from "@/design-system/atoms/Textarea";
+import { SelectBox } from "@/design-system/atoms/SelectBox";
+
+import type { IProvinces } from "@/shared/types/city";
+import { useLocationData } from "@/hooks/queries/useCounties";
+import useCreateFarm from "@/hooks/mutations/useCreateFarm";
+
+import Map from "../dashbord/map/Map";
+
+import { FaUpload } from "react-icons/fa";
 import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
-import { TbBuildingBridge2, TbFileDescription } from "react-icons/tb";
+import {
+  TbBuildingBridge2,
+  TbFileDescription,
+} from "react-icons/tb";
 import { LiaAddressCard } from "react-icons/lia";
 import { BsCashCoin, BsSignpost2 } from "react-icons/bs";
 import { BiMapPin } from "react-icons/bi";
 import { AiOutlineHome } from "react-icons/ai";
 
+/* -------------------- Types -------------------- */
+
 type RegisterFarmFormProps = {
   provinces: IProvinces[] | null | undefined;
+};
+
+type SelectedPlace = {
+  code: string;
+  name: string;
+  type: "City" | "Village";
+};
+
+type MapPoint = {
+  lat: number;
+  lng: number;
 };
 
 type FormValues = {
@@ -32,109 +54,230 @@ type FormValues = {
   address: string;
   postalCode: string;
   minPurchase: string;
-  selectedLocation?: { code: string; name: string; type: "City" | "Village" };
+  selectedLocation?: SelectedPlace;
 };
 
-const RegisterFarmForm = ({ provinces }: RegisterFarmFormProps) => {
-  const { control, handleSubmit, watch, setValue, register, reset } =
-    useForm<FormValues>({
-      defaultValues: {
-        selectedLocation: undefined,
-      },
-    });
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+/* -------------------- Component -------------------- */
+
+const RegisterFarmForm = ({
+  provinces,
+}: RegisterFarmFormProps) => {
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    register,
+    reset,
+  } = useForm<FormValues>({
+    defaultValues: {
+      farmName: "",
+      farmDescription: "",
+      province: "",
+      county: "",
+      city: "",
+      address: "",
+      postalCode: "",
+      minPurchase: "",
+      selectedLocation: undefined,
+    },
+  });
+
+  const [imagePreview, setImagePreview] =
+    useState<string | null>(null);
+
   const [imageFile, setImageFile] = useState<File | null>(null);
+
+  // مختصات فقط بعد از تأیید روی نقشه ذخیره می‌شود.
+  const [location, setLocation] = useState<MapPoint | null>(null);
+
+  /* -------------------- انتخاب‌های فرم -------------------- */
+
   const selectedProvinceCode = watch("province");
   const selectedCountyCode = watch("county");
+  const selectedCityCode = watch("city");
+  const selectedPlace = watch("selectedLocation");
 
-  const { data: counties } = useLocationData("counties", selectedProvinceCode);
+  /* -------------------- دریافت شهرستان و شهر/روستا -------------------- */
+
+  const { data: counties } = useLocationData(
+    "counties",
+    selectedProvinceCode,
+  );
+
   const { data: cities } = useLocationData(
     "cityAndVillage",
     selectedCountyCode,
   );
-  const [location, setLocation] = useState({
-    lat: 35.6892,
-    lng: 51.389,
-  });
+
+  /* -------------------- نام‌های ارسالی به نقشه -------------------- */
+
+  const provinceName = provinces?.find(
+    (item) => item.code === selectedProvinceCode,
+  )?.name;
+
+  const countyName = counties?.find(
+    (item) => item.code === selectedCountyCode,
+  )?.name;
+
+  const currentPlace =
+    selectedCityCode &&
+    selectedPlace?.code === selectedCityCode
+      ? selectedPlace
+      : undefined;
+
+  const cityName =
+    currentPlace?.type === "City"
+      ? currentPlace.name
+      : undefined;
+
+  const villageName =
+    currentPlace?.type === "Village"
+      ? currentPlace.name
+      : undefined;
+
   const { createFarm } = useCreateFarm();
 
-  useEffect(() => {
-    console.log(location);
-  }, [location]);
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  /* -------------------- تصویر -------------------- */
+
+  const handleImageUpload = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+
     if (!file) return;
+
     setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
+
+    // خواندن تصویر بدون ایجاد URL موقت
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        setImagePreview(reader.result);
+      }
+    };
+
+    reader.readAsDataURL(file);
   };
+
+  /* -------------------- ارسال فرم -------------------- */
+
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     if (!imageFile) {
       toast.error("لطفا یک تصویر انتخاب کنید");
       return;
     }
 
+    if (!location) {
+      toast.error(
+        "موقعیت مزرعه را روی نقشه انتخاب و تأیید کنید",
+      );
+      return;
+    }
+
     const formData = new FormData();
-    formData.append("Name", data.farmName?.trim());
-    formData.append("Description", data.farmDescription?.trim());
+
+    formData.append("Name", data.farmName.trim());
+    formData.append(
+      "Description",
+      data.farmDescription.trim(),
+    );
     formData.append("MinPurchase", data.minPurchase || "0");
     formData.append("Capacity", "0");
-    formData.append("Address.Street", data.address?.trim());
-    formData.append("Address.PostalCode", data.postalCode?.trim());
-    formData.append("Address.Latitude", String(location?.lat));
-    formData.append("Address.Longitude", String(location?.lng));
+
+    formData.append("Address.Street", data.address.trim());
+    formData.append(
+      "Address.PostalCode",
+      data.postalCode.trim(),
+    );
+    formData.append(
+      "Address.Latitude",
+      String(location.lat),
+    );
+    formData.append(
+      "Address.Longitude",
+      String(location.lng),
+    );
     formData.append("Address.IsDefault", "false");
-    formData.append("Address.ProvinceCode", data.province || "");
-    formData.append("Address.CountyCode", data.county || "");
-    // formData.append("Address.CityCode", data.city || "");
-    // formData.append("Address.VillageCode", "");
 
-    const selectedLocation = data.selectedLocation as any;
+    formData.append(
+      "Address.ProvinceCode",
+      data.province || "",
+    );
+    formData.append(
+      "Address.CountyCode",
+      data.county || "",
+    );
 
-    if (selectedLocation?.type === "Village") {
+    const place =
+      data.city && data.selectedLocation?.code === data.city
+        ? data.selectedLocation
+        : undefined;
+
+    if (place?.type === "Village") {
       formData.append("Address.CityCode", "");
-      formData.append("Address.VillageCode", selectedLocation.code);
-    } else if (selectedLocation?.type === "City" || selectedLocation) {
+      formData.append("Address.VillageCode", place.code);
+    } else {
       formData.append(
         "Address.CityCode",
-        selectedLocation?.code || data.city || "",
+        place?.code || data.city || "",
       );
       formData.append("Address.VillageCode", "");
-    } else {
-      formData.append("Address.CityCode", "");
-      formData.append("Address.VillageCode", "");
     }
+
     formData.append("Image", imageFile);
 
     createFarm.mutate(formData, {
       onSuccess: (response) => {
-        toast.success(response?.message || "مزرعه با موفقیت ثبت شد");
+        toast.success(
+          response?.message || "مزرعه با موفقیت ثبت شد",
+        );
+
         reset();
+        setLocation(null);
         setImageFile(null);
         setImagePreview(null);
       },
-      onError: (error: any) => {
-        console.error("خطا:", error);
+      onError: () => {
         toast.error("خطا در ثبت مزرعه");
       },
     });
   };
 
   return (
-    <form className="space-y-6 w-full" onSubmit={handleSubmit(onSubmit)}>
-      <h2 className="text-xl font-bold text-center">ثبت مزرعه</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="rounded-2xl overflow-hidden shadow relative">
+    <form
+      dir="rtl"
+      className="w-full space-y-6"
+      onSubmit={handleSubmit(onSubmit)}
+    >
+      <h2 className="text-center text-xl font-bold">
+        ثبت مزرعه
+      </h2>
+
+      {/* -------------------- تصویر و مشخصات -------------------- */}
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="relative overflow-hidden rounded-2xl shadow">
           {imagePreview ? (
-            <img src={imagePreview} className="w-full object-cover max-h-40" />
+            <img
+              src={imagePreview}
+              alt="تصویر مزرعه"
+              className="max-h-40 w-full object-cover"
+            />
           ) : (
-            <div className="h-40 bg-gray-100 flex items-center justify-center text-gray-400">
-              عکس محصول
+            <div className="flex h-40 items-center justify-center bg-gray-100 text-gray-400">
+              عکس مزرعه
             </div>
           )}
-          <label className="absolute bottom-0 left-0 right-0 bg-black/40 text-white p-2 text-sm flex items-center justify-center gap-x-2 cursor-pointer">
-            <FaUpload /> ویرایش عکس
+
+          <label className="absolute inset-x-0 bottom-0 flex cursor-pointer items-center justify-center gap-x-2 bg-black/40 p-2 text-sm text-white">
+            <FaUpload />
+            انتخاب یا ویرایش عکس
+
             <input
               type="file"
+              accept="image/*"
               className="hidden"
               onChange={handleImageUpload}
             />
@@ -147,9 +290,9 @@ const RegisterFarmForm = ({ provinces }: RegisterFarmFormProps) => {
             name="farmName"
             render={({ field }) => (
               <Input
-                placeholder="نام کامل مزرعه"
-                lable="نام مزرعه :"
                 {...field}
+                placeholder="نام کامل مزرعه"
+                lable="نام مزرعه:"
                 icon={
                   <MdOutlineDriveFileRenameOutline
                     size={24}
@@ -165,12 +308,15 @@ const RegisterFarmForm = ({ provinces }: RegisterFarmFormProps) => {
             name="farmDescription"
             render={({ field }) => (
               <Textarea
-                placeholder="توضیحات کامل مزرعه..."
                 {...field}
+                placeholder="توضیحات کامل مزرعه..."
                 className="min-h-28"
-                lable="توضیحات مزرعه :"
+                lable="توضیحات مزرعه:"
                 icon={
-                  <TbFileDescription size={24} className="text-slate-700" />
+                  <TbFileDescription
+                    size={24}
+                    className="text-slate-700"
+                  />
                 }
               />
             )}
@@ -178,23 +324,40 @@ const RegisterFarmForm = ({ provinces }: RegisterFarmFormProps) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1  xl:grid-cols-3  gap-4">
+      {/* -------------------- استان، شهرستان، شهر/روستا -------------------- */}
+
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <Controller
           name="province"
           control={control}
           render={({ field }) => (
             <SelectBox
-              label="استان :"
+              label="استان:"
               placeholder="انتخاب استان"
               options={provinces?.map((p) => p.name) ?? []}
-              value={provinces?.find((p) => p.code === field.value)?.name || ""}
+              value={
+                provinces?.find(
+                  (p) => p.code === field.value,
+                )?.name || ""
+              }
               onChange={(name) => {
-                const found = provinces?.find((p) => p.name === name);
+                const found = provinces?.find(
+                  (p) => p.name === name,
+                );
+
                 setValue("province", found?.code ?? "");
                 setValue("county", "");
                 setValue("city", "");
+                setValue("selectedLocation", undefined);
+
+                setLocation(null);
               }}
-              icon={<BiMapPin size={24} className="text-slate-700" />}
+              icon={
+                <BiMapPin
+                  size={24}
+                  className="text-slate-700"
+                />
+              }
             />
           )}
         />
@@ -205,14 +368,33 @@ const RegisterFarmForm = ({ provinces }: RegisterFarmFormProps) => {
           render={({ field }) => (
             <SelectBox
               label="شهرستان"
-              options={counties?.map((c) => c.name) ?? []}
-              value={counties?.find((c) => c.code === field.value)?.name || ""}
+              options={
+                selectedProvinceCode
+                  ? counties?.map((c) => c.name) ?? []
+                  : []
+              }
+              value={
+                counties?.find(
+                  (c) => c.code === field.value,
+                )?.name || ""
+              }
               onChange={(name) => {
-                const found = counties?.find((c) => c.name === name);
+                const found = counties?.find(
+                  (c) => c.name === name,
+                );
+
                 setValue("county", found?.code ?? "");
                 setValue("city", "");
+                setValue("selectedLocation", undefined);
+
+                setLocation(null);
               }}
-              icon={<TbBuildingBridge2 size={24} className="text-slate-700" />}
+              icon={
+                <TbBuildingBridge2
+                  size={24}
+                  className="text-slate-700"
+                />
+              }
             />
           )}
         />
@@ -223,31 +405,67 @@ const RegisterFarmForm = ({ provinces }: RegisterFarmFormProps) => {
           render={({ field }) => (
             <SelectBox
               label="شهر یا روستا"
-              options={cities?.map((c) => c.name) ?? []}
-              value={cities?.find((c) => c.code === field.value)?.name || ""}
+              options={
+                selectedCountyCode
+                  ? cities?.map((c) => c.name) ?? []
+                  : []
+              }
+              value={
+                cities?.find(
+                  (c) => c.code === field.value,
+                )?.name || ""
+              }
               onChange={(name) => {
-                const found = cities?.find((c) => c.name === name);
-                if (found) {
-                  setValue("city", found.code);
+                const found = cities?.find(
+                  (c) => c.name === name,
+                );
 
-                  setValue("selectedLocation", found as any);
+                setValue("city", found?.code ?? "");
+
+                if (
+                  found &&
+                  (found.type === "City" ||
+                    found.type === "Village")
+                ) {
+                  setValue("selectedLocation", {
+                    code: found.code,
+                    name: found.name,
+                    type: found.type,
+                  });
+                } else {
+                  setValue("selectedLocation", undefined);
                 }
+
+                setLocation(null);
               }}
-              icon={<AiOutlineHome size={24} className="text-slate-700" />}
+              icon={
+                <AiOutlineHome
+                  size={24}
+                  className="text-slate-700"
+                />
+              }
             />
           )}
         />
       </div>
-      <div className="grid grid-cols-1  xl:grid-cols-3  gap-4">
+
+      {/* -------------------- آدرس و مبلغ -------------------- */}
+
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <Controller
           control={control}
           name="address"
           render={({ field }) => (
             <Input
-              placeholder="آدرس دقیق مزرعه"
               {...field}
-              lable="آدرس مزرعه :"
-              icon={<LiaAddressCard size={24} className="text-slate-700" />}
+              placeholder="آدرس دقیق مزرعه"
+              lable="آدرس مزرعه:"
+              icon={
+                <LiaAddressCard
+                  size={24}
+                  className="text-slate-700"
+                />
+              }
             />
           )}
         />
@@ -257,41 +475,79 @@ const RegisterFarmForm = ({ provinces }: RegisterFarmFormProps) => {
           name="postalCode"
           render={({ field }) => (
             <Input
-              placeholder="کد پستی"
-              type="number"
               {...field}
-              lable=" کد پستی :"
-              icon={<BsSignpost2 size={24} className="text-slate-700" />}
+              placeholder="کد پستی"
+              type="text"
+              inputMode="numeric"
+              lable="کد پستی:"
+              icon={
+                <BsSignpost2
+                  size={24}
+                  className="text-slate-700"
+                />
+              }
             />
           )}
         />
+
         <Input
           placeholder="حداقل مبلغ خرید (ریال)"
           type="number"
-          lable="حداقل مبلغ خرید :"
-          icon={<BsCashCoin size={24} className="text-slate-700" />}
+          lable="حداقل مبلغ خرید:"
+          icon={
+            <BsCashCoin
+              size={24}
+              className="text-slate-700"
+            />
+          }
           {...register("minPurchase", {
-            onChange: (e) => {
-              const clean = e.target.value.replace(
-                /[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g,
-                "",
-              );
-
-              e.target.value = clean;
+            onChange: (event) => {
+              event.target.value =
+                event.target.value.replace(
+                  /[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g,
+                  "",
+                );
             },
           })}
         />
       </div>
-      <div className="w-full h-[400px] overflow-hidden  relative space-y-2">
-        <label
-          htmlFor=""
-          className=" block  text-sm font-medium text-slate-700"
-        >
-          موقعیت مزرعه روی نقشه :
-        </label>
-        <Map position={location} updatePosition={setLocation} isAdvertiseView />
+
+      {/* -------------------- نقشه -------------------- */}
+
+      <div className="w-full space-y-2">
+        <p className="text-sm font-medium text-slate-700">
+          موقعیت مزرعه روی نقشه:
+        </p>
+
+        <Map
+          key={JSON.stringify([
+            selectedProvinceCode,
+            selectedCountyCode,
+            selectedCityCode,
+          ])}
+          pickLocation
+          onConfirmLocation={setLocation}
+          provinceName={provinceName}
+          cityName={
+            cityName ||
+            (villageName ? countyName : undefined)
+          }
+          villageName={villageName}
+          className="h-[400px]"
+        />
+
+        {location && (
+          <p className="text-sm text-green-700">
+            موقعیت مزرعه تأیید شد.
+          </p>
+        )}
       </div>
-      <Button variant="secondary" className="w-full" type="submit">
+
+      <Button
+        variant="secondary"
+        className="w-full"
+        type="submit"
+      >
         ثبت نهایی مزرعه
       </Button>
     </form>
