@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.ServiceRequest;
+using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.ServiceRequest;
 using AlooGiyah_Application.DTOs.Users;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
@@ -15,6 +16,8 @@ namespace AlooGiyah_Application.Services;
 
 public class ServiceRequestService : IServiceRequestService
 {
+    private readonly IServiceRequestQuery _readQuery;
+
     #region Constructor
     private readonly IGenericRepository<ServiceRequest> _serviceRequestRepository;
     private readonly IGenericRepository<User> _userRepository;
@@ -25,7 +28,8 @@ public class ServiceRequestService : IServiceRequestService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public ServiceRequestService(
+    public ServiceRequestService(IServiceRequestQuery readQuery,
+        
         IGenericRepository<ServiceRequest> serviceRequestRepository,
         IGenericRepository<User> userRepository,
         ICurrentUserService currentUserService,
@@ -35,6 +39,7 @@ public class ServiceRequestService : IServiceRequestService
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
+        _readQuery = readQuery;
         _serviceRequestRepository = serviceRequestRepository;
         _userRepository = userRepository;
         _currentUserService = currentUserService;
@@ -80,7 +85,7 @@ public class ServiceRequestService : IServiceRequestService
         // مپ کردن DTO به انتیتی
         var entity = _mapper.Map<ServiceRequest>(dto);
         entity.UserId = userId;
-        entity.StatusId = statusId.Value;
+        entity.StatusId = statusId ?? throw new InvalidOperationException("A service request status is required.");
         entity.DiscountId = discountId;
 
 
@@ -127,7 +132,7 @@ public class ServiceRequestService : IServiceRequestService
             var statusId = await _statusRepository.GetIdByCodeAsync(dto.StatusCode, s => s.StatusId);
             if (statusId == null)
                 throw new NotFoundException($"وضعیت با کد {dto.StatusCode} پیدا نشد");
-            entity.StatusId = statusId.Value;
+            entity.StatusId = statusId ?? throw new InvalidOperationException("A service request status is required.");
         }
 
         // به‌روزرسانی DiscountId
@@ -194,69 +199,14 @@ public class ServiceRequestService : IServiceRequestService
     #region Get By Code
     public async Task<ServiceRequestDto?> GetByCodeAsync(string code)
     {
-        if (string.IsNullOrEmpty(code))
-            throw new ArgumentNullException(nameof(code));
-
-        var entity = await _serviceRequestRepository.GetByCodeWithIncludeAsync(
-            code: code,
-            includes: new Expression<Func<ServiceRequest, object>>[]
-            {
-                sr => sr.Status,
-                sr => sr.User,
-                sr => sr.Provider,
-                sr => sr.Discount
-            }
-        );
-
-        if (entity == null)
-            return null;
-
-        var requestDto = _mapper.Map<ServiceRequestDto>(entity);
-        requestDto.UserCode = entity.User.Code;
-        requestDto.ProviderCode = entity.Provider?.Code;
-        requestDto.StatusCode = entity.Status.Code;
-        requestDto.DiscountCode = entity.Discount?.Code;
-
-        return requestDto;
+        return await _readQuery.GetByCodeAsync(code);
     }
     #endregion
 
     #region Get By Filter
     public async Task<PagedResult<ServiceRequestDto>> GetPagedAsync(ServiceRequestFilterDto filter)
     {
-        Expression<Func<ServiceRequest, bool>> predicate = sr => !sr.IsDeleted;
-
-        if (!string.IsNullOrEmpty(filter.UserCode))
-            predicate = predicate.And(sr => sr.User != null && sr.User.Code == filter.UserCode);
-
-        if (!string.IsNullOrEmpty(filter.Code))
-            predicate = predicate.And(sr => sr.Code == filter.Code);
-
-        if (!string.IsNullOrEmpty(filter.StatusCode))
-            predicate = predicate.And(sr => sr.Status != null && sr.Status.Code == filter.StatusCode);
-
-        if (filter.ServiceType.HasValue)
-            predicate = predicate.And(sr => sr.ServiceType == filter.ServiceType);
-
-        return await _serviceRequestRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: sr => new ServiceRequestDto
-            {
-                Code = sr.Code,
-                ServiceType = sr.ServiceType,
-                StatusCode = sr.Status != null ? sr.Status.Code : string.Empty,
-                UserCode = sr.User != null ? sr.User.Code : string.Empty,
-                ProviderCode = sr.Provider != null ? sr.Provider.Code : null,
-                Price = sr.Price,
-                DiscountCode = sr.Discount != null ? sr.Discount.Code : null,
-                DiscountAmount = sr.DiscountAmount,
-                Description = sr.Description,
-                ServiceDate = sr.servicedate
-            },
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: sr => sr.CreatedAt
-        );
+        return await _readQuery.GetPagedAsync(filter);
     }
 
   

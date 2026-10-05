@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.Discount;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.Discount;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.Store;
@@ -14,6 +15,8 @@ namespace AlooGiyah_Application.Services;
 
 public class DiscountService : IDiscountService
 {
+    private readonly IDiscountQuery _readQuery;
+
 
     #region Constractor
     private readonly IGenericRepository<Discount> _discountRepository;
@@ -24,7 +27,8 @@ public class DiscountService : IDiscountService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public DiscountService(
+    public DiscountService(IDiscountQuery readQuery,
+        
         IGenericRepository<Discount> discountRepository,
         IGenericRepository<User> userRepository,
         IGenericRepository<AgriculturalProduct> agriculturalProductRepository,
@@ -33,6 +37,7 @@ public class DiscountService : IDiscountService
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
+        _readQuery = readQuery;
         _discountRepository = discountRepository;
         _userRepository = userRepository;
         _agriculturalProductRepository = agriculturalProductRepository;
@@ -166,54 +171,14 @@ public class DiscountService : IDiscountService
     #region Get By Code
     public async Task<DiscountDto?> GetByCodeAsync(string code)
     {
-        var entity = await _discountRepository.GetByCodeWithIncludeAsync(
-         code,
-         "Users",
-         "Products",
-         "Categories.ParentCategory",
-         "Farm"
-     );
-
-        if (entity == null)
-            return null;
-
-       
-        return _mapper.Map<DiscountDto>(entity);
+        return await _readQuery.GetByCodeAsync(code);
     }
     #endregion
 
     #region Get By Filter
     public async Task<PagedResult<DiscountDto>> GetByFilterAsync(DiscountFilterDto filter)
     {
-        Expression<Func<Discount, bool>> predicate = d => !d.IsDeleted;
-
-        if (!string.IsNullOrEmpty(filter.SearchTerm))
-            predicate = predicate.And(d => d.Code.Contains(filter.SearchTerm));
-
-        if (filter.CategoryCodes?.Any() ?? false)
-            predicate = predicate.And(p => p.Categories.Any(c => filter.CategoryCodes.Contains(c.Code)));
-
-
-        if (filter.DiscountType.HasValue)
-            predicate = predicate.And(d => d.DiscountType == filter.DiscountType);
-
-        if (filter.IsActive.HasValue)
-            predicate = predicate.And(d => d.IsActive == filter.IsActive.Value);
-
-        return await _discountRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: d => _mapper.Map<DiscountDto>(d),
-            includes: new string[]
-        {
-            "Users",
-            "Products",
-            "Categories.ParentCategory",
-            "Farm"
-        },
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: d => d.CreatedAt
-        );
+        return await _readQuery.GetByFilterAsync(filter);
     }
     #endregion
 }

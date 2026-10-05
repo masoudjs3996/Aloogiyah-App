@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Application.Commons;
+using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.Users;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Shared.Constants;
@@ -105,7 +105,7 @@ public class AuthController : ControllerBase
                 Message = ex.Message
             });
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return BadRequest(new ApiResponse<object>
             {

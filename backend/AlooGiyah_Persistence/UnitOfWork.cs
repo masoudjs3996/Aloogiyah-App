@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Domain.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Persistence.Context;
 
 
@@ -23,6 +24,11 @@ public class UnitOfWork : IUnitOfWork
     {
         var transaction = await _context.Database.BeginTransactionAsync();
         return new EfCoreTransaction(transaction);
+    }
+
+    public async Task<ITransaction> BeginTransactionAsync(System.Data.IsolationLevel isolationLevel)
+    {
+        return new EfCoreTransaction(await _context.Database.BeginTransactionAsync(isolationLevel));
     }
 
     public void Dispose()

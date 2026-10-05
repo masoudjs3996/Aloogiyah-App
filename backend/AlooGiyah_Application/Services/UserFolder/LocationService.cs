@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.Location;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.Location;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.UserFolder.AddressFolder;
@@ -14,6 +15,8 @@ namespace AlooGiyah_Application.Services.UserFolder;
 
 public class LocationService : ILocationService
 {
+    private readonly ILocationQuery _readQuery;
+
     #region Constructor
     private readonly IGenericRepository<Province> _provinceRepo;
     private readonly IGenericRepository<County> _countyRepo;
@@ -23,7 +26,8 @@ public class LocationService : ILocationService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public LocationService(
+    public LocationService(ILocationQuery readQuery,
+        
         IGenericRepository<Province> provinceRepo,
         IGenericRepository<County> countyRepo,
         IGenericRepository<City> cityRepo,
@@ -32,6 +36,7 @@ public class LocationService : ILocationService
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
+        _readQuery = readQuery;
         _provinceRepo = provinceRepo;
         _countyRepo = countyRepo;
         _cityRepo = cityRepo;
@@ -46,27 +51,7 @@ public class LocationService : ILocationService
     #region GetProvincesAsync
     public async Task<PagedResult<ProvinceListDto>> GetProvincesAsync(LocationFilterDto filter)
     {
-        var predicate = PredicateBuilder.True<Province>()
-            .And(p => !p.IsDeleted);
-
-        if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
-            predicate = predicate.And(p => p.Name.Contains(filter.SearchTerm) || p.Code.Contains(filter.SearchTerm));
-
-        if (!string.IsNullOrWhiteSpace(filter.StatusCode))
-            predicate = predicate.And(p => p.Status.EntityStatus == EntityStatus.Location &&
-                                          p.Status.Code == (filter.StatusCode));
-
-        return await _provinceRepo.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: p => new ProvinceListDto
-            {
-                Code = p.Code,
-                Name = p.Name,
-                StatusCode = p.Status.Code,
-                StatusName = p.Status.Name,
-            },
-            orderBy: p => p.Name
-        );
+        return await _readQuery.GetProvincesAsync(filter);
     }
     #endregion
 
@@ -118,33 +103,7 @@ public class LocationService : ILocationService
     #region GetCountiesAsync
     public async Task<PagedResult<CountyDto>> GetCountiesAsync(string? provinceCode, LocationFilterDto filter)
     {
-        var predicate = PredicateBuilder.True<County>()
-            .And(c => !c.IsDeleted);
-
-        if (!string.IsNullOrWhiteSpace(provinceCode))
-        {
-            var provinceId = await _provinceRepo.GetIdByCodeAsync(provinceCode, p => p.ProvinceId)
-                             ?? throw new NotFoundException("استان یافت نشد");
-            predicate = predicate.And(c => c.ProvinceId == provinceId);
-        }
-
-        if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
-            predicate = predicate.And(c => c.Name.Contains(filter.SearchTerm));
-
-        return await _countyRepo.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: c => new CountyDto
-            {
-                Code = c.Code,
-                Name = c.Name,
-                ProvinceCode = c.Province.Code,
-                ProvinceName = c.Province.Name,
-                StatusCode = c.Status.Code,
-                StatusName = c.Status.Name,
-            },
-            orderBy: c => c.Name,
-            expressionIncludes: c => c.Province
-        );
+        return await _readQuery.GetCountiesAsync(provinceCode, filter);
     }
     #endregion
 
@@ -237,51 +196,7 @@ public class LocationService : ILocationService
     #region GetCountyLocationsAsync
     public async Task<List<CountyLocationItemDto>> GetCountyLocationsAsync(CountyLocationsFilterDto filterDto)
     {
-        var countyId = await _countyRepo.GetIdByCodeAsync(filterDto.countyCode, c => c.CountyId)
-                       ?? throw new NotFoundException("شهرستان یافت نشد");
-
-        var result = new List<CountyLocationItemDto>();
-
-        // همیشه شهرها رو بیار (مگر اینکه فقط روستا بخواد)
-        if (filterDto.IncludeVillages != true)
-        {
-            var cities = await _cityRepo.GetAll()
-                .Where(c => !c.IsDeleted && c.CountyId == countyId)
-                .Select(c => new CountyLocationItemDto
-                {
-                    Code = c.Code,
-                    Name = c.Name,
-                    Type = "City",
-                    StatusCode = c.Status.Code,
-                    StatusName = c.Status.Name,
-
-                })
-                .ToListAsync();
-
-            result.AddRange(cities);
-        }
-
-        // فقط وقتی روستا بخواد یا همه
-        if (filterDto.IncludeVillages == true || filterDto.IncludeVillages == null)
-        {
-            var villages = await _villageRepo.GetAll()
-                .Where(v => !v.IsDeleted && v.CountyId == countyId)
-                .Select(v => new CountyLocationItemDto
-                {
-                    Code = v.Code,
-                    Name = v.Name,
-                    Type = "Village",
-                    Latitude = v.Latitude,
-                    Longitude = v.Longitude,
-                    StatusCode = v.Status.Code,
-                    StatusName = v.Status.Name,
-                })
-                .ToListAsync();
-
-            result.AddRange(villages);
-        }
-
-        return result.OrderBy(x => x.Name).ToList();
+        return await _readQuery.GetCountyLocationsAsync(filterDto);
     }
     #endregion
 }

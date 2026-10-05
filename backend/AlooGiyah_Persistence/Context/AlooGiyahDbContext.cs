@@ -12,6 +12,10 @@ public class AlooGiyahDbContext : DbContext
     public DbSet<Files> Files { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<Checkout> Checkouts { get; set; }
+    public DbSet<CheckoutPayment> CheckoutPayments { get; set; }
+    public DbSet<OrderRefund> OrderRefunds { get; set; }
+    public DbSet<AgriculturalOrderHistory> AgriculturalOrderHistories { get; set; }
     public DbSet<AgriculturalOrder> AgriculturalOrders { get; set; }
     public DbSet<AgriculturalOrderItem> AgriculturalOrderItems { get; set; }
     public DbSet<AgriculturalProduct> AgriculturalProducts { get; set; }
@@ -41,6 +45,7 @@ public class AlooGiyahDbContext : DbContext
     public DbSet<City> Citys { get; set; }
     public DbSet<Village> Villages { get; set; }
     public DbSet<Wallet> Wallets { get; set; }
+    public DbSet<WalletTransaction> WalletTransactions { get; set; }
     public DbSet<Warehouse> Warehouses { get; set; }
     public DbSet<WarehouseInventory> WarehouseInventories { get; set; }
     public DbSet<Slider> Sliders { get; set; }

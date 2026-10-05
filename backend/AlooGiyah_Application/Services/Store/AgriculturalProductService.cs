@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Application.DTOs.AgriculturalProduct;
+using AlooGiyah_Application.DTOs.AgriculturalProduct;
 using AlooGiyah_Application.DTOs.File;
 using AlooGiyah_Application.Interfaces.Query;
 using AlooGiyah_Application.Interfaces.Service;
@@ -223,7 +223,7 @@ public class AgriculturalProductService : IAgriculturalProductService
 
             await transaction.CommitAsync();
 
-            return await GetByCodeAsync(entity.Code);
+            return await GetByCodeAsync(entity.Code) ?? throw new NotFoundException("The saved product could not be retrieved.");
         }
         catch (Exception)
         {
@@ -341,7 +341,7 @@ public class AgriculturalProductService : IAgriculturalProductService
     #endregion
 
     #region Get By Code
-    public async Task<AgriculturalProductDetailDto> GetByCodeAsync(string code)
+    public async Task<AgriculturalProductDetailDto?> GetByCodeAsync(string code)
     {
         var role = _currentUserService.Roles.FirstOrDefault() ?? "User";
 

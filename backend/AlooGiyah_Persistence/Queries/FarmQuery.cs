@@ -15,157 +15,29 @@ public class FarmQuery : BaseQuery, IFarmQuery
     {
     }
 
-    public async Task<PagedResult<FarmListDto>> GetByFilterAsync(FarmFilterDto filter)
+
+    private const string ListFrom = """
+FROM "Farms" t JOIN "Users" u ON u."UserId"=t."OwnerId" JOIN "Statuses" s ON s."StatusId"=t."StatusId" LEFT JOIN "Addresses" a ON a."AddressId"=t."AddressId" LEFT JOIN "Provinces" prov ON prov."ProvinceId"=a."ProvinceId" LEFT JOIN "Countys" county ON county."CountyId"=a."CountyId"
+""";
+    public Task<PagedResult<FarmListDto>> GetByFilterAsync(FarmFilterDto filter)
     {
-        var parameters = new DynamicParameters();
-
-        var where = new StringBuilder();
-        where.AppendLine("WHERE 1=1");
-        where.AppendLine("AND f.\"IsDeleted\" = FALSE");
-
-        if (!string.IsNullOrWhiteSpace(filter.Name))
-        {
-            where.AppendLine("AND f.\"Name\" ILIKE @Name");
-            parameters.Add("Name", $"%{filter.Name}%");
-        }
-
-        if (!string.IsNullOrWhiteSpace(filter.UserCode))
-        {
-            where.AppendLine("AND u.\"Code\" = @UserCode");
-            parameters.Add("UserCode", filter.UserCode);
-        }
-
-        if (!string.IsNullOrWhiteSpace(filter.StatusCode))
-        {
-            where.AppendLine("AND s.\"Code\" = @StatusCode");
-            parameters.Add("StatusCode", filter.StatusCode);
-        }
-
-        parameters.Add("FarmEntity", (int)EntityFile.Farm);
-        parameters.Add("UserEntity", (int)EntityFile.Profile);
-
-        var baseSql = @"
-SELECT
-    f.""Code"" AS ""FarmCode"",
-    f.""Name"" AS ""FarmName"",
-    f.""Description"" AS ""Description"",
-
-    u.""Code"" AS ""UserCode"",
-    CONCAT(u.""FName"", ' ', COALESCE(u.""LName"", '')) AS ""UserFullName"",
-
-    farmFile.""Url"" AS ""FarmImageUrl"",
-    userFile.""Url"" AS ""UserImageUrl""
-
-FROM ""Farms"" f
-INNER JOIN ""Users"" u ON u.""UserId"" = f.""OwnerId""
-INNER JOIN ""Statuses"" s ON s.""StatusId"" = f.""StatusId""
-
-LEFT JOIN ""Files"" farmFile
-    ON farmFile.""EntityCode"" = f.""Code""
-    AND farmFile.""EntityFile"" = @FarmEntity
-    AND farmFile.""IsPrimary"" = TRUE
-
-LEFT JOIN ""Files"" userFile
-    ON userFile.""EntityCode"" = u.""Code""
-    AND userFile.""EntityFile"" = @UserEntity
-    AND userFile.""IsPrimary"" = TRUE
-";
-
-        var countSql = @"
-SELECT COUNT(*)
-FROM ""Farms"" f
-INNER JOIN ""Users"" u ON u.""UserId"" = f.""OwnerId""
-INNER JOIN ""Statuses"" s ON s.""StatusId"" = f.""StatusId""
-";
-
-        return await QueryPagedAsync<FarmListDto>(
-            baseSql + where,
-            countSql + where,
-            parameters,
-            filter.PageNumber,
-            filter.PageSize);
+        var where = new QueryFilter(); where.Contains("t.\"Name\"", "Name", filter.Name); where.Equal("u.\"Code\"", "User", filter.UserCode); where.Equal("s.\"Code\"", "Status", filter.StatusCode);
+        if (!string.IsNullOrWhiteSpace(filter.AddressCode)) where.Add("(prov.\"Code\"=@Address OR county.\"Code\"=@Address OR a.\"Code\"=@Address)", "Address", filter.AddressCode);
+        return QueryJsonPagedAsync<FarmListDto>("""
+to_jsonb(t) || jsonb_build_object('FarmCode', t."Code", 'FarmName', t."Name", 'UserCode', u."Code", 'UserFullName', concat_ws(' ',u."FName",u."LName"), 'FarmImageUrl', (SELECT fi."Url" FROM "Files" fi WHERE fi."EntityCode"=t."Code" AND fi."EntityFile"=6 AND fi."IsPrimary" AND NOT fi."IsDeleted" ORDER BY fi."CreatedAt" DESC, fi."FileId" DESC LIMIT 1), 'UserImageUrl', (SELECT fi."Url" FROM "Files" fi WHERE fi."EntityCode"=u."Code" AND fi."EntityFile"=0 AND fi."IsPrimary" AND NOT fi."IsDeleted" ORDER BY fi."CreatedAt" DESC, fi."FileId" DESC LIMIT 1))
+""", ListFrom, where, "t.\"CreatedAt\" DESC,t.\"FarmId\" DESC", filter.PageNumber, filter.PageSize);
     }
-
-    public async Task<PagedResult<MyFarmlistDto>> GetMyFarmsAsync(GetMyFarmDto filter, int currentUserId)
+    public Task<PagedResult<MyFarmlistDto>> GetMyFarmsAsync(GetMyFarmDto filter, int currentUserId)
     {
-        var whereParts = new List<string>
-        {
-            "f.\"IsDeleted\" = false",
-            "f.\"OwnerId\" = @OwnerId"
-        };
-
-        var parameters = new DynamicParameters();
-        parameters.Add("OwnerId", currentUserId);
-        parameters.Add("FarmEntity", (int)EntityFile.Farm);
-
-        if (!string.IsNullOrWhiteSpace(filter.Name))
-        {
-            whereParts.Add("f.\"Name\" ILIKE @Name");
-            parameters.Add("Name", $"%{filter.Name}%");
-        }
-
-        if (!string.IsNullOrWhiteSpace(filter.AddressCode))
-        {
-            whereParts.Add("(prov.\"Code\" = @AddressCode OR county.\"Code\" = @AddressCode)");
-            parameters.Add("AddressCode", filter.AddressCode);
-        }
-
-        var whereClause = string.Join(" AND ", whereParts);
-
-        var baseSql = $"""
-            SELECT
-                f."Code" AS "Code",
-                f."Name" AS "Name",
-                f."Description" AS "Description",
-                f."Capacity" AS "Capacity",
-                
-                COALESCE(prov."Name", '') AS "ProvinceName",
-                COALESCE(county."Name", '') AS "CountyName",
-                
-                COALESCE(farmFile."Url", '') AS "FarmImageUrl",
-                
-                COALESCE(s."Code", '') AS "StatusCode",
-                COALESCE(s."Name", '') AS "StatusName",
-                
-                (
-                    SELECT ap."Name"
-                    FROM "AgriculturalProducts" ap
-                    WHERE ap."FarmId" = f."FarmId"
-                        AND ap."IsDeleted" = FALSE
-                    ORDER BY ap."CreatedAt" ASC, ap."AgriculturalProductId" ASC
-                    LIMIT 1
-                ) AS "FirstProductName"
-                
-            FROM "Farms" f
-            LEFT JOIN "Addresses" addr ON addr."AddressId" = f."AddressId"
-            LEFT JOIN "Provinces" prov ON prov."ProvinceId" = addr."ProvinceId"
-            LEFT JOIN "Countys" county ON county."CountyId" = addr."CountyId"
-            LEFT JOIN "Statuses" s ON s."StatusId" = f."StatusId"
-            LEFT JOIN "Files" farmFile
-                ON farmFile."EntityCode" = f."Code"
-                AND farmFile."EntityFile" = @FarmEntity
-                AND farmFile."IsPrimary" = TRUE
-                AND farmFile."IsDeleted" = FALSE
-            WHERE {whereClause}
-            """;
-
-        var countSql = $"""
-            SELECT COUNT(*)
-            FROM "Farms" f
-            LEFT JOIN "Addresses" addr ON addr."AddressId" = f."AddressId"
-            LEFT JOIN "Provinces" prov ON prov."ProvinceId" = addr."ProvinceId"
-            LEFT JOIN "Countys" county ON county."CountyId" = addr."CountyId"
-            WHERE {whereClause}
-            """;
-
-        var orderBy = "ORDER BY f.\"CreatedAt\" DESC";
-        baseSql += "\n" + orderBy;
-
-        return await QueryPagedAsync<MyFarmlistDto>(
-            baseSql,
-            countSql,
-            parameters,
-            filter.PageNumber,
-            filter.PageSize);
+        var where = new QueryFilter(); where.Add("t.\"OwnerId\"=@Owner", "Owner", currentUserId); where.Contains("t.\"Name\"", "Name", filter.Name);
+        if (!string.IsNullOrWhiteSpace(filter.AddressCode)) where.Add("(prov.\"Code\"=@Address OR county.\"Code\"=@Address)", "Address", filter.AddressCode);
+        return QueryJsonPagedAsync<MyFarmlistDto>("""
+to_jsonb(t) || jsonb_build_object('ProvinceName', COALESCE(prov."Name",''), 'CountyName', COALESCE(county."Name",''), 'FarmImageUrl', COALESCE((SELECT fi."Url" FROM "Files" fi WHERE fi."EntityCode"=t."Code" AND fi."EntityFile"=6 AND fi."IsPrimary" AND NOT fi."IsDeleted" ORDER BY fi."CreatedAt" DESC, fi."FileId" DESC LIMIT 1),''), 'StatusCode', s."Code", 'StatusName', s."Name", 'FirstProductName', (SELECT p."Name" FROM "AgriculturalProducts" p WHERE p."FarmId"=t."FarmId" AND NOT p."IsDeleted" ORDER BY p."CreatedAt",p."AgriculturalProductId" LIMIT 1))
+""", ListFrom, where, "t.\"CreatedAt\" DESC,t.\"FarmId\" DESC", filter.PageNumber, filter.PageSize);
     }
+    public Task<FarmDto?> GetByCodeAsync(string code) => QueryJsonFirstAsync<FarmDto>("""
+SELECT (to_jsonb(t) || jsonb_build_object('OwnerCode', u."Code", 'ImageUrl', (SELECT fi."Url" FROM "Files" fi WHERE fi."EntityCode"=t."Code" AND fi."EntityFile"=6 AND fi."IsPrimary" AND NOT fi."IsDeleted" ORDER BY fi."CreatedAt" DESC, fi."FileId" DESC LIMIT 1), 'Address', CASE WHEN a."AddressId" IS NULL THEN NULL ELSE to_jsonb(a) || jsonb_build_object('UserCode', u."Code", 'ProvinceCode', prov."Code", 'ProvinceName', prov."Name", 'CountyCode', county."Code", 'CountyName', county."Name", 'CityCode', city."Code", 'CityName', city."Name", 'VillageCode', v."Code", 'VillageName', v."Name") END))::text FROM "Farms" t JOIN "Users" u ON u."UserId"=t."OwnerId" LEFT JOIN "Addresses" a ON a."AddressId"=t."AddressId"
+LEFT JOIN "Provinces" prov ON prov."ProvinceId"=a."ProvinceId" LEFT JOIN "Countys" county ON county."CountyId"=a."CountyId"
+LEFT JOIN "Citys" city ON city."CityId"=a."CityId" LEFT JOIN "Villages" v ON v."VillageId"=a."VillageId" WHERE NOT t."IsDeleted" AND t."Code"=@Code
+""", new { Code = code });
 }

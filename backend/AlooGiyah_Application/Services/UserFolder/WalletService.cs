@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.Wallet;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.Wallet;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Entities.UserFolder;
@@ -10,6 +11,8 @@ namespace AlooGiyah_Application.Services.UserFolder;
 
 public class WalletService : IWalletService
 {
+    private readonly IWalletQuery _readQuery;
+
     private readonly IGenericRepository<Wallet> _walletRepository;
     private readonly IGenericRepository<WalletTransaction> _walletTransactionRepository;
     private readonly ICurrentUserService _currentUserService;
@@ -17,7 +20,8 @@ public class WalletService : IWalletService
     private readonly IPaymentGatewayService _paymentGatewayService; // سرویس پرداخت
     private readonly IMapper _mapper;
 
-    public WalletService(
+    public WalletService(IWalletQuery readQuery,
+        
         IGenericRepository<Wallet> walletRepository,
         IGenericRepository<WalletTransaction> walletTransactionRepository,
         ICurrentUserService currentUserService,
@@ -25,6 +29,7 @@ public class WalletService : IWalletService
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
+        _readQuery = readQuery;
         _walletRepository = walletRepository;
         _walletTransactionRepository = walletTransactionRepository;
         _currentUserService = currentUserService;
@@ -35,16 +40,7 @@ public class WalletService : IWalletService
 
     public async Task<WalletDto> GetWalletByUserCodeAsync()
     {
-        if (string.IsNullOrEmpty(_currentUserService.UserId))
-            throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
-
-        var userId =int.Parse(_currentUserService.UserId);
-
-        var wallet = await _walletRepository.FirstOrDefaultAsync(w => w.UserId == userId);
-        if (wallet == null)
-            throw new NotFoundException("کیف پول پیدا نشد");
-
-        return _mapper.Map<WalletDto>(wallet);
+        return await _readQuery.GetWalletByUserCodeAsync() ?? throw new NotFoundException("کیف پول پیدا نشد.");
     }
 
     public async Task<bool> CheckBalanceAsync( decimal requiredAmount)

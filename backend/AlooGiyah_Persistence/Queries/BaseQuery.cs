@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Domain.Pagination;
+using AlooGiyah_Domain.Pagination;
 using AlooGiyah_Domain.Interfaces;
 using Dapper;
 using System.Data;
@@ -36,7 +36,7 @@ public abstract class BaseQuery
         return await conn.QueryAsync<T>(sql, param);
     }
 
-    protected async Task<T> ExecuteScalarAsync<T>(
+    protected async Task<T?> ExecuteScalarAsync<T>(
         string sql,
         object? param = null)
     {
@@ -55,6 +55,8 @@ public abstract class BaseQuery
         int pageNumber,
         int pageSize)
     {
+        pageNumber = Math.Max(1, pageNumber);
+        pageSize = Math.Clamp(pageSize, 1, 100);
         using var conn = CreateConnection();
 
         parameters.Add("Offset", (pageNumber - 1) * pageSize);
@@ -62,7 +64,7 @@ public abstract class BaseQuery
 
         var finalSql = new StringBuilder();
         finalSql.AppendLine(baseSql);
-        finalSql.AppendLine("OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;");
+        finalSql.AppendLine("LIMIT @PageSize OFFSET @Offset;");
         finalSql.AppendLine(countSql);
 
         using var multi = await conn.QueryMultipleAsync(finalSql.ToString(), parameters);
@@ -100,4 +102,50 @@ public abstract class BaseQuery
     }
 
     #endregion
+
+    private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = CreateJsonOptions();
+    private static System.Text.Json.JsonSerializerOptions CreateJsonOptions()
+    {
+        var resolver = new System.Text.Json.Serialization.Metadata.DefaultJsonTypeInfoResolver();
+        resolver.Modifiers.Add(info =>
+        {
+            // Domain codes have a private setter; preserve stored codes when hydrating read graphs.
+            if (typeof(AlooGiyah_Domain.Entities.BaseEntity).IsAssignableFrom(info.Type))
+            {
+                var code = info.Properties.FirstOrDefault(x => x.Name == "Code");
+                if (code != null) code.Set = (entity, value) =>
+                    typeof(AlooGiyah_Domain.Entities.BaseEntity).GetProperty("Code")!.SetValue(entity, value);
+            }
+        });
+        return new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true, TypeInfoResolver = resolver };
+    }
+    protected async Task<T?> QueryJsonFirstAsync<T>(string sql, object? parameters = null) where T : class
+    {
+        using var conn = CreateConnection();
+        var json = await conn.QuerySingleOrDefaultAsync<string>(sql, parameters);
+        return json == null ? null : System.Text.Json.JsonSerializer.Deserialize<T>(json, JsonOptions);
+    }
+    protected async Task<List<T>> QueryJsonAsync<T>(string sql, object? parameters = null)
+    {
+        using var conn = CreateConnection();
+        var rows = await conn.QueryAsync<string>(sql, parameters);
+        return rows.Select(x => System.Text.Json.JsonSerializer.Deserialize<T>(x, JsonOptions)!).ToList();
+    }
+    protected async Task<PagedResult<T>> QueryJsonPagedAsync<T>(string projection, string from,
+        QueryFilter filter, string orderBy, int pageNumber, int pageSize)
+    {
+        pageNumber = Math.Max(1, pageNumber); pageSize = Math.Clamp(pageSize, 1, 100);
+        filter.Parameters.Add("Offset", checked((pageNumber - 1) * pageSize));
+        filter.Parameters.Add("PageSize", pageSize);
+        // Same snapshot for count and rows, even while orders change in another request.
+        using var conn = CreateConnection(); conn.Open();
+        using var transaction = conn.BeginTransaction(System.Data.IsolationLevel.RepeatableRead);
+        var sql = $"SELECT ({projection})::text {from} {filter.Where} ORDER BY {orderBy} LIMIT @PageSize OFFSET @Offset; " +
+            $"SELECT COUNT(*) {from} {filter.Where};";
+        using var multi = await conn.QueryMultipleAsync(sql, filter.Parameters, transaction);
+        var rows = (await multi.ReadAsync<string>()).Select(x => System.Text.Json.JsonSerializer.Deserialize<T>(x, JsonOptions)!).ToList();
+        var count = await multi.ReadSingleAsync<int>();
+        transaction.Commit();
+        return new PagedResult<T> { Items = rows, TotalCount = count, PageNumber = pageNumber, PageSize = pageSize };
+    }
 }

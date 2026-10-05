@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.Category;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.Category;
 using AlooGiyah_Application.DTOs.File;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Domain.Entities;
@@ -14,6 +15,8 @@ namespace AlooGiyah_Application.Services;
 
 public class CategoryService : ICategoryService
 {
+    private readonly ICategoryQuery _readQuery;
+
     #region Constructor
     private readonly IGenericRepository<Category> _categoryRepository;
     private readonly IGenericRepository<Files> _fileRepo;
@@ -26,7 +29,8 @@ public class CategoryService : ICategoryService
     private const string TreeCacheKey = "Category_Tree_V3";
     private const string HomeCacheKey = "Category_Home_V3";
 
-    public CategoryService(
+    public CategoryService(ICategoryQuery readQuery,
+        
         IGenericRepository<Category> categoryRepo,
         IGenericRepository<Files> fileRepo,
         IGenericRepository<Status> statusRepo,
@@ -35,6 +39,7 @@ public class CategoryService : ICategoryService
         IMemoryCache cache,
         IUnitOfWork unitOfWork)
     {
+        _readQuery = readQuery;
         _categoryRepository = categoryRepo ?? throw new ArgumentNullException(nameof(categoryRepo));
         _fileRepo = fileRepo ?? throw new ArgumentNullException(nameof(fileRepo));
         _statusRepo = statusRepo ?? throw new ArgumentNullException(nameof(statusRepo));
@@ -49,201 +54,29 @@ public class CategoryService : ICategoryService
     #region Full tree
     public async Task<List<CategoryDto>> GetCategoryTreeAsync()
     {
-        if (_cache.TryGetValue(TreeCacheKey, out List<CategoryDto> cached))
-            return cached;
-
-        var page = await _categoryRepository.GetPagedProjectedAsync(
-            filter: c => !c.IsDeleted,
-            selector: c => new
-            {
-                c.Code,
-                c.Name,
-                c.Slug,
-                c.Icon,
-                c.ParentCategoryId,
-                c.MetaTitle,
-                c.MetaDescription,
-                c.MetaKeywords,
-                c.SortOrder,
-                StatusCode = c.Status != null ? c.Status.Code : "ACTIVE",
-                StatusName = c.Status != null ? c.Status.Name : "فعال"
-            },
-            orderBy: c => c.Name,
-            pageNumber: 1,
-            pageSize: 5000
-        );
-
-        var raw = page.Items.ToList();
-        if (!raw.Any())
-        {
-            var empty = new List<CategoryDto>();
-            _cache.Set(TreeCacheKey, empty, TimeSpan.FromMinutes(10));
-            return empty;
-        }
-
-        var codes = raw.Select(x => x.Code).ToList();
-
-        // تبدیل ParentCategoryId → ParentCategoryCode (یک کوئری)
-        var parentIds = raw.Where(x => x.ParentCategoryId.HasValue).Select(x => x.ParentCategoryId!.Value).Distinct().ToList();
-        var parentMap = new Dictionary<int, string>();
-
-        if (parentIds.Any())
-        {
-            var parents = await _categoryRepository.GetPagedProjectedAsync(
-                filter: c => parentIds.Contains(c.CategoryId),
-                selector: c => new { c.CategoryId, c.Code },
-                pageNumber: 1,
-                pageSize: parentIds.Count
-            );
-            parentMap = parents.Items.ToDictionary(x => x.CategoryId, x => x.Code);
-        }
-
-        var dtoList = new List<CategoryDto>();
-
-        foreach (var c in raw)
-        {
-            var dto = new CategoryDto
-            {
-                Code = c.Code,
-                Name = c.Name,
-                Slug = c.Slug,
-                Icon = c.Icon,
-                ParentCategoryCode = c.ParentCategoryId.HasValue ? parentMap.GetValueOrDefault(c.ParentCategoryId.Value) : null,
-                MetaTitle = c.MetaTitle ?? string.Empty,
-                MetaDescription = c.MetaDescription ?? string.Empty,
-                MetaKeywords = c.MetaKeywords,
-                StatusCode = c.StatusCode,
-                statusName = c.StatusName,
-                SortOrder = c.SortOrder,
-                SubCategories = new List<CategoryDto>()
-            };
-
-            // فقط یک عکس — با متد موجود
-            dto.ImageUrl = await _fileService.GetPrimaryFileUrlAsync(EntityFile.Category, c.Code);
-
-            dtoList.Add(dto);
-        }
-
-        // ساخت درخت
-        var codeToDto = dtoList.ToDictionary(x => x.Code);
-        var roots = new List<CategoryDto>();
-
-        foreach (var dto in dtoList)
-        {
-            if (string.IsNullOrEmpty(dto.ParentCategoryCode))
-                roots.Add(dto);
-            else if (codeToDto.TryGetValue(dto.ParentCategoryCode!, out var parent))
-                parent.SubCategories.Add(dto);
-        }
-
-        SortTree(roots);
-        _cache.Set(TreeCacheKey, roots, TimeSpan.FromMinutes(30));
-        return roots;
+        if (_cache.TryGetValue(TreeCacheKey, out List<CategoryDto>? cached) && cached != null) return cached;
+        var result = await _readQuery.GetCategoryTreeAsync(); _cache.Set(TreeCacheKey, result, TimeSpan.FromMinutes(30)); return result;
     }
     #endregion
 
     #region GetCategoriesByTypeAsync
     public async Task<List<CategoryDto>> GetCategoriesByTypeAsync(CategoryFetchType type)
     {
-        int statusId = type switch
-        {
-            CategoryFetchType.Home => 53,
-            CategoryFetchType.Menu => 54,
-            CategoryFetchType.Featured => 55,
-            _ => 0
-        };
-
-        var page = await _categoryRepository.GetPagedProjectedAsync(
-            filter: c => !c.IsDeleted && c.StatusId == statusId,
-            selector: c => c,
-            orderBy: c => c.SortOrder,
-            pageNumber: 1,
-            pageSize: 100
-        );
-
-        var items = page.Items.ToList();
-
-        var categoryDto = _mapper.Map<List<CategoryDto>>(items);
-
-        // اضافه کردن عکس
-        foreach (var dto in categoryDto)
-        {
-            dto.ImageUrl = await _fileService.GetPrimaryFileUrlAsync(EntityFile.Category, dto.Code);
-        }
-
-        return categoryDto;
+        return await _readQuery.GetCategoriesByTypeAsync(type);
     }
     #endregion
 
     #region Admin filter + paging
     public async Task<PagedResult<CategoryListDto>> GetFilteredAsync(CategoryFilterDto filter)
     {
-        if (filter == null) throw new ArgumentNullException(nameof(filter));
-
-        int? parentId = null;
-        if (!string.IsNullOrEmpty(filter.ParentCategoryCode))
-        {
-            parentId = await _categoryRepository.GetIdByCodeAsync(filter.ParentCategoryCode, c => c.CategoryId);
-        }
-
-        var page = await _categoryRepository.GetPagedProjectedAsync(
-            filter: c => !c.IsDeleted &&
-                         (string.IsNullOrEmpty(filter.SearchTerm) ||
-                          c.Name.Contains(filter.SearchTerm) ||
-                          c.Code.Contains(filter.SearchTerm)) &&
-                         (!parentId.HasValue || c.ParentCategoryId == parentId) &&
-                         (string.IsNullOrEmpty(filter.StatusCode) ||
-                          (c.Status != null && c.Status.Code == filter.StatusCode)),
-            selector: c => new CategoryListDto
-            {
-                Code = c.Code,
-                Name = c.Name,
-                Slug = c.Slug,
-                Icon = c.Icon,
-                ParentCategoryCode = c.ParentCategory != null ? c.ParentCategory.Code : null
-            },
-            orderBy: c => c.SortOrder,
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize
-        );
-
-        var items = page.Items.ToList();
-
-        // رفع ارور ۱: لوپ برای عکس
-        foreach (var item in items)
-        {
-            item.ImageUrl = await _fileService.GetPrimaryFileUrlAsync(EntityFile.Category, item.Code);
-        }
-
-        // رفع ارور ۲: object initializer
-        return new PagedResult<CategoryListDto>
-        {
-            Items = items,
-            TotalCount = page.TotalCount,
-            PageNumber = filter.PageNumber,
-            PageSize = filter.PageSize
-        };
+        return await _readQuery.GetFilteredAsync(filter);
     }
     #endregion
 
     #region Get By Code
     public async Task<CategoryDto> GetByCodeAsync(string code)
     {
-        if (string.IsNullOrWhiteSpace(code))
-            throw new ArgumentNullException(nameof(code));
-
-        // رفع ارور ۳: استفاده از FirstOrDefaultAsync مستقیم
-        var cat = await _categoryRepository.FirstOrDefaultAsync(c => c.Code == code && !c.IsDeleted);
-
-        if (cat == null)
-            throw new NotFoundException("دسته‌بندی یافت نشد");
-
-        // دستی مپ کن
-        var dto = _mapper.Map<CategoryDto>(cat);
-
-        dto.ImageUrl = await _fileService.GetPrimaryFileUrlAsync(EntityFile.Category, code);
-
-        return dto;
+        return await _readQuery.GetByCodeAsync(code) ?? throw new NotFoundException("دسته‌بندی یافت نشد.");
     }
     #endregion
 

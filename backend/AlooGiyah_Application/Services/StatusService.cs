@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.Status;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.Status;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.Store;
@@ -13,6 +14,8 @@ namespace AlooGiyah_Application.Services;
 
 public class StatusService : IStatusService
 {
+    private readonly IStatusQuery _readQuery;
+
     #region Constructor
     private readonly IGenericRepository<Status> _statusRepository;
     private readonly IGenericRepository<Auction> _auctionRepository;
@@ -23,7 +26,8 @@ public class StatusService : IStatusService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public StatusService(
+    public StatusService(IStatusQuery readQuery,
+        
         IGenericRepository<Status> statusRepository,
         IGenericRepository<Auction> auctionRepository,
         IGenericRepository<AgriculturalOrder> agriculturalOrderRepository,
@@ -33,6 +37,7 @@ public class StatusService : IStatusService
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
+        _readQuery = readQuery;
         _statusRepository = statusRepository;
         _auctionRepository = auctionRepository;
         _agriculturalOrderRepository = agriculturalOrderRepository;
@@ -125,40 +130,14 @@ public class StatusService : IStatusService
     #region Get By Code
     public async Task<StatusDto?> GetByCodeAsync(string code)
     {
-        var entity = await _statusRepository.GetByCodeAsync(code);
-        if (entity == null)
-            return null;
-
-        return _mapper.Map<StatusDto>(entity);
+        return await _readQuery.GetByCodeAsync(code);
     }
     #endregion
 
     #region Get By Filter
     public async Task<PagedResult<StatusDto>> GetByFilterAsync(StatusFilterDto filter)
     {
-        Expression<Func<Status, bool>> predicate = s => !s.IsDeleted;
-
-        if (!string.IsNullOrEmpty(filter.Name))
-            predicate = predicate.And(s => s.Name.Contains(filter.Name));
-
-        if (filter.EntityStatus.HasValue)
-            predicate = predicate.And(s => s.EntityStatus == filter.EntityStatus.Value);
-
-        return await _statusRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: s => new StatusDto
-            {
-                Code = s.Code,
-                Name = s.Name,
-                Description = s.Description,
-                EntityStatus = s.EntityStatus,
-                CreatedAt = s.CreatedAt,
-                UpdatedAt = s.UpdatedAt
-            },
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: s => s.CreatedAt
-        );
+        return await _readQuery.GetByFilterAsync(filter);
     }
     #endregion
 }

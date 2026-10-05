@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.Cart;
+using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.Cart;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Application.Interfaces.Service.Store;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
@@ -16,6 +17,8 @@ namespace AlooGiyah_Application.Services.Store;
 
 public class CartService : ICartService
 {
+    private readonly ICartQuery _readQuery;
+
     private readonly IGenericRepository<Cart> _cartRepo;
     private readonly IGenericRepository<CartItem> _cartItemRepo;
     private readonly IGenericRepository<AgriculturalProduct> _productRepo;
@@ -26,7 +29,8 @@ public class CartService : ICartService
     private readonly IPriceCalculatorService _priceCalculator;
     private readonly IMapper _mapper;
 
-    public CartService(
+    public CartService(ICartQuery readQuery,
+        
     IGenericRepository<Cart> cartRepo,
     IGenericRepository<CartItem> cartItemRepo,
     IGenericRepository<AgriculturalProduct> productRepo,
@@ -37,6 +41,7 @@ public class CartService : ICartService
     IPriceCalculatorService priceCalculator,
     IMapper mapper)
     {
+        _readQuery = readQuery;
         _cartRepo = cartRepo;
         _cartItemRepo = cartItemRepo;
         _productRepo = productRepo;
@@ -60,88 +65,14 @@ public class CartService : ICartService
 
     public async Task<CartDto?> GetCartAsync()
     {
-        var cartQuery = _cartRepo.GetAll()
-        .Include(c => c.CartItems)
-            .ThenInclude(i => i.AgriculturalProduct)
-                .ThenInclude(p => p.Farm)
-                    .ThenInclude(f => f.Address)
-                        .ThenInclude(a => a.City)
-                            .ThenInclude(c => c.County)
-                                .ThenInclude(co => co.Province)
-        .Where(c => !c.IsDeleted);
-        Cart? cart;
-
-        if (_currentUserService.IsGuest)
-        {
-            var cartIdStr = _currentUserService.CartId;
-            if (string.IsNullOrEmpty(cartIdStr))
-                return null;
-
-            var cartId = Guid.Parse(cartIdStr);
-            cart = await cartQuery.FirstOrDefaultAsync(c => c.CartId == cartId);
-        }
-        else
-        {
-            var userId = int.Parse(_currentUserService.UserId!);
-            cart = await cartQuery.FirstOrDefaultAsync(c => c.UserId == userId);
-        }
-
-        if (cart == null)
-            return null;
-
-        _priceCalculator.CalculateCart(cart, CurrentRole);
-
-        return BuildCartDto(cart);
+        return await _readQuery.GetCartAsync();
     }
 
 
     #region GetCartByIdAsync
     public async Task<CartDto?> GetCartByIdAsync(Guid cartId)
     {
-        var cart = await _cartRepo.GetAll()
-        .Include(c => c.CartItems)
-            .ThenInclude(ci => ci.AgriculturalProduct)
-                .ThenInclude(p => p.Farm)
-                    .ThenInclude(f => f.Address)
-                        .ThenInclude(a => a.City)
-                            .ThenInclude(c => c.County)
-                                .ThenInclude(co => co.Province)
-        .Include(c => c.Farm)
-        .FirstOrDefaultAsync(c => c.CartId == cartId && !c.IsDeleted);
-
-        if (cart == null)
-        {
-            return null;
-        }
-
-        // چک مالکیت - امنیت مهم است
-        bool isOwner = false;
-
-        if (CurrentUserId.HasValue)
-        {
-            isOwner = cart.UserId == CurrentUserId.Value;
-        }
-        else if (CurrentGuestId.HasValue)
-        {
-            isOwner = cart.GuestId == CurrentGuestId.Value;
-        }
-
-        if (!isOwner)
-        {
-            return null;
-        }
-
-        // محاسبه قیمت‌ها (اگر آیتم داشته باشد)
-        if (cart.CartItems.Any())
-        {
-            var discountEligibility = cart.Discount != null
-                ? await _priceCalculator.PrepareDiscountEligibilityAsync(cart, cart.Discount)
-                : null;
-
-            _priceCalculator.CalculateCart(cart, CurrentRole, discountEligibility);
-        }
-
-        return _mapper.Map<CartDto>(cart);
+        return await _readQuery.GetCartByIdAsync(cartId);
     }
     #endregion
 
@@ -345,15 +276,15 @@ public class CartService : ICartService
         var farmImages = _fileRepo.GetAll()
             .Where(f => !f.IsDeleted && f.IsPrimary &&
                         f.EntityFile == EntityFile.Farm &&
-                        farmCodes.Contains(f.EntityCode))
-            .ToDictionary(f => f.EntityCode, f => f.Url);
+                        f.EntityCode != null && farmCodes.Contains(f.EntityCode))
+            .ToDictionary(f => f.EntityCode!, f => f.Url);
 
         // دریافت تصاویر اصلی محصولات کشاورزی
         var productImages = _fileRepo.GetAll()
             .Where(f => !f.IsDeleted && f.IsPrimary &&
                         f.EntityFile == EntityFile.AgriculturalProduct &&
-                        productCodes.Contains(f.EntityCode))
-            .ToDictionary(f => f.EntityCode, f => f.Url);
+                        f.EntityCode != null && productCodes.Contains(f.EntityCode))
+            .ToDictionary(f => f.EntityCode!, f => f.Url);
 
         return new CartDto
         {
@@ -376,8 +307,8 @@ public class CartService : ICartService
                    FarmName = farm.Name,
                    TotalPrice = g.Sum(i => i.Price),
                    ImageUrl = farmImages.GetValueOrDefault(farm.Code),
-                   Province = province?.Name,   // ← نام استان
-                   County = county?.Name,       // ← نام شهرستان
+                   Province = province?.Name ?? string.Empty,   // ← نام استان
+                   County = county?.Name ?? string.Empty,       // ← نام شهرستان
                    Items = g.Select(i => new CartItemDto
                    {
                        Code = i.Code,
@@ -385,7 +316,7 @@ public class CartService : ICartService
                        ProductName = i.AgriculturalProduct.Name,
                        ProductSlug = i.AgriculturalProduct.Slug,
                        Quantity = i.Quantity,
-                       UnitPrice = i.Price,
+                       UnitPrice = i.Quantity > 0 ? i.Price / i.Quantity : 0,
                        AvailableStock = i.AgriculturalProduct.Stock,
                        PrimaryImageUrl = productImages.GetValueOrDefault(i.AgriculturalProduct.Code)
                    }).ToList()
@@ -401,8 +332,8 @@ public class CartService : ICartService
     .Include(c => c.CartItems)
         .ThenInclude(i => i.AgriculturalProduct)
             .ThenInclude(p => p.Farm)
-                .ThenInclude(f => f.Address)
-                    .ThenInclude(a => a.City)
+                .ThenInclude(f => f.Address!)
+                    .ThenInclude(a => a.City!)
                         .ThenInclude(c => c.County)
                             .ThenInclude(co => co.Province)
     .Where(c => !c.IsDeleted);

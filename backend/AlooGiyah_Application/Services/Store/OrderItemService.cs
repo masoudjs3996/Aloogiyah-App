@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.OrderItem;
+using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.OrderItem;
 using AlooGiyah_Application.Interfaces.Service.Store;
 using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Interfaces;
@@ -14,6 +15,8 @@ namespace AlooGiyah_Application.Services.Store;
 
 public class OrderItemService : IOrderItemService
 {
+    private readonly IOrderItemQuery _readQuery;
+
     #region Constructor
     private readonly IGenericRepository<OrderItem> _orderItemRepository;
     private readonly IGenericRepository<Order> _orderRepository;
@@ -22,7 +25,8 @@ public class OrderItemService : IOrderItemService
     private readonly IMapper _mapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public OrderItemService(
+    public OrderItemService(IOrderItemQuery readQuery,
+        
         IGenericRepository<OrderItem> orderItemRepository,
         IGenericRepository<Order> orderRepository,
         IGenericRepository<Product> productRepository,
@@ -30,6 +34,7 @@ public class OrderItemService : IOrderItemService
         IMapper mapper,
         IHttpContextAccessor httpContextAccessor)
     {
+        _readQuery = readQuery;
         _orderItemRepository = orderItemRepository;
         _orderRepository = orderRepository;
         _productRepository = productRepository;
@@ -47,53 +52,16 @@ public class OrderItemService : IOrderItemService
     #endregion
 
     #region Get by Filter
-    public async Task<PagedResult<OrderItemDto?>> GetByFilterAsync(OrderItemFilterDto dto)
+    public async Task<PagedResult<OrderItemDto>> GetByFilterAsync(OrderItemFilterDto dto)
     {
-        Expression<Func<OrderItem, bool>> predicate = oi => !oi.IsDeleted;
-
-        if (!string.IsNullOrEmpty(dto.OrderCode))
-            predicate = predicate.And(oi => oi.Order.Code == dto.OrderCode);
-
-        if (!string.IsNullOrEmpty(dto.ProductCode))
-            predicate = predicate.And(oi => oi.Product.Code == dto.ProductCode);
-
-        if (!string.IsNullOrEmpty(dto.SearchTerm))
-            predicate = predicate.And(oi => oi.Product.Name.Contains(dto.SearchTerm));
-
-        return await _orderItemRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: oi => new OrderItemDto
-            {
-                OrderItemCode = oi.Code,
-                ProductCode = oi.Product.Code,
-                ProductName = oi.Product.Name,
-                Quantity = oi.Quantity,
-                Price = oi.Price,
-                PriceType = oi.PriceType,
-                OrderCode = oi.Order.Code
-            },
-            pageNumber: dto.PageNumber,
-            pageSize: dto.PageSize,
-            orderBy: oi => oi.CreatedAt
-        );
+        return await _readQuery.GetByFilterAsync(dto);
     }
     #endregion
 
     #region Get by Code
     public async Task<OrderItemDto?> GetByCodeAsync(string orderItemCode)
     {
-        var entity = await _orderItemRepository.GetByCodeAsync(orderItemCode);
-        if (entity == null) return null;
-
-        var orderCode = await _orderRepository.GetCodeByIdAsync(entity.OrderId);
-        var productCode = await _productRepository.GetCodeByIdAsync(entity.ProductId);
-        var orderItemDto = _mapper.Map<OrderItemDto>(entity);
-        orderItemDto.OrderCode = orderCode ?? string.Empty;
-        orderItemDto.ProductCode = productCode ?? string.Empty;
-        orderItemDto.ProductName = entity.Product.Name;
-        orderItemDto.PriceType = entity.PriceType;
-
-        return orderItemDto;
+        return await _readQuery.GetByCodeAsync(orderItemCode);
     }
     #endregion
 

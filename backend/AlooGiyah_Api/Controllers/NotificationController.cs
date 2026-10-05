@@ -20,7 +20,7 @@ namespace AlooGiyah_Api.Controllers
         }
 
         // دریافت همه اعلان‌های کاربر جاری
-        [Authorize(Policy = "NotGuest")]
+        [Authorize]
         [HttpGet("MyNotifications")]
         public async Task<IActionResult> GetMyNotifications()
         {

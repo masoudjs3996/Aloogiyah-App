@@ -1,4 +1,4 @@
-﻿using AlooGiyah_API.Middlewares;
+using AlooGiyah_API.Middlewares;
 using AlooGiyah_Application.Interfaces.Query;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Application.Interfaces.Service.Store;
@@ -18,7 +18,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -61,8 +61,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("NotGuest", policy =>
-        policy.RequireAssertion(context =>
-            !context.User.IsInRole("Guest")));
+    {
+        policy.RequireAuthenticatedUser();
+        policy.RequireAssertion(context => !context.User.IsInRole("Guest"));
+    });
 });
 
 #endregion
@@ -93,19 +95,9 @@ builder.Services.AddSwaggerGen(c =>
         Description = "????? JWT ?? ?? ????: Bearer {token} ???? ????"
     });
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    c.AddSecurityRequirement(document => new OpenApiSecurityRequirement
     {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
+        [new OpenApiSecuritySchemeReference("Bearer", document)] = []
     });
 });
 #endregion
@@ -135,6 +127,8 @@ builder.Services.AddScoped<IQualityAssessmentService, QualityAssessmentService>(
 builder.Services.AddScoped<IChatMessageService, ChatMessageService>();
 builder.Services.AddScoped<IAgriculturalProductService, AgriculturalProductService>();
 builder.Services.AddScoped<IAgriculturalOrderService, AgriculturalOrderService>();
+builder.Services.AddScoped<ICheckoutService, CheckoutService>();
+builder.Services.AddHostedService<AlooGiyah_Api.BackgroundServices.CheckoutExpiryWorker>();
 builder.Services.AddScoped<IAgriculturalOrderItemService, AgriculturalOrderItemService>();
 builder.Services.AddScoped<IAuctionService, AuctionService>();
 builder.Services.AddScoped<IAuctionBidService, AuctionBidService>();
@@ -162,7 +156,33 @@ builder.Services.AddScoped<ICartRepository,CartRepository>();
 builder.Services.AddScoped<IDbConnectionFactory, SqlConnectionFactory>();
 
 
+builder.Services.AddScoped<IAddressQuery, AddressQuery>();
+builder.Services.AddScoped<ICategoryQuery, CategoryQuery>();
+builder.Services.AddScoped<IFileQuery, FileQuery>();
+builder.Services.AddScoped<IWalletQuery, WalletQuery>();
+builder.Services.AddScoped<INotificationQuery, NotificationQuery>();
+builder.Services.AddScoped<ISliderQuery, SliderQuery>();
+builder.Services.AddScoped<ILocationQuery, LocationQuery>();
+builder.Services.AddScoped<ICommentQuery, CommentQuery>();
+builder.Services.AddScoped<IDiscountQuery, DiscountQuery>();
+builder.Services.AddScoped<IAgriculturalOrderQuery, AgriculturalOrderQuery>();
+builder.Services.AddScoped<ICheckoutQuery, CheckoutQuery>();
+builder.Services.AddScoped<IAgriculturalOrderItemQuery, AgriculturalOrderItemQuery>();
+builder.Services.AddScoped<ICartQuery, CartQuery>();
 builder.Services.AddScoped<IUserQuery, UserQuery>();
+builder.Services.AddScoped<IStatusQuery, StatusQuery>();
+builder.Services.AddScoped<IWarehouseQuery, WarehouseQuery>();
+builder.Services.AddScoped<IWarehouseInventoryQuery, WarehouseInventoryQuery>();
+builder.Services.AddScoped<IQualityAssessmentQuery, QualityAssessmentQuery>();
+builder.Services.AddScoped<IStatusChangeLogQuery, StatusChangeLogQuery>();
+builder.Services.AddScoped<IServiceRequestQuery, ServiceRequestQuery>();
+builder.Services.AddScoped<IChatMessageQuery, ChatMessageQuery>();
+builder.Services.AddScoped<IAuctionBidQuery, AuctionBidQuery>();
+builder.Services.AddScoped<IAuctionQuery, AuctionQuery>();
+builder.Services.AddScoped<IArticleQuery, ArticleQuery>();
+builder.Services.AddScoped<IProductQuery, ProductQuery>();
+builder.Services.AddScoped<IOrderQuery, OrderQuery>();
+builder.Services.AddScoped<IOrderItemQuery, OrderItemQuery>();
 builder.Services.AddScoped<IFarmQuery, FarmQuery>();
 builder.Services.AddScoped<IAgriculturalProductQuery, AgriculturalProductQuery>();
 
@@ -173,7 +193,12 @@ builder.Services.AddHttpContextAccessor();
 
 //builder.Services.AddScoped<IRequestService, RequestService>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddAutoMapper(cfg =>
+{
+    var licenseKey = builder.Configuration["AutoMapper:LicenseKey"];
+    if (!string.IsNullOrWhiteSpace(licenseKey))
+        cfg.LicenseKey = licenseKey;
+}, AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddMemoryCache();
 #endregion
 

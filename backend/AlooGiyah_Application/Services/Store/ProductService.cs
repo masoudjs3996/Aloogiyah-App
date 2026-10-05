@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.Category;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.Category;
 using AlooGiyah_Application.DTOs.Product;
 using AlooGiyah_Application.Interfaces.Service.Store;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
@@ -17,6 +18,8 @@ namespace AlooGiyah_Application.Services.Store;
 
 public class ProductService : IProductService
 {
+    private readonly IProductQuery _readQuery;
+
     #region Constructor
     private readonly IGenericRepository<Product> _productRepository;
     private readonly IGenericRepository<Category> _categoryRepository;
@@ -25,7 +28,8 @@ public class ProductService : IProductService
     private readonly IMapper _mapper;
 
 
-    public ProductService(
+    public ProductService(IProductQuery readQuery,
+        
         IGenericRepository<Product> productRepository,
         IGenericRepository<Category> categoryRepository,
         ICurrentUserService currentUserService,
@@ -33,6 +37,7 @@ public class ProductService : IProductService
         IMapper mapper
 )
     {
+        _readQuery = readQuery;
         _productRepository = productRepository;
         _categoryRepository = categoryRepository;
         _currentUserService = currentUserService;
@@ -172,73 +177,14 @@ public class ProductService : IProductService
     #region Get by Code
     public async Task<ProductDto?> GetByCodeAsync(string code)
     {
-        if (string.IsNullOrEmpty(_currentUserService.UserId))
-            throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
-
-        var role = _currentUserService.Roles.FirstOrDefault();
-
-        var entity = await _productRepository.GetByCodeWithIncludeAsync(
-            code: code,
-            includes: new Expression<Func<Product, object>>[] { p => p.Categories });
-
-        if (entity == null) return null;
-
-        var dto = _mapper.Map<ProductDto>(entity);
-        dto.CategoryCodes = entity.Categories.Select(c => c.Code).ToList();
-        dto.Slug = entity.Slug;
-        dto.MetaTitle = entity.MetaTitle;
-        dto.MetaDescription = entity.MetaDescription;
-        dto.MetaKeywords = entity.MetaKeywords;
-        dto.RetailPrice = entity.RetailPrice;
-        dto.WholesalePrice = role == "User" ? null : entity.WholesalePrice;
-
-        return dto;
+        return await _readQuery.GetByCodeAsync(code);
     }
     #endregion
 
     #region Get by Filter
     public async Task<PagedResult<ProductDto>> GetByFilterAsync(ProductFilterDto filter)
     {
-        if (string.IsNullOrEmpty(_currentUserService.UserId))
-            throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
-
-        Expression<Func<Product, bool>> predicate = p => !p.IsDeleted;
-
-        var role = _currentUserService.Roles.FirstOrDefault();
-
-        if (!string.IsNullOrEmpty(filter.SearchTerm))
-            predicate = predicate.And(p => p.Name.Contains(filter.SearchTerm));
-
-
-        if (!string.IsNullOrEmpty(filter.CategoryCode))
-        {
-            var categoryId = await _categoryRepository.GetIdByCodeAsync(filter.CategoryCode, c => c.CategoryId);
-            if (categoryId != null)
-                predicate = predicate.And(p => p.Categories.Any(cat => cat.CategoryId == categoryId.Value));
-        }
-
-        var paged = await _productRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: p => new ProductDto
-            {
-                Code = p.Code,
-                Name = p.Name,
-                Description = p.Description,
-                Stock = p.Stock,
-                RetailPrice = p.RetailPrice,
-                WholesalePrice = role == "User" ? null : p.WholesalePrice,
-                CategoryCodes = p.Categories.Select(c => c.Code).ToList(),
-                Slug = p.Slug,
-                MetaTitle = p.MetaTitle,
-                MetaDescription = p.MetaDescription,    
-                MetaKeywords = p.MetaKeywords,
-            },
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: p => p.CreatedAt
-        );
-
-        return paged;
+        return await _readQuery.GetByFilterAsync(filter);
     }
     #endregion
 }

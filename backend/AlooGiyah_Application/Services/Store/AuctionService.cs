@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.Auction;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.Auction;
 using AlooGiyah_Application.DTOs.AuctionBid;
 using AlooGiyah_Application.Interfaces.Service.Store;
 using AlooGiyah_Domain.Entities;
@@ -15,6 +16,8 @@ namespace AlooGiyah_Application.Services.Store;
 
 public class AuctionService : IAuctionService
 {
+    private readonly IAuctionQuery _readQuery;
+
     #region Constructor
     private readonly IGenericRepository<Auction> _auctionRepository;
     private readonly IGenericRepository<AgriculturalProduct> _agriculturalProductRepository;
@@ -24,7 +27,8 @@ public class AuctionService : IAuctionService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public AuctionService(
+    public AuctionService(IAuctionQuery readQuery,
+        
         IGenericRepository<Auction> auctionRepository,
         IGenericRepository<AgriculturalProduct> agriculturalProductRepository,
         IGenericRepository<User> userRepository,
@@ -33,6 +37,7 @@ public class AuctionService : IAuctionService
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
+        _readQuery = readQuery;
         _auctionRepository = auctionRepository;
         _agriculturalProductRepository = agriculturalProductRepository;
         _userRepository = userRepository;
@@ -140,81 +145,14 @@ public class AuctionService : IAuctionService
     #region Get By Code
     public async Task<AuctionDto?> GetByCodeAsync(string code)
     {
-        var entity = await _auctionRepository.GetByCodeAsync(code);
-        if (entity == null)
-            return null;
-
-        var auctionDto = _mapper.Map<AuctionDto>(entity);
-        auctionDto.AgriculturalProductCode = await _agriculturalProductRepository.GetCodeByIdAsync(entity.AgriculturalProductId) ?? string.Empty;
-        auctionDto.StatusCode = await _statusRepository.GetCodeByIdAsync(entity.StatusId) ?? string.Empty;
-        auctionDto.WinnerCode = entity.WinnerId.HasValue ? await _userRepository.GetCodeByIdAsync(entity.WinnerId.Value) ?? string.Empty : string.Empty;
-        auctionDto.Bids = entity.Bids.Select(b => new AuctionBidDto
-        {
-            Code = b.Code,
-            BidAmount = b.BidAmount,
-            CreatedAt = b.CreatedAt
-        }).ToList();
-
-        return auctionDto;
+        return await _readQuery.GetByCodeAsync(code);
     }
     #endregion
 
     #region Get By Filter
     public async Task<PagedResult<AuctionDto>> GetByFilterAsync(AuctionFilterDto filter)
     {
-        Expression<Func<Auction, bool>> predicate = a => !a.IsDeleted;
-
-        if (!string.IsNullOrEmpty(filter.ProductCode))
-            predicate = predicate.And(a => a.AgriculturalProduct.Code == filter.ProductCode);
-
-        if (!string.IsNullOrEmpty(filter.StatusCode))
-            predicate = predicate.And(a => a.Status.Code == filter.StatusCode);
-
-        if (!string.IsNullOrEmpty(filter.WinnerCode))
-            predicate = predicate.And(a => a.Winner != null && a.Winner.Code == filter.WinnerCode);
-
-        if (filter.StartDateFrom.HasValue)
-            predicate = predicate.And(a => a.StartDate >= filter.StartDateFrom.Value);
-
-        if (filter.StartDateTo.HasValue)
-            predicate = predicate.And(a => a.StartDate <= filter.StartDateTo.Value);
-
-        if (filter.EndDateFrom.HasValue)
-            predicate = predicate.And(a => a.EndDate >= filter.EndDateFrom.Value);
-
-        if (filter.EndDateTo.HasValue)
-            predicate = predicate.And(a => a.EndDate <= filter.EndDateTo.Value);
-
-        if (filter.MinStartingPrice.HasValue)
-            predicate = predicate.And(a => a.StartingPrice >= filter.MinStartingPrice.Value);
-
-        if (filter.MaxStartingPrice.HasValue)
-            predicate = predicate.And(a => a.StartingPrice <= filter.MaxStartingPrice.Value);
-
-        return await _auctionRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: a => new AuctionDto
-            {
-                Code = a.Code,
-                AgriculturalProductCode = a.AgriculturalProduct.Code,
-                StartDate = a.StartDate,
-                EndDate = a.EndDate,
-                StartingPrice = a.StartingPrice,
-                CurrentPrice = a.CurrentPrice,
-                WinnerCode = a.Winner != null ? a.Winner.Code : string.Empty,
-                StatusCode = a.Status.Code,
-                CreatedAt = a.CreatedAt,
-                Bids = a.Bids.Select(b => new AuctionBidDto
-                {
-                    Code = b.Code,
-                    BidAmount = b.BidAmount,
-                    CreatedAt = b.CreatedAt
-                }).ToList()
-            },
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: a => a.CreatedAt
-        );
+        return await _readQuery.GetByFilterAsync(filter);
     }
     #endregion
 

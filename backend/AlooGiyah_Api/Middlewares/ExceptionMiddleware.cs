@@ -40,6 +40,23 @@ namespace AlooGiyah_API.Middlewares
 
             switch (exception)
             {
+                case ConflictException conflictEx:
+                    context.Response.StatusCode = 409;
+                    response = new ApiResponse<object>(conflictEx.Message, "CONFLICT");
+                    break;
+                case Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException:
+                    context.Response.StatusCode = 409;
+                    response = new ApiResponse<object>("اطلاعات هم‌زمان تغییر کرده است؛ دوباره دریافت کنید.", "CONFLICT");
+                    break;
+                case Npgsql.PostgresException pg when pg.SqlState is "40001" or "40P01" or "23505":
+                    context.Response.StatusCode = 409;
+                    response = new ApiResponse<object>("درخواست هم‌زمان یا تکراری است؛ وضعیت را دوباره دریافت کنید.", "CONFLICT");
+                    break;
+                case Microsoft.EntityFrameworkCore.DbUpdateException db when db.InnerException is Npgsql.PostgresException pgInner &&
+                    (pgInner.SqlState == "40001" || pgInner.SqlState == "40P01" || pgInner.SqlState == "23505"):
+                    context.Response.StatusCode = 409;
+                    response = new ApiResponse<object>("درخواست هم‌زمان یا تکراری است؛ وضعیت را دوباره دریافت کنید.", "CONFLICT");
+                    break;
                 case NotFoundException notFoundEx:
                     context.Response.StatusCode = (int)HttpStatusCode.NotFound;
                     response = new ApiResponse<object>(notFoundEx.Message, "NOT_FOUND");

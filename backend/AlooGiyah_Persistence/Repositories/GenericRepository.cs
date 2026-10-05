@@ -33,6 +33,8 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
         return query;
     }
 
+    public IQueryable<T> GetAllIncludingDeleted() => _dbSet.AsQueryable();
+
     private IQueryable<T> GetQuery()
     {
         return _dbSet.Where(e => !e.IsDeleted);

@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.Auction;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.Auction;
 using AlooGiyah_Application.DTOs.AuctionBid;
 using AlooGiyah_Application.Interfaces.Service.Store;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
@@ -14,6 +15,8 @@ namespace AlooGiyah_Application.Services.Store;
 
 public class AuctionBidService : IAuctionBidService
 {
+    private readonly IAuctionBidQuery _readQuery;
+
     #region Constructor
     private readonly IGenericRepository<AuctionBid> _auctionBidRepository;
     private readonly IGenericRepository<Auction> _auctionRepository;
@@ -21,13 +24,15 @@ public class AuctionBidService : IAuctionBidService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public AuctionBidService(
+    public AuctionBidService(IAuctionBidQuery readQuery,
+        
         IGenericRepository<AuctionBid> auctionBidRepository,
         IGenericRepository<Auction> auctionRepository,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
+        _readQuery = readQuery;
         _auctionBidRepository = auctionBidRepository;
         _auctionRepository = auctionRepository;
         _currentUserService = currentUserService;
@@ -150,56 +155,14 @@ public class AuctionBidService : IAuctionBidService
     #region Get By Code
     public async Task<AuctionBidDto?> GetByCodeAsync(string code)
     {
-        var entity = await _auctionBidRepository.GetByCodeAsync(code);
-        if (entity == null)
-            return null;
-
-        var bidDto = _mapper.Map<AuctionBidDto>(entity);
-
-        return bidDto;
+        return await _readQuery.GetByCodeAsync(code);
     }
     #endregion
 
     #region Get By Filter
     public async Task<PagedResult<AuctionBidDto>> GetByFilterAsync(AuctionBidFilterDto filter)
     {
-        if (string.IsNullOrEmpty(_currentUserService.UserId))
-            throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
-
-        Expression<Func<AuctionBid, bool>> predicate = b => !b.IsDeleted;
-
-        var userRole = _currentUserService.Roles.FirstOrDefault(); // نقش فعلی کاربر
-        if (userRole != "Manager") //  فقط مدیر می‌تونه آدرس‌های دیگران رو ببینه
-        {
-            predicate = predicate.And(a => a.User.UserId == int.Parse(_currentUserService.UserId));
-        }
-        else if (!string.IsNullOrEmpty(filter.UserCode))
-        {
-            predicate = predicate.And(a => a.User.Code == filter.UserCode);
-        }
-
-        if (!string.IsNullOrEmpty(filter.AuctionCode))
-            predicate = predicate.And(b => b.Auction.Code == filter.AuctionCode);
-
-
-        if (filter.MinBidAmount.HasValue)
-            predicate = predicate.And(b => b.BidAmount >= filter.MinBidAmount.Value);
-
-        if (filter.MaxBidAmount.HasValue)
-            predicate = predicate.And(b => b.BidAmount <= filter.MaxBidAmount.Value);
-
-        return await _auctionBidRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: b => new AuctionBidDto
-            {
-                Code = b.Code,
-                BidAmount = b.BidAmount,
-                CreatedAt = b.CreatedAt
-            },
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: b => b.CreatedAt
-        );
+        return await _readQuery.GetByFilterAsync(filter);
     }
     #endregion
 }

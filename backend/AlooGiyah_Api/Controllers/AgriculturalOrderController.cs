@@ -1,153 +1,55 @@
 ﻿using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.AgriculturalOrder;
 using AlooGiyah_Application.Interfaces.Service.Store;
-using AlooGiyah_Domain.Enums;
-using AlooGiyah_Shared.Constants;
 using AlooGiyah_Shared.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 namespace AlooGiyah_Api.Controllers;
-
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Policy = "NotGuest")]
 public class AgriculturalOrderController : ControllerBase
 {
     #region Constructor
-    private readonly IAgriculturalOrderService _agriculturalOrderService;
-
-    public AgriculturalOrderController(IAgriculturalOrderService agriculturalOrderService)
+    private readonly IAgriculturalOrderService _service;
+    public AgriculturalOrderController(IAgriculturalOrderService service) { _service = service; }
+    #endregion
+    #region Read
+    [HttpGet("GetByCode")]
+    public async Task<IActionResult> GetByCode([FromQuery] string code)
     {
-        _agriculturalOrderService = agriculturalOrderService;
+        var result = await _service.GetByCodeAsync(code) ?? throw new NotFoundException("سفارش یافت نشد.");
+        return Ok(new ApiResponse<AgriculturalOrderDto> { IsSuccess = true, Message = "اطلاعات سفارش", Data = result });
+    }
+    [HttpGet("GetByFilter")]
+    public async Task<IActionResult> GetByFilter([FromQuery] AgriculturalOrderFilterDto dto)
+    {
+        var result = await _service.GetByFilterAsync(dto);
+        return Ok(new ApiResponse<object> { IsSuccess = true, Message = "فهرست سفارش‌ها", Data = result });
     }
     #endregion
-
-
-    #region Create
-    [Authorize(Policy = "NotGuest")]
-    [HttpPost("Create")]
-    public async Task<IActionResult> CreateAgriculturalOrder(AgriculturalOrderCreateDto createDto)
-    {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
-
-        var result = await _agriculturalOrderService.CreateAsync(createDto);
-
-        return Ok(new ApiResponse<object>
-        {
-            IsSuccess = true,
-            Message = "سفارش کشاورزی با موفقیت ثبت شد",
-            Data = result
-        });
-    }
-    #endregion
-
-    #region CreateFromCart
+    #region Create From Cart
+    // Compatibility route; now returns a Checkout containing several farm orders.
     [HttpPost("CreateFromCart")]
-    [Authorize(Policy = "NotGuest")]
     public async Task<IActionResult> CreateFromCart([FromBody] CheckoutFromCartDto dto)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-
-        var result = await _agriculturalOrderService.CreateFromCartAsync(dto);
-
-        return Ok(new ApiResponse<AgriculturalOrderDto>
-        {
-            IsSuccess = true,
-            Message = "سفارش با موفقیت از سبد خرید ثبت شد",
-            Data = result
-        });
+        var result = await _service.CreateFromCartAsync(dto);
+        return Ok(new ApiResponse<CheckoutDto> { IsSuccess = true, Message = "خرید در انتظار پرداخت ثبت شد", Data = result });
     }
     #endregion
-
-    #region GetByFilter
-    [Authorize(Policy = "NotGuest")]
-    [HttpGet("GetByFilter")]
-    public async Task<IActionResult> GetByFilterAsync([FromQuery] AgriculturalOrderFilterDto filterDto)
+    #region Order Operations
+    [HttpPost("{code}/Action")]
+    public async Task<IActionResult> Action(string code, [FromBody] OrderActionDto dto)
     {
-        var result = await _agriculturalOrderService.GetByFilterAsync(filterDto);
-
-        if (result == null || !result.Items.Any())
-            throw new NotFoundException(ErrorMessages.ErrorNullAgriculturalOrder);
-
-        return Ok(new ApiResponse<object>
-        {
-            IsSuccess = true,
-            Message = "لیست سفارش‌های کشاورزی با موفقیت دریافت شد",
-            Data = result
-        });
+        var result = await _service.ExecuteActionAsync(code, dto);
+        return Ok(new ApiResponse<AgriculturalOrderDto> { IsSuccess = true, Message = "عملیات سفارش ثبت شد", Data = result });
     }
-    #endregion
-
-    #region GetByCode
-    [HttpGet("GetByCode")]
-    [Authorize(Policy = "NotGuest")]
-    public async Task<IActionResult> GetByCodeAsync([FromQuery] string code)
+    [HttpPost("{code}/Refund/Complete")]
+    [Authorize(Roles = "Manager")]
+    public async Task<IActionResult> CompleteRefund(string code, [FromBody] CompleteRefundDto dto)
     {
-        var result = await _agriculturalOrderService.GetByCodeAsync(code);
-        if (result == null)
-            throw new NotFoundException(ErrorMessages.ErrorNullAgriculturalOrder);
-
-        return Ok(new ApiResponse<object>
-        {
-            IsSuccess = true,
-            Message = "سفارش کشاورزی با موفقیت دریافت شد",
-            Data = result
-        });
-    }
-    #endregion
-
-    #region Update
-    [Authorize(Policy = "NotGuest")]
-    [HttpPut("Update")]
-    public async Task<IActionResult> UpdateAgriculturalOrder(AgriculturalOrderUpdateDto updateDto)
-    {
-        var result = await _agriculturalOrderService.UpdateAsync(updateDto);
-
-        if (!result)
-            throw new NotFoundException(ErrorMessages.ErrorAgriculturalOrderUpdate);
-
-        return Ok(new ApiResponse<object>
-        {
-            IsSuccess = true,
-            Message = "سفارش کشاورزی با موفقیت ویرایش شد",
-            Data = result
-        });
-    }
-    #endregion
-
-    #region Approve Order
-    [Authorize(Policy = "NotGuest")]
-    [HttpPatch("ChangeOrderStatus")]
-    public async Task<IActionResult> ChangeOrderStatus(string OrderCode, OrderAction action)
-    {
-        var result = await _agriculturalOrderService.ChangeOrderStatus(OrderCode, action);
-
-        if (!result)
-            throw new NotFoundException(ErrorMessages.ErrorStatusUpdate);
-
-        return Ok(new ApiResponse<object>
-        {
-            IsSuccess = true,
-            Message = "وضعیت سفارش کشاورزی با موفقیت ویرایش شد ",
-            Data = result
-        });
-    }
-    #endregion
-
-    #region pay
-    [HttpPost("pay")]
-    [Authorize(Policy = "NotGuest")]
-    public async Task<IActionResult> ProceedToPayment(string orderCode)
-    {
-        var result = await _agriculturalOrderService.ProceedToPaymentAsync(orderCode);
-
-        return Ok(new ApiResponse<PaymentResultDto>
-        {
-            IsSuccess = true,
-            Message = result.Message,
-            Data = result
-        });
+        var result = await _service.CompleteRefundAsync(code, dto);
+        return Ok(new ApiResponse<AgriculturalOrderDto> { IsSuccess = true, Message = "تأیید بازپرداخت ثبت شد", Data = result });
     }
     #endregion
 }

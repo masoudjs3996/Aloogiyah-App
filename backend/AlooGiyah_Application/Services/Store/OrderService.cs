@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.Order;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.Order;
 using AlooGiyah_Application.DTOs.OrderItem;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Application.Interfaces.Service.Store;
@@ -18,6 +19,8 @@ namespace AlooGiyah_Application.Services.Store;
 
 public class OrderService : IOrderService
 {
+    private readonly IOrderQuery _readQuery;
+
     #region Constructor
     private readonly IGenericRepository<Order> _orderRepository;
     private readonly IGenericRepository<OrderItem> _orderItemRepository;
@@ -31,7 +34,8 @@ public class OrderService : IOrderService
     private readonly IMapper _mapper;
     
 
-    public OrderService(
+    public OrderService(IOrderQuery readQuery,
+        
         IGenericRepository<Order> orderRepository,
         IGenericRepository<OrderItem> orderItemRepository,
         IGenericRepository<Product> productRepository,
@@ -43,6 +47,7 @@ public class OrderService : IOrderService
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
+        _readQuery = readQuery;
         _orderRepository = orderRepository;
         _orderItemRepository = orderItemRepository;
         _currentUserService = currentUserService;
@@ -167,87 +172,14 @@ public class OrderService : IOrderService
     #region Get By Filter
     public async Task<PagedResult<OrderDto>> GetByFilterAsync(OrderFilterDto dto)
     {
-        if (string.IsNullOrEmpty(_currentUserService.UserId))
-            throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
-
-        Expression<Func<Order, bool>> predicate = o => !o.IsDeleted;
-
-      
-
-        var userRole = _currentUserService.Roles.FirstOrDefault(); // نقش فعلی کاربر
-        if (userRole != "Manager") //  فقط مدیر می‌تونه آدرس‌های دیگران رو ببینه
-        {
-            predicate = predicate.And(a => a.User.UserId == int.Parse(_currentUserService.UserId));
-        }
-        else if (!string.IsNullOrEmpty(dto.UserCode)) 
-        {
-            predicate = predicate.And(a => a.User.Code == dto.UserCode);
-        }
-
-        if (!string.IsNullOrEmpty(dto.StatusCode))
-            predicate = predicate.And(o => o.Status.Code == dto.StatusCode);
-
-        if (!string.IsNullOrEmpty(dto.SearchTerm))
-            predicate = predicate.And(o => o.Code.Contains(dto.SearchTerm));
-
-        return await _orderRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: o => new OrderDto
-            {
-                Code = o.Code,
-                StatusCode = o.Status.Code,
-                TotalPrice = o.TotalPrice,
-                DiscountAmount = o.DiscountAmount,
-                AddressCode = o.Address != null ? o.Address.Code : null,
-                DiscountCode = o.Discount != null ? o.Discount.Code : null,
-                IsPaid = o.IsPaid,
-                PaymentDate = o.PaymentDate,
-                PaymentReference = o.PaymentReference,
-                Items = o.OrderItems.Select(oi => new OrderItemDto
-                {
-                    OrderItemCode = oi.Code,
-                    ProductCode = oi.Product.Code,
-                    ProductName = oi.Product.Name,
-                    Quantity = oi.Quantity,
-                    Price = oi.Price,
-                    PriceType = oi.PriceType
-                }).ToList()
-            },
-            pageNumber: dto.PageNumber,
-            pageSize: dto.PageSize,
-            orderBy: o => o.CreatedAt
-        );
+        return await _readQuery.GetByFilterAsync(dto);
     }
     #endregion
 
     #region Get By Code
     public async Task<OrderDto?> GetByCodeAsync(string orderCode)
     {
-        if (string.IsNullOrEmpty(orderCode))
-            throw new ArgumentNullException(nameof(orderCode));
-
-        var entity = await _orderRepository.GetByCodeWithIncludeAsync(
-            code: orderCode,
-            includes: new Expression<Func<Order, object>>[] { o => o.OrderItems, o => o.User, o => o.Status, o => o.Address, o => o.Discount });
-
-        if (entity == null) return null;
-
-        var orderDto = _mapper.Map<OrderDto>(entity);
-        orderDto.UserCode = entity.User?.Code ?? string.Empty;
-        orderDto.StatusCode = entity.Status?.Code ?? string.Empty;
-        orderDto.AddressCode = entity.AddressId.HasValue ? entity.Address?.Code : null;
-        orderDto.DiscountCode = entity.DiscountId.HasValue ? entity.Discount?.Code : null;
-        orderDto.Items = entity.OrderItems.Select(oi => new OrderItemDto
-        {
-            OrderItemCode = oi.Code,
-            ProductCode = oi.Product.Code,
-            ProductName = oi.Product.Name,
-            Quantity = oi.Quantity,
-            Price = oi.Price,
-            PriceType = oi.PriceType
-        }).ToList();
-
-        return orderDto;
+        return await _readQuery.GetByCodeAsync(orderCode);
     }
     #endregion
 

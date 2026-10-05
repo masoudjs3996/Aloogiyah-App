@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.Address;
+using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.Address;
 using AlooGiyah_Domain.Entities.UserFolder.AddressFolder;
 using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Domain.Pagination;
@@ -14,6 +15,8 @@ namespace AlooGiyah_Application.Services.UserFolder;
 
 public class AddressService : IAddressService
 {
+    private readonly IAddressQuery _readQuery;
+
     #region Constructor
     private readonly IGenericRepository<Address> _addressRepo;
     private readonly IGenericRepository<Province> _provinceRepo;
@@ -24,7 +27,8 @@ public class AddressService : IAddressService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public AddressService(
+    public AddressService(IAddressQuery readQuery,
+        
         IGenericRepository<Address> addressRepo,
         IGenericRepository<Province> provinceRepo,
         IGenericRepository<County> countyRepo,
@@ -34,6 +38,7 @@ public class AddressService : IAddressService
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
+        _readQuery = readQuery;
         _addressRepo = addressRepo;
         _provinceRepo = provinceRepo;
         _countyRepo = countyRepo;
@@ -89,65 +94,13 @@ public class AddressService : IAddressService
         await _addressRepo.AddAsync(address);
         await _unitOfWork.SaveChangesAsync();
 
-        return await GetByCodeAsync(address.Code);
+        return await GetByCodeAsync(address.Code) ?? throw new NotFoundException("The saved address could not be retrieved.");
     }
 
 
 public async Task<PagedResult<AddressDto>> GetByFilterAsync(AddressFilterDto filter)
 {
-    Expression<Func<Address, bool>> predicate = a => !a.IsDeleted;
-
-    if (!IsManager)
-        predicate = predicate.And(a => a.UserId == CurrentUserId);
-
-    if (!string.IsNullOrWhiteSpace(filter.PostalCode))
-        predicate = predicate.And(a => a.PostalCode.Contains(filter.PostalCode));
-
-    if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
-    {
-        predicate = predicate.And(a =>
-            a.Street.Contains(filter.SearchTerm) ||
-            a.Province.Name.Contains(filter.SearchTerm) ||
-            a.County.Name.Contains(filter.SearchTerm) ||
-            (a.City != null && a.City.Name.Contains(filter.SearchTerm)) ||
-            (a.Village != null && a.Village.Name.Contains(filter.SearchTerm))
-        );
-    }
-
-        return await _addressRepo.GetPagedProjectedAsync(
-        filter: predicate,
-        selector: a => new AddressDto
-        {
-            Code = a.Code,
-            UserCode = a.User.Code,
-            Street = a.Street,
-            PostalCode = a.PostalCode,
-            Latitude = a.Latitude,
-            Longitude = a.Longitude,
-            IsDefault = a.IsDefault,
-            CreatedAt = a.CreatedAt,
-            UpdatedAt = a.UpdatedAt,
-            ProvinceCode = a.Province.Code,
-            ProvinceName = a.Province.Name,
-            CountyCode = a.County.Code,
-            CountyName = a.County.Name,
-            CityCode = a.City != null ? a.City.Code : null,
-            CityName = a.City != null ? a.City.Name : null,
-            VillageCode = a.Village != null ? a.Village.Code : null,
-            VillageName = a.Village != null ? a.Village.Name : null
-        },
-        pageNumber: filter.PageNumber,
-        pageSize: filter.PageSize,
-        orderBy: a => a.CreatedAt,
-       includes: new string[] // اینو استفاده کن
-    {
-        "Province",
-        "County",
-        "City",
-        "Village",
-        "User"
-    }
-    );
+        return await _readQuery.GetByFilterAsync(filter);
     }
 
 public async Task<AddressDto?> GetByCodeAsync(string code)
@@ -206,7 +159,7 @@ public async Task<AddressDto?> GetByCodeAsync(string code)
         await _addressRepo.UpdateAsync(address);
         await _unitOfWork.SaveChangesAsync();
 
-        return await GetByCodeAsync(address.Code);
+        return await GetByCodeAsync(address.Code) ?? throw new NotFoundException("The saved address could not be retrieved.");
     }
 
     public async Task<bool> DeleteAsync(string code)

@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Domain.Enums;
+using AlooGiyah_Domain.Enums;
 using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Domain.ValueObjects;
 using Microsoft.AspNetCore.Hosting;
@@ -10,11 +10,9 @@ namespace AlooGiyah_Infrastructure.Files;
 
 public class FileStorageService : IFileStorageService
 {
-    private readonly IWebHostEnvironment _env;
-    private readonly IConfiguration _config;
     private readonly string _baseUploadPath;
 
-    public FileStorageService(IWebHostEnvironment env, IConfiguration config)
+    public FileStorageService(IConfiguration config)
     {
         _baseUploadPath = config.GetValue<string>("FileStorage:UploadPath")
             ?? Path.Combine(

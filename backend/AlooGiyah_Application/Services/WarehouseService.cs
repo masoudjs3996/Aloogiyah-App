@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.Warehouse;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.Warehouse;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Entities;
@@ -13,6 +14,8 @@ namespace AlooGiyah_Application.Services;
 
 public class WarehouseService : IWarehouseService
 {
+    private readonly IWarehouseQuery _readQuery;
+
     #region Constructor
     private readonly IGenericRepository<Warehouse> _warehouseRepository;
     private readonly IGenericRepository<User> _userRepository;
@@ -21,7 +24,8 @@ public class WarehouseService : IWarehouseService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public WarehouseService(
+    public WarehouseService(IWarehouseQuery readQuery,
+        
         IGenericRepository<Warehouse> warehouseRepository,
         IGenericRepository<User> userRepository,
         ICurrentUserService currentUserService,
@@ -29,6 +33,7 @@ public class WarehouseService : IWarehouseService
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
+        _readQuery = readQuery;
         _warehouseRepository = warehouseRepository;
         _userRepository = userRepository;
         _currentUserService = currentUserService;
@@ -115,54 +120,14 @@ public class WarehouseService : IWarehouseService
     #region Get By Code
     public async Task<WarehouseDto?> GetByCodeAsync(string code)
     {
-        var entity = await _warehouseRepository.GetByCodeAsync(code);
-        if (entity == null)
-            return null;
-
-        var warehouseDto = _mapper.Map<WarehouseDto>(entity);
-        warehouseDto.FarmerCode = await _userRepository.GetCodeByIdAsync(entity.FarmerId) ?? string.Empty;
-
-        return warehouseDto;
+        return await _readQuery.GetByCodeAsync(code);
     }
     #endregion
 
     #region Get By Filter
     public async Task<PagedResult<WarehouseDto>> GetByFilterAsync(WarehouseFilterDto filter)
     {
-        if (string.IsNullOrEmpty(_currentUserService.UserId))
-            throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
-
-        Expression<Func<Warehouse, bool>> predicate = w => !w.IsDeleted;
-
-
-        if (!string.IsNullOrEmpty(filter.Name))
-            predicate = predicate.And(w => w.Name.Contains(filter.Name));
-
-        var userRole = _currentUserService.Roles.FirstOrDefault(); // نقش فعلی کاربر
-        if (userRole != "Manager") //  فقط مدیر می‌تونه آدرس‌های دیگران رو ببینه
-        {
-            predicate = predicate.And(a => a.Farmer.UserId == int.Parse(_currentUserService.UserId));
-        }
-        else if (!string.IsNullOrEmpty(filter.FarmerCode))
-        {
-            predicate = predicate.And(a => a.Farmer.Code == filter.FarmerCode);
-        }
-
-        return await _warehouseRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: w => new WarehouseDto
-            {
-                Code = w.Code,
-                Name = w.Name,
-                Address = w.Address,
-                FarmerCode = w.Farmer.Code,
-                CreatedAt = w.CreatedAt,
-                UpdatedAt = w.UpdatedAt
-            },
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: w => w.CreatedAt
-        );
+        return await _readQuery.GetByFilterAsync(filter);
     }
     #endregion
 }

@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.File;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.File;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Entities;
@@ -18,6 +19,8 @@ namespace AlooGiyah_Application.Services;
 
 public class FileService : IFileService
 {
+    private readonly IFileQuery _readQuery;
+
     #region Constructor
 
     private readonly IFileRepository _fileRepository;
@@ -29,7 +32,8 @@ public class FileService : IFileService
     private readonly IGenericRepository<FileType> _genericFileRepository;
     private readonly IRepositoryFactory _repositoryFactory;
 
-    public FileService(
+    public FileService(IFileQuery readQuery,
+        
         IFileRepository fileRepository,
         IFileStorageService fileStorageService,
         IUnitOfWork unitOfWork,
@@ -39,6 +43,7 @@ public class FileService : IFileService
         ICurrentUserService currentUserService,
         IRepositoryFactory repositoryFactory)
     {
+        _readQuery = readQuery;
         _fileRepository = fileRepository;
         _fileStorageService = fileStorageService;
         _unitOfWork = unitOfWork;
@@ -131,71 +136,7 @@ public class FileService : IFileService
     #region Get By Filter
     public async Task<PagedResult<FileDto>> GetFilesAsync(FileFilterDto filter)
     {
-        if (string.IsNullOrEmpty(_currentUserService.UserId))
-            throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
-
-        // ساخت predicate (شرط‌ها)
-        Expression<Func<Files, bool>> predicate = f => !f.IsDeleted;
-
-        var userRole = _currentUserService.Roles.FirstOrDefault(); // نقش فعلی کاربر
-        if (userRole != "Manager") //  فقط مدیر می‌تونه آدرس‌های دیگران رو ببینه
-        {
-            predicate = predicate.And(a => a.User.UserId == int.Parse(_currentUserService.UserId));
-        }
-        else if (!string.IsNullOrEmpty(filter.UserCode))
-        {
-            predicate = predicate.And(a => a.User.Code == filter.UserCode);
-        }
-
-        int? fileTypeId = null;
-        if (!string.IsNullOrEmpty(filter.FileTypeCode))
-        {
-            var fileType = await _genericFileRepository.GetByCodeAsync(filter.FileTypeCode);
-            if (fileType == null)
-                throw new InvalidOperationException($"FileType with code {filter.FileTypeCode} does not exist.");
-            fileTypeId = fileType.FileTypeId;
-        }
-
-        if (!string.IsNullOrEmpty(filter.EntityCode) && filter.EntityFile.HasValue)
-        {
-            var isValidEntity = await ValidateEntityCodeAsync(filter.EntityFile.Value, filter.EntityCode);
-            if (!isValidEntity)
-                throw new InvalidOperationException($"Entity with code {filter.EntityCode} not found for EntityFile {filter.EntityFile.Value}.");
-        }
-
-
-
-
-        if (fileTypeId.HasValue)
-            predicate = predicate.And(f => f.FileTypeId == fileTypeId.Value);
-
-        if (filter.EntityFile.HasValue)
-            predicate = predicate.And(f => f.EntityFile == filter.EntityFile.Value);
-
-        if (!string.IsNullOrEmpty(filter.EntityCode))
-            predicate = predicate.And(f => f.EntityCode == filter.EntityCode);
-
-        if (!string.IsNullOrEmpty(filter.SearchText))
-            predicate = predicate.And(f => f.Description != null && f.Description.Contains(filter.SearchText));
-
-        // استفاده از متد GetPagedProjectedAsync جنریک ریپازیتوری با پروجکشن
-        var pagedResult = await _genericRepositoryfile.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: f => new FileDto
-            {
-                FileCode = f.Code,
-                Url = f.Url,
-                Description = f.Description,
-                CreatedAt = f.CreatedAt,
-                FileTypeCode = f.FileType.Code,
-                UserCode = f.User.Code
-            },
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: f => f.CreatedAt
-        );
-
-        return pagedResult;
+        return await _readQuery.GetFilesAsync(filter);
     }
 
     #endregion
@@ -232,13 +173,7 @@ public class FileService : IFileService
     #region GetPrimaryFileUrlAsync
     public async Task<string?> GetPrimaryFileUrlAsync(EntityFile entityFile, string entityCode)
     {
-        var file = await _genericRepositoryfile.FirstOrDefaultAsync(f =>
-            f.EntityFile == entityFile &&
-            f.EntityCode == entityCode &&
-            f.IsPrimary &&
-            !f.IsDeleted);
-
-        return file?.Url;
+        return await _readQuery.GetPrimaryFileUrlAsync(entityFile, entityCode);
     }
     #endregion
 

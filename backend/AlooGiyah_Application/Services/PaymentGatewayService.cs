@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Application.Interfaces.Service;
+using AlooGiyah_Application.Interfaces.Service;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 
@@ -7,7 +7,7 @@ namespace AlooGiyah_Application.Services;
 public class PaymentGatewayService : IPaymentGatewayService
 {
     private readonly HttpClient _httpClient;
-    private readonly string _gatewayApiKey; // از appsettings.json
+    private readonly string? _gatewayApiKey; // از appsettings.json
 
     public PaymentGatewayService(HttpClient httpClient, IConfiguration configuration)
     {
@@ -17,32 +17,16 @@ public class PaymentGatewayService : IPaymentGatewayService
 
     public async Task<string> InitiatePaymentAsync(string transactionId, decimal amount, string? redirectUrl)
     {
-        // فرض: فراخوانی API درگاه (مثل زرین‌پال یا ملت)
-        var request = new
-        {
-            TransactionId = transactionId,
-            Amount = amount,
-            RedirectUrl = redirectUrl ?? "http://yourapp.com/api/Wallet/DepositCallback"
-        };
-
-        // فرض: فراخوانی API درگاه
-        var response = await _httpClient.PostAsJsonAsync("https://gateway.example.com/api/initiate", request);
-        if (!response.IsSuccessStatusCode)
-            throw new InvalidOperationException("خطا در ایجاد درخواست پرداخت");
-
-        var result = await response.Content.ReadAsStringAsync();
-        return result; // URL درگاه
+        await Task.CompletedTask;
+        throw new AlooGiyah_Shared.Exceptions.BadRequestException(
+            "درگاه آنلاین هنوز به ارائه‌دهنده واقعی متصل نشده است.");
     }
 
     public async Task<PaymentStatus> VerifyPaymentAsync(string transactionId)
     {
-        // فرض: تأیید پرداخت از درگاه
-        var response = await _httpClient.GetAsync($"https://gateway.example.com/api/verify?transactionId={transactionId}");
-        if (!response.IsSuccessStatusCode)
-            return new PaymentStatus { IsSuccess = false };
-
-        // فرض: پاسخ موفق
-        return new PaymentStatus { IsSuccess = true };
+        await Task.CompletedTask;
+        return new PaymentStatus { IsSuccess = false,
+            ErrorMessage = "درگاه واقعی پیکربندی نشده است؛ پرداخت تأیید نشد." };
     }
 }
 

@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.QualityAssessment;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.QualityAssessment;
 using AlooGiyah_Application.DTOs.Users;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
@@ -16,6 +17,8 @@ namespace AlooGiyah_Application.Services;
 
 public class QualityAssessmentService : IQualityAssessmentService
 {
+    private readonly IQualityAssessmentQuery _readQuery;
+
     #region Constractor
     private readonly IGenericRepository<QualityAssessment> _qualityAssessmentRepository;
     private readonly IGenericRepository<AgriculturalProduct> _agriculturalProductRepository;
@@ -24,7 +27,8 @@ public class QualityAssessmentService : IQualityAssessmentService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public QualityAssessmentService(
+    public QualityAssessmentService(IQualityAssessmentQuery readQuery,
+        
         IGenericRepository<QualityAssessment> qualityAssessmentRepository,
         IGenericRepository<AgriculturalProduct> agriculturalProductRepository,
         IGenericRepository<User> userRepository,
@@ -32,6 +36,7 @@ public class QualityAssessmentService : IQualityAssessmentService
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
+        _readQuery = readQuery;
         _qualityAssessmentRepository = qualityAssessmentRepository;
         _agriculturalProductRepository = agriculturalProductRepository;
         _userRepository = userRepository;
@@ -77,69 +82,14 @@ public class QualityAssessmentService : IQualityAssessmentService
     #region Get By Filter
     public async Task<PagedResult<QualityAssessmentDto>> GetByFilterAsync(QualityAssessmentFilterDto filter)
     {
-        Expression<Func<QualityAssessment, bool>> predicate = qa => !qa.IsDeleted;
-
-        if (!string.IsNullOrEmpty(filter.AgriculturalProductCode))
-            predicate = predicate.And(qa => qa.AgriculturalProduct.Code == filter.AgriculturalProductCode);
-
-        if (!string.IsNullOrEmpty(filter.ExpertCode))
-            predicate = predicate.And(qa => qa.Expert.Code == filter.ExpertCode);
-
-        if (!string.IsNullOrEmpty(filter.QualityGrade))
-            predicate = predicate.And(qa => qa.QualityGrade == filter.QualityGrade);
-
-        if (filter.MinSuggestedPrice.HasValue)
-            predicate = predicate.And(qa => qa.SuggestedPrice >= filter.MinSuggestedPrice.Value);
-
-        if (filter.MaxSuggestedPrice.HasValue)
-            predicate = predicate.And(qa => qa.SuggestedPrice <= filter.MaxSuggestedPrice.Value);
-
-        if (filter.StartAssessmentDate.HasValue)
-            predicate = predicate.And(qa => qa.AssessmentDate >= filter.StartAssessmentDate.Value);
-
-        if (filter.EndAssessmentDate.HasValue)
-            predicate = predicate.And(qa => qa.AssessmentDate <= filter.EndAssessmentDate.Value);
-
-        return await _qualityAssessmentRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: qa => new QualityAssessmentDto
-            {
-                Code = qa.Code,
-                AgriculturalProductCode = qa.AgriculturalProduct.Code,
-                ExpertCode = qa.Expert.Code,
-                QualityDescription = qa.QualityDescription,
-                QualityGrade = qa.QualityGrade,
-                SuggestedPrice = qa.SuggestedPrice,
-                AssessmentDate = qa.AssessmentDate,
-                CreatedAt = qa.CreatedAt
-            },
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: qa => qa.AssessmentDate ?? qa.CreatedAt
-        );
+        return await _readQuery.GetByFilterAsync(filter);
     }
     #endregion
 
     #region Get By Code
     public async Task<QualityAssessmentDto?> GetByCodeAsync(string code)
     {
-        var entity = await _qualityAssessmentRepository.GetByCodeAsync(code);
-        if (entity == null)
-            return null;
-
-        var qualityAssessmentDto = _mapper.Map<QualityAssessmentDto>(entity);
-        qualityAssessmentDto.AgriculturalProductCode = await _agriculturalProductRepository.GetCodeByIdAsync(entity.AgriculturalProductId) ?? string.Empty;
-        if (entity.ExpertId.HasValue)
-        {
-            qualityAssessmentDto.ExpertCode =
-                await _userRepository.GetCodeByIdAsync(entity.ExpertId.Value);
-        }
-        else
-        {
-            qualityAssessmentDto.ExpertCode = null;
-        }
-
-        return qualityAssessmentDto;
+        return await _readQuery.GetByCodeAsync(code);
     }
     #endregion
 

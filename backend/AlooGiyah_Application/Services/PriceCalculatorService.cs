@@ -1,4 +1,6 @@
-﻿using AlooGiyah_Application.Interfaces.Service;
+﻿using Microsoft.Extensions.Configuration;
+using AlooGiyah_Application.Services.Store;
+using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Entities.UserFolder;
@@ -12,9 +14,11 @@ public class PriceCalculatorService : IPriceCalculatorService
 {
     #region Constructor
     private readonly IGenericRepository<AgriculturalProduct> _agriculturalProductRepository;
-    public PriceCalculatorService(IGenericRepository<AgriculturalProduct> agriculturalProductRepository)
+    private readonly IConfiguration _configuration;
+    public PriceCalculatorService(IGenericRepository<AgriculturalProduct> agriculturalProductRepository, IConfiguration configuration)
     {
         _agriculturalProductRepository = agriculturalProductRepository;
+        _configuration = configuration;
     }
     #endregion
 
@@ -111,6 +115,8 @@ public class PriceCalculatorService : IPriceCalculatorService
     #region AgriculturalOrder Pricing
     public async Task<decimal> CalculateAgriculturalOrder(AgriculturalOrder order, string? userRole = null)
     {
+        if (order.CheckoutId.HasValue)
+            throw new BadRequestException("قیمت سفارش ثبت‌شده قابل محاسبه مجدد نیست.");
         if (order?.AgriculturalOrderItems == null || !order.AgriculturalOrderItems.Any())
             return 0;
 
@@ -168,59 +174,37 @@ public class PriceCalculatorService : IPriceCalculatorService
      string userRole,
      Dictionary<int, bool>? discountEligibility = null)
     {
-        if (cart?.CartItems == null || !cart.CartItems.Any())
-            return 0;
-
-        decimal totalBeforeDiscount = 0;
-        decimal totalDiscount = 0;
-
+        if (cart?.CartItems == null || cart.CartItems.Count == 0) return 0;
+        var wholesale = _configuration.GetSection("Commerce:WholesaleRoles").GetChildren().Any(x => x.Value == userRole);
         var discount = cart.Discount;
-        var buyerCode = cart.User?.Code;
-
-        if (discount != null && !IsDiscountValid(discount, buyerCode))
-            discount = null;
-
-        foreach (var item in cart.CartItems)
+        if (discount != null && (!IsDiscountValid(discount, cart.User?.Code) || discount.Value < 0 ||
+            discount.DiscountType == DiscountType.Percentage && discount.Value > 100 || discount.MaxDiscountAmount < 0)) discount = null;
+        var eligible = new Dictionary<int, decimal>();
+        decimal gross = 0;
+        foreach (var group in cart.CartItems.GroupBy(x => x.AgriculturalProduct.FarmId))
         {
-            var product = item.AgriculturalProduct;
-            if (product == null) continue;
-
-            decimal unitPrice =
-                userRole is "User" or "Guest"
-                ? product.RetailPrice
-                : product.WholesalePrice;
-
-            decimal subtotal = unitPrice * item.Quantity;
-
-            item.Price = subtotal; // ✅ قیمت کل آیتم
-
-            decimal itemDiscount = 0;
-
-            if (discount != null &&
-                discountEligibility?.TryGetValue(item.AgriculturalProductId, out var eligible) == true &&
-                eligible)
+            decimal eligibleTotal = 0;
+            foreach (var item in group)
             {
-                itemDiscount = discount.DiscountType switch
-                {
-                    DiscountType.Percentage =>
-                        Math.Min(subtotal * discount.Value / 100m,
-                                 discount.MaxDiscountAmount ?? decimal.MaxValue),
-
-                    DiscountType.Fixed =>
-                        Math.Min(discount.Value * item.Quantity,
-                                 discount.MaxDiscountAmount ?? decimal.MaxValue),
-
-                    _ => 0
-                };
+                var product = item.AgriculturalProduct;
+                var unit = decimal.Round(wholesale ? product.WholesalePrice : product.RetailPrice, 2);
+                item.Price = Math.Max(0, unit * item.Quantity); gross += item.Price;
+                if (discount != null &&
+                    (!discount.FarmId.HasValue || discount.FarmId == product.FarmId) &&
+                    (discount.agriculturalProducts == null || discount.agriculturalProducts.Count == 0 || discount.agriculturalProducts.Any(p => p.AgriculturalProductId == product.AgriculturalProductId)) &&
+                    (discount.Categories == null || discount.Categories.Count == 0 || product.Categories?.Any(c => discount.Categories.Any(d => d.CategoryId == c.CategoryId)) == true)) eligibleTotal += item.Price;
             }
-
-            totalBeforeDiscount += subtotal;
-            totalDiscount += itemDiscount;
+            eligible[group.Key] = eligibleTotal;
         }
-
-        cart.DiscountAmount = totalDiscount;
-        cart.TotalPrice = Math.Max(0, totalBeforeDiscount - totalDiscount);
-
+        var totalEligible = eligible.Values.Sum();
+        var amount = discount == null ? 0m : discount.DiscountType switch
+        {
+            DiscountType.Percentage => totalEligible * discount.Value / 100m,
+            DiscountType.Fixed => discount.Value,
+            _ => 0m
+        };
+        amount = decimal.Round(Math.Min(totalEligible, Math.Min(amount, discount?.MaxDiscountAmount ?? decimal.MaxValue)), 2);
+        cart.DiscountAmount = amount; cart.TotalPrice = Math.Max(0, gross - amount);
         return cart.TotalPrice;
     }
 
@@ -258,7 +242,7 @@ public class PriceCalculatorService : IPriceCalculatorService
 
         // اگر Users خالی یا null بود → عمومی (همه مجاز)
         var allowedUsers = discount.Users ?? Enumerable.Empty<User>();
-        if (allowedUsers.Any() && buyerCode != null && !allowedUsers.Any(u => u.Code == buyerCode))
+        if (allowedUsers.Any() && (buyerCode == null || !allowedUsers.Any(u => u.Code == buyerCode)))
             return false;
 
         return true;

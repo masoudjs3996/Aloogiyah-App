@@ -9,6 +9,12 @@ public class AgriculturalOrderConfiguration : IEntityTypeConfiguration<Agricultu
     public void Configure(EntityTypeBuilder<AgriculturalOrder> builder)
     {
         builder.HasKey(ao => ao.AgriculturalOrderId);
+        builder.HasIndex(ao => new { ao.IsHeld, ao.ApprovalExpiresAt });
+        builder.Property(x => x.Version).IsConcurrencyToken();
+        builder.Property(x => x.Subtotal).HasPrecision(20, 2);
+        builder.Property(x => x.ShippingAmount).HasPrecision(20, 2);
+        builder.HasOne(x => x.Farm).WithMany().HasForeignKey(x => x.FarmId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => new { x.CheckoutId, x.FarmId }).IsUnique();
 
         builder.Property(ao => ao.CreatedAt)
             .IsRequired();

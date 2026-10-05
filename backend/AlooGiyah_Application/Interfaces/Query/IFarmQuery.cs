@@ -5,6 +5,7 @@ namespace AlooGiyah_Application.Interfaces.Query;
 
 public interface IFarmQuery
 {
+    Task<FarmDto?> GetByCodeAsync(string code);
     Task<PagedResult<FarmListDto>> GetByFilterAsync(FarmFilterDto filter);
     Task<PagedResult<MyFarmlistDto>> GetMyFarmsAsync(GetMyFarmDto filter , int currentUserId);
 }

@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Domain.Entities;
+using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Persistence.Context;
 using Microsoft.EntityFrameworkCore;
@@ -44,13 +44,6 @@ public class AuthRepository : GenericRepository<RefreshToken>, IAuthRepository
         _dbSet.Update(token);
     }
 
-    public async Task AddAsync(RefreshToken token)
-    {
-        if (token == null)
-            throw new ArgumentNullException(nameof(token));
-
-        await _dbSet.AddAsync(token);
-    }
 
     public async Task RevokeAllTokensForUserAsync(int userId)
     {

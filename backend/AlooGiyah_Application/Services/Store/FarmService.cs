@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Application.DTOs.Address;
+using AlooGiyah_Application.DTOs.Address;
 using AlooGiyah_Application.DTOs.Farm;
 using AlooGiyah_Application.DTOs.File;
 using AlooGiyah_Application.Interfaces.Query;
@@ -276,14 +276,14 @@ public class FarmService : IFarmService
             if (result.Address != null)
             {
                 result.Address.UserCode = farm.Owner.Code;
-                result.Address.ProvinceCode = farm.Address.Province.Code;
-                result.Address.ProvinceName = farm.Address.Province.Name;
-                result.Address.CountyCode = farm.Address.County.Code;
-                result.Address.CountyName = farm.Address.County.Name;
-                result.Address.CityCode = farm.Address.City?.Code;
-                result.Address.CityName = farm.Address.City?.Name;
-                result.Address.VillageCode = farm.Address.Village?.Code;
-                result.Address.VillageName = farm.Address.Village?.Name;
+                result.Address.ProvinceCode = farm.Address?.Province?.Code ?? string.Empty;
+                result.Address.ProvinceName = farm.Address?.Province?.Name ?? string.Empty;
+                result.Address.CountyCode = farm.Address?.County?.Code ?? string.Empty;
+                result.Address.CountyName = farm.Address?.County?.Name ?? string.Empty;
+                result.Address.CityCode = farm.Address?.City?.Code;
+                result.Address.CityName = farm.Address?.City?.Name;
+                result.Address.VillageCode = farm.Address?.Village?.Code;
+                result.Address.VillageName = farm.Address?.Village?.Name;
             }
 
             return result;
@@ -387,35 +387,7 @@ public class FarmService : IFarmService
     #region GetByCode
     public async Task<FarmDto?> GetByCodeAsync(string code)
     {
-        var farm = await _farmRepository.GetByCodeWithIncludeAsync(
-            code,
-            f => f.Owner!,
-            f => f.Address!.Province!,
-            f => f.Address!.County!,
-            f => f.Address!.City!,
-            f => f.Address!.Village!
-        );
-
-        if (farm == null || farm.IsDeleted) return null;
-
-        var dto = _mapper.Map<FarmDto>(farm);
-        dto.OwnerCode = farm.Owner.Code;
-        dto.ImageUrl = await _fileService.GetPrimaryFileUrlAsync(EntityFile.Farm, code);
-
-        if (dto.Address != null)
-        {
-            dto.Address.UserCode = farm.Owner.Code;
-            dto.Address.ProvinceCode = farm.Address.Province.Code;
-            dto.Address.ProvinceName = farm.Address.Province.Name;
-            dto.Address.CountyCode = farm.Address.County.Code;
-            dto.Address.CountyName = farm.Address.County.Name;
-            dto.Address.CityCode = farm.Address.City?.Code;
-            dto.Address.CityName = farm.Address.City?.Name;
-            dto.Address.VillageCode = farm.Address.Village?.Code;
-            dto.Address.VillageName = farm.Address.Village?.Name;
-        }
-
-        return dto;
+        return await _farmQuery.GetByCodeAsync(code);
     }
     #endregion
 

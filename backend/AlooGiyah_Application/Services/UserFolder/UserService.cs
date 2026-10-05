@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Application.DTOs.File;
+using AlooGiyah_Application.DTOs.File;
 using AlooGiyah_Application.DTOs.Users;
 using AlooGiyah_Application.Interfaces.Query;
 using AlooGiyah_Application.Interfaces.Service;
@@ -72,8 +72,11 @@ public class UserService : IUserService
     #endregion
 
     #region Get By Code
-    public async Task<UserDto> GetUserByCode(string code)
+    public async Task<UserDto> GetUserByCode(string? code)
     {
+        if (string.IsNullOrWhiteSpace(code))
+            throw new ArgumentException("User code is required.", nameof(code));
+
         var user = await _userQuery.GetByCodeAsync(code);
         if (user == null) throw new NotFoundException("کاربر پیدا پیدا نشد");
 

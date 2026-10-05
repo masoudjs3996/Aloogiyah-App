@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.Warehouse;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.Warehouse;
 using AlooGiyah_Application.DTOs.WarehouseInventory;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Domain.Entities;
@@ -15,6 +16,8 @@ namespace AlooGiyah_Application.Services;
 
 public class WarehouseInventoryService : IWarehouseInventoryService
 {
+    private readonly IWarehouseInventoryQuery _readQuery;
+
     #region Constructor
     private readonly IGenericRepository<WarehouseInventory> _warehouseInventoryRepository;
     private readonly IGenericRepository<Warehouse> _warehouseRepository;
@@ -22,13 +25,15 @@ public class WarehouseInventoryService : IWarehouseInventoryService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public WarehouseInventoryService(
+    public WarehouseInventoryService(IWarehouseInventoryQuery readQuery,
+        
         IGenericRepository<WarehouseInventory> warehouseInventoryRepository,
         IGenericRepository<Warehouse> warehouseRepository,
         IGenericRepository<AgriculturalProduct> agriculturalProductRepository,
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
+        _readQuery = readQuery;
         _warehouseInventoryRepository = warehouseInventoryRepository;
         _warehouseRepository = warehouseRepository;
         _agriculturalProductRepository = agriculturalProductRepository;
@@ -120,94 +125,14 @@ public class WarehouseInventoryService : IWarehouseInventoryService
     #region Get By Code
     public async Task<WarehouseInventoryDto?> GetByCodeAsync(string code)
     {
-        var entity = await _warehouseInventoryRepository.GetByCodeAsync(code);
-        if (entity == null)
-            return null;
-
-        var inventoryDto = _mapper.Map<WarehouseInventoryDto>(entity);
-        inventoryDto.WarehouseCode = await _warehouseRepository.GetCodeByIdAsync(entity.WarehouseId) ?? string.Empty;
-
-        switch (entity.EntityWarehouse)
-        {
-            case EntityWarehouseInventory.AgriculturalProduct:
-                inventoryDto.EntityCode = await _agriculturalProductRepository.GetCodeByIdAsync(entity.EntityId) ?? string.Empty;
-                break;
-            // برای سایر EntityType‌ها می‌تونی repositoryهای مربوطه رو اضافه کنی
-            default:
-                inventoryDto.EntityCode = string.Empty;
-                break;
-        }
-
-        return inventoryDto;
+        return await _readQuery.GetByCodeAsync(code);
     }
     #endregion
 
     #region Get By Filter
     public async Task<PagedResult<WarehouseInventoryDto>> GetByFilterAsync(WarehouseInventoryFilterDto filter)
     {
-        Expression<Func<WarehouseInventory, bool>> predicate = wi => !wi.IsDeleted;
-
-        if (!string.IsNullOrEmpty(filter.WarehouseCode))
-            predicate = predicate.And(wi => wi.Warehouse.Code == filter.WarehouseCode);
-
-        if (!string.IsNullOrEmpty(filter.EntityCode))
-            predicate = predicate.And(wi => wi.EntityWarehouse == filter.EntityWarehouse);
-
-        if (filter.EntityWarehouse.HasValue)
-            predicate = predicate.And(wi => wi.EntityWarehouse == filter.EntityWarehouse.Value);
-
-        if (filter.MinQuantity.HasValue)
-            predicate = predicate.And(wi => wi.Quantity >= filter.MinQuantity.Value);
-
-        if (filter.MaxQuantity.HasValue)
-            predicate = predicate.And(wi => wi.Quantity <= filter.MaxQuantity.Value);
-
-        if (filter.LastRestockFrom.HasValue)
-            predicate = predicate.And(wi => wi.LastRestockDate >= filter.LastRestockFrom.Value);
-
-        if (filter.LastRestockTo.HasValue)
-            predicate = predicate.And(wi => wi.LastRestockDate <= filter.LastRestockTo.Value);
-
-        // گرفتن داده‌ها
-        var inventories = await _warehouseInventoryRepository.GetPagedWithIncludeAsync(
-            filter: predicate,
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: wi => wi.CreatedAt,
-            includes: new Expression<Func<WarehouseInventory, object>>[] { wi => wi.Warehouse }
-        );
-
-        // پروجکشن دستی برای پر کردن EntityCode
-        var dtos = new List<WarehouseInventoryDto>();
-        foreach (var wi in inventories.Items)
-        {
-            string entityCode = string.Empty;
-            if (wi.EntityWarehouse == EntityWarehouseInventory.AgriculturalProduct)
-            {
-                entityCode = await _agriculturalProductRepository.GetCodeByIdAsync(wi.EntityId) ?? string.Empty;
-            }
-            // برای سایر EntityType‌ها می‌تونی شرط اضافه کنی
-
-            dtos.Add(new WarehouseInventoryDto
-            {
-                Code = wi.Code,
-                WarehouseCode = wi.Warehouse.Code,
-                EntityCode = entityCode,
-                EntityWarehouse = wi.EntityWarehouse,
-                Quantity = wi.Quantity,
-                LastRestockDate = wi.LastRestockDate,
-                CreatedAt = wi.CreatedAt,
-                UpdatedAt = wi.UpdatedAt
-            });
-        }
-
-        return new PagedResult<WarehouseInventoryDto>
-        {
-            Items = dtos,
-            TotalCount = inventories.TotalCount,
-            PageNumber = inventories.PageNumber,
-            PageSize = inventories.PageSize
-        };
+        return await _readQuery.GetByFilterAsync(filter);
     }
     #endregion
 }

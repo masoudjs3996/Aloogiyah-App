@@ -13,5 +13,8 @@ public interface IAgriculturalOrderService
     Task<PagedResult<AgriculturalOrderDto>> GetByFilterAsync(AgriculturalOrderFilterDto filter);
     Task<bool> ChangeOrderStatus(string orderCode, OrderAction action);
     Task<PaymentResultDto> ProceedToPaymentAsync(string orderCode);
-    Task<AgriculturalOrderDto> CreateFromCartAsync(CheckoutFromCartDto dto);
+    Task<CheckoutDto> CreateFromCartAsync(CheckoutFromCartDto dto);
+    Task ExpireApprovalDueAsync();
+    Task<AgriculturalOrderDto> ExecuteActionAsync(string code, OrderActionDto dto);
+    Task<AgriculturalOrderDto> CompleteRefundAsync(string code, CompleteRefundDto dto);
 }

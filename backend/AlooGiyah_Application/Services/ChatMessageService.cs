@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.ChatMessage;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.ChatMessage;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Entities;
@@ -14,6 +15,8 @@ namespace AlooGiyah_Application.Services;
 
 public class ChatMessageService : IChatMessageService
 {
+    private readonly IChatMessageQuery _readQuery;
+
     #region Constructor
     private readonly IGenericRepository<ChatMessage> _chatMessageRepository;
     private readonly IGenericRepository<User> _userRepository;
@@ -21,13 +24,15 @@ public class ChatMessageService : IChatMessageService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public ChatMessageService(
+    public ChatMessageService(IChatMessageQuery readQuery,
+        
         IGenericRepository<ChatMessage> chatMessageRepository,
         IGenericRepository<User> userRepository,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
+        _readQuery = readQuery;
         _chatMessageRepository = chatMessageRepository;
         _userRepository = userRepository;
         _currentUserService = currentUserService;
@@ -110,87 +115,21 @@ public class ChatMessageService : IChatMessageService
     #region Get By Code
     public async Task<ChatMessageDto?> GetByCodeAsync(string code)
     {
-        var entity = await _chatMessageRepository.GetByCodeAsync(code);
-        if (entity == null)
-            return null;
-
-        var chatMessageDto = _mapper.Map<ChatMessageDto>(entity);
-        chatMessageDto.SenderCode = await _userRepository.GetCodeByIdAsync(entity.SenderId) ?? string.Empty;
-        chatMessageDto.ReceiverCode = await _userRepository.GetCodeByIdAsync(entity.ReceiverId) ?? string.Empty;
-
-        return chatMessageDto;
+        return await _readQuery.GetByCodeAsync(code);
     }
     #endregion
 
     #region Get By Filter
     public async Task<PagedResult<ChatMessageDto>> GetByFilterAsync(ChatMessageFilterDto filter)
     {
-        Expression<Func<ChatMessage, bool>> predicate = cm => !cm.IsDeleted;
-
-        if (!string.IsNullOrEmpty(filter.SenderCode))
-            predicate = predicate.And(cm => cm.Sender.Code == filter.SenderCode);
-
-        if (!string.IsNullOrEmpty(filter.ReceiverCode))
-            predicate = predicate.And(cm => cm.Receiver.Code == filter.ReceiverCode);
-
-        if (filter.IsRead.HasValue)
-            predicate = predicate.And(cm => cm.IsRead == filter.IsRead.Value);
-
-        if (filter.StartDate.HasValue)
-            predicate = predicate.And(cm => cm.CreatedAt >= filter.StartDate.Value);
-
-        if (filter.EndDate.HasValue)
-            predicate = predicate.And(cm => cm.CreatedAt <= filter.EndDate.Value);
-
-        return await _chatMessageRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: cm => new ChatMessageDto
-            {
-                Code = cm.Code,
-                Message = cm.Message,
-                SenderCode = cm.Sender.Code,
-                ReceiverCode = cm.Receiver.Code,
-                IsRead = cm.IsRead,
-                CreatedAt = cm.CreatedAt
-            },
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: cm => cm.CreatedAt
-        );
+        return await _readQuery.GetByFilterAsync(filter);
     }
     #endregion
 
     #region Get Conversation
     public async Task<PagedResult<ChatMessageDto>> GetConversationAsync(string userCode1, string userCode2, int pageNumber, int pageSize)
     {
-        var user1Id = await _userRepository.GetIdByCodeAsync(userCode1, u => u.UserId);
-        if (user1Id == null)
-            throw new NotFoundException($"کاربر با کد {userCode1} پیدا نشد");
-
-        var user2Id = await _userRepository.GetIdByCodeAsync(userCode2, u => u.UserId);
-        if (user2Id == null)
-            throw new NotFoundException($"کاربر با کد {userCode2} پیدا نشد");
-
-        Expression<Func<ChatMessage, bool>> predicate = cm =>
-            !cm.IsDeleted &&
-            ((cm.SenderId == user1Id.Value && cm.ReceiverId == user2Id.Value) ||
-             (cm.SenderId == user2Id.Value && cm.ReceiverId == user1Id.Value));
-
-        return await _chatMessageRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: cm => new ChatMessageDto
-            {
-                Code = cm.Code,
-                Message = cm.Message,
-                SenderCode = cm.Sender.Code,
-                ReceiverCode = cm.Receiver.Code,
-                IsRead = cm.IsRead,
-                CreatedAt = cm.CreatedAt
-            },
-            pageNumber: pageNumber,
-            pageSize: pageSize,
-            orderBy: cm => cm.CreatedAt
-        );
+        return await _readQuery.GetConversationAsync(userCode1, userCode2, pageNumber, pageSize);
     }
     #endregion
 }

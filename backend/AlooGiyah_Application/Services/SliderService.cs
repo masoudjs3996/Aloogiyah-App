@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.File;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.File;
 using AlooGiyah_Application.DTOs.Slider;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Domain.Entities;
@@ -10,15 +11,19 @@ namespace AlooGiyah_Application.Services;
 
 public class SliderService : ISliderService
 {
+    private readonly ISliderQuery _readQuery;
+
     private readonly IGenericRepository<Slider> _sliderRepository;
     private readonly IFileService _fileService;
     private readonly IUnitOfWork _unitOfWork;
 
-    public SliderService(
+    public SliderService(ISliderQuery readQuery,
+        
         IGenericRepository<Slider> sliderRepository,
         IFileService fileService,
         IUnitOfWork unitOfWork)
     {
+        _readQuery = readQuery;
         _sliderRepository = sliderRepository;
         _fileService = fileService;
         _unitOfWork = unitOfWork;
@@ -86,34 +91,7 @@ public class SliderService : ISliderService
     #region Get Active Sliders
     public async Task<IEnumerable<SliderDto>> GetActiveSlidersAsync()
     {
-        var sliders = await _sliderRepository.GetAllAsync();
-
-        var activeSliders = sliders
-            .Where(s => s.IsActive && !s.IsDeleted)
-            .OrderBy(s => s.Order)
-            .ToList();
-
-        var result = new List<SliderDto>();
-
-        foreach (var slider in activeSliders)
-        {
-            var imageUrl = await _fileService.GetPrimaryFileUrlAsync(
-                EntityFile.Slider,
-                slider.Code
-            );
-
-            result.Add(new SliderDto
-            {
-                Code = slider.Code,
-                Title = slider.Title,
-                Description = slider.Description,
-                LinkUrl = slider.LinkUrl,
-                Order = slider.Order,
-                ImageUrl = imageUrl
-            });
-        }
-
-        return result;
+        return await _readQuery.GetActiveSlidersAsync();
     }
     #endregion
 

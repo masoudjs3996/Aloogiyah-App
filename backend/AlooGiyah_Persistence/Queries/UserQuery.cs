@@ -50,7 +50,7 @@ public class UserQuery : BaseQuery, IUserQuery
           SELECT 
               u."Code", u."FName", u."LName", u."Email", u."UserName", u."PhoneNumber", 
               u."Age", u."IsEmailConfirmed", u."CreatedAt", u."UpdatedAt",
-              r."Code" AS "RoleCode", r."Name" AS "Name"
+              r."Code" AS "RoleCode", r."Name" AS "RoleName"
           FROM "Users" u
           INNER JOIN "Roles" r ON u."RoleId" = r."RoleId"
           WHERE u."Code" = @Code AND u."IsDeleted" = false
@@ -90,9 +90,9 @@ public class UserQuery : BaseQuery, IUserQuery
             u."IsEmailConfirmed",
 
             r."RoleId",
-            r."Code"        AS "RoleCode",
+            r."Code"        AS "Code",
             r."Name"        AS "Name",
-            r."Description" AS "RoleDescription"
+            r."Description" AS "Description"
 
         FROM "Users" u
         INNER JOIN "Roles" r ON u."RoleId" = r."RoleId"
@@ -155,7 +155,7 @@ public class UserQuery : BaseQuery, IUserQuery
                 u."FName",
                 u."LName",
                 u."Email",
-                u."Name",
+                u."UserName",
                 u."PhoneNumber",
                 r."Code" AS "RoleCode",
                 r."Name" AS "RoleName",

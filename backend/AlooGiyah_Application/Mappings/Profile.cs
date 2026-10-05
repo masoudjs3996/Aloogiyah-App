@@ -189,24 +189,6 @@ namespace AlooGiyah_Application.Mappings
                 .ForMember(dest => dest.Categories, opt => opt.Ignore());
             #endregion
 
-            #region AgriculturalOrder
-            CreateMap<AgriculturalOrder, AgriculturalOrderDto>()
-                .ForMember(dest => dest.StatusCode, opt => opt.Ignore())
-                .ForMember(dest => dest.OrderItems, opt => opt.Ignore())
-                .ForMember(dest => dest.TotalPrice, opt => opt.Ignore());
-            CreateMap<AgriculturalOrderCreateDto, AgriculturalOrder>()
-                .ForMember(dest => dest.AgriculturalOrderItems, opt => opt.Ignore());
-            CreateMap<AgriculturalOrderUpdateDto, AgriculturalOrder>()
-                .ForMember(dest => dest.AgriculturalOrderItems, opt => opt.Ignore());
-            #endregion
-
-            #region AgriculturalOrderItem
-            CreateMap<AgriculturalOrderItem, AgriculturalOrderItemDto>()
-                .ForMember(dest => dest.AgriculturalProductCode, opt => opt.Ignore());
-            CreateMap<AgriculturalOrderItemCreateDto, AgriculturalOrderItem>();
-            CreateMap<AgriculturalOrderItemUpdateDto, AgriculturalOrderItem>();
-            #endregion
-
             #region Auction
             CreateMap<Auction, AuctionDto>()
                 .ForMember(dest => dest.AgriculturalProductCode, opt => opt.Ignore())
@@ -364,6 +346,8 @@ namespace AlooGiyah_Application.Mappings
 
             #region Notification
             CreateMap<Notification, NotificationDto>()
+                .ForMember(dest => dest.UserCode,
+                    opt => opt.MapFrom(src => src.User == null ? null : src.User.Code))
                 .ForMember(dest => dest.CreatedAt,
                            opt => opt.MapFrom(src => src.CreatedAt)); // اگر BaseEntity این ویژگی را داشته باشد
 
