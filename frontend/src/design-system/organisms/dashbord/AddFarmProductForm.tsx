@@ -27,7 +27,7 @@ const AddFarmProductForm = ({
   fermCode,
   categories,
 }: AddFarmProductFormProps) => {
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFile, setImageFile] = useState<File[]>([]);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
@@ -60,12 +60,12 @@ const AddFarmProductForm = ({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setImageFile(file);
+    setImageFile(Array.isArray(file) ? file : [file]);
     setImagePreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = async () => {
-    if (!imageFile) {
+    if (!imageFile.length) {
       toast.error("لطفا یک تصویر انتخاب کنید");
       return;
     }
@@ -113,8 +113,9 @@ const AddFarmProductForm = ({
           DailyProductionCapacity: "",
           stock: "",
         });
-        setImageFile(null);
+        setImageFile([]);
         setImagePreview(null);
+        setImageFile([]);
         setSelectedParentCategory("");
         setSelectedCategoryCodes([]);
       },
@@ -147,15 +148,16 @@ const AddFarmProductForm = ({
 
       <div className="grid grid-cols-1  lg:grid-cols-3 gap-y-5 lg:gap-x-5">
         <MultiImageUpload
+          value={imageFile}
           maxFiles={15}
           maxSize={5}
           className=""
           onChange={(file) => {
             if (file) {
-              setImageFile(file);
+              setImageFile(Array.isArray(file) ? file : [file]);
             }
             if (!file) {
-              setImagePreview(file);
+              setImagePreview(null);
             }
           }}
         />
@@ -250,7 +252,6 @@ const AddFarmProductForm = ({
                 )
                 .filter(Boolean) as string[];
               setSelectedCategoryCodes(codes);
-              console.log("کدهای انتخاب شده:", codes);
             }
           }}
           placeholder="دسته‌بندی‌ها را انتخاب کنید"

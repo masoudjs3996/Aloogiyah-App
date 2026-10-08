@@ -44,7 +44,7 @@ EXISTS (SELECT 1 FROM "AgriculturalProductCategory" mine JOIN "AgriculturalProdu
  CROSS JOIN (SELECT "AgriculturalProductId","FarmId" FROM "AgriculturalProducts" WHERE "Code"=@Code AND NOT "IsDeleted") current
 """;
         var projection = Projection + """
- || jsonb_build_object('ProductImageUrl', (SELECT fi."Url" FROM "Files" fi WHERE fi."EntityCode"=t."Code" AND fi."EntityFile"=3 AND fi."IsPrimary" AND NOT fi."IsDeleted" ORDER BY fi."CreatedAt" DESC, fi."FileId" DESC LIMIT 1))
+ || jsonb_build_object('PrimaryImageUrl', COALESCE((SELECT fi."Url" FROM "Files" fi WHERE fi."EntityCode"=t."Code" AND fi."EntityFile"=3 AND fi."IsPrimary" AND NOT fi."IsDeleted" ORDER BY fi."CreatedAt" DESC, fi."FileId" DESC LIMIT 1), '/placeholder.svg'))
 """;
         var order = "(CASE WHEN t.\"FarmId\"=current.\"FarmId\" AND " + categoryMatch + " THEN 3 WHEN t.\"FarmId\"=current.\"FarmId\" THEN 2 ELSE 1 END) DESC,t.\"CreatedAt\" DESC,t.\"AgriculturalProductId\" DESC";
         return QueryJsonPagedAsync<AgriculturalProductSimilarDto>(projection, from, where, order, filter.PageNumber, filter.PageSize);

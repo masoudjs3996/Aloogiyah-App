@@ -62,6 +62,14 @@ public class FileService : IFileService
         if (string.IsNullOrEmpty(_currentUserService.UserId))
             throw new UnauthorizedException("کاربر لاگین نیست");
 
+        if (dto.File == null || dto.File.Length == 0)
+            throw new BadRequestException("فایل خالی است.");
+        var extension = Path.GetExtension(dto.File.FileName).ToLowerInvariant();
+        if (dto.File.Length > 15 * 1024 * 1024 ||
+            !dto.File.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ||
+            extension is not ".jpg" and not ".jpeg" and not ".png" and not ".webp" and not ".gif")
+            throw new BadRequestException("فقط تصویرهای JPG، PNG، WEBP یا GIF تا سقف ۱۵ مگابایت پذیرفته می‌شوند.");
+
         var fileType = await _genericFileRepository.GetByCodeAsync(dto.FileTypeCode)
                        ?? throw new AppException("نوع فایل یافت نشد");
 
@@ -127,6 +135,10 @@ public class FileService : IFileService
         if (file == null || file.IsDeleted)
             throw new AppException("File not found", "FILE_NOT_FOUND");
 
+        var userId = CurrentUserId();
+        if (!IsManager && file.UserId != userId)
+            throw new ForbiddenException("حذف این فایل برای شما مجاز نیست.");
+
         file.IsDeleted = true;
         await _fileStorageService.DeleteFileAsync(file.Url);
         await _unitOfWork.SaveChangesAsync();
@@ -146,6 +158,9 @@ public class FileService : IFileService
     {
         var file = await _genericRepositoryfile.GetByCodeAsync(fileCode);
         if (file == null || file.IsDeleted) throw new AppException("File not found or deleted");
+        var userId = CurrentUserId();
+        if (!IsManager && file.UserId != userId)
+            throw new ForbiddenException("تغییر فایل اصلی برای شما مجاز نیست.");
 
         // قدیمی primary رو غیرفعال کن
         var oldPrimary = await _genericRepositoryfile.FirstOrDefaultAsync(f =>
@@ -234,5 +249,14 @@ public class FileService : IFileService
         EntityFile.Slider => false,
         _ => false
     };
+
+    private int CurrentUserId()
+    {
+        if (!_currentUserService.IsAuthenticated || _currentUserService.IsGuest || !int.TryParse(_currentUserService.UserId, out var id))
+            throw new UnauthorizedException("ابتدا وارد حساب کاربری شوید.");
+        return id;
+    }
+
+    private bool IsManager => _currentUserService.Roles.Contains("Manager") || _currentUserService.Roles.Contains("Admin");
 
 }

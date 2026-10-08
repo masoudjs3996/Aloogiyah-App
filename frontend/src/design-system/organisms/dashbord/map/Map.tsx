@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 import type { LatLngExpression, Marker as LeafletMarker } from "leaflet";
 
 import "leaflet/dist/leaflet.css";
@@ -68,11 +68,61 @@ const Map = dynamic<MapProps>(
 
     const L = leafletModule.default;
 
-    const { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } =
-      reactLeaflet;
+    const { TileLayer, Marker, Popup, useMap, useMapEvents } = reactLeaflet;
+    const { LeafletProvider, createLeafletContext } = await import(
+      "@react-leaflet/core"
+    );
 
     const ProvinceZoom = provinceZoomModule.default;
     const bounds = L.latLngBounds(iranBounds);
+
+    /**
+     * React-Leaflet's MapContainer creates the map in a callback ref. During
+     * Next.js development remounts that callback can run against a reused DOM
+     * node before Leaflet's previous instance has released it. Owning the map
+     * in an effect gives setup/cleanup a strict, repeatable lifecycle.
+     */
+    function StableMapContainer({
+      children,
+      className,
+      bounds: initialBounds,
+      ...options
+    }: {
+      children: ReactNode;
+      className?: string;
+      bounds?: typeof iranBounds;
+      [key: string]: unknown;
+    }) {
+      const containerRef = useRef<HTMLDivElement>(null);
+      const [context, setContext] = useState<
+        ReturnType<typeof createLeafletContext> | null
+      >(null);
+
+      useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const map = L.map(container, options as L.MapOptions);
+        if (initialBounds) map.fitBounds(initialBounds);
+
+        setContext(createLeafletContext(map));
+
+        return () => {
+          map.remove();
+          setContext(null);
+        };
+        // Map setup is intentionally tied to this container's lifecycle.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, []);
+
+      return (
+        <div ref={containerRef} className={className}>
+          {context && (
+            <LeafletProvider value={context}>{children}</LeafletProvider>
+          )}
+        </div>
+      );
+    }
 
     /* -------------------- Icons -------------------- */
 
@@ -390,7 +440,7 @@ const Map = dynamic<MapProps>(
             }
           `}</style>
 
-          <MapContainer
+          <StableMapContainer
             bounds={iranBounds}
             maxBounds={iranBounds}
             maxBoundsViscosity={1}
@@ -493,7 +543,7 @@ const Map = dynamic<MapProps>(
                 </Marker>
               );
             })}
-          </MapContainer>
+          </StableMapContainer>
 
           {canPick && !pickedPoint && (
             <div

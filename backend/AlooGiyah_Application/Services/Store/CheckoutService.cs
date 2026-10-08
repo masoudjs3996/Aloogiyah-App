@@ -67,7 +67,8 @@ public class CheckoutService : ICheckoutService
     {
         var dto = _mapper.Map<CheckoutDto>(checkout);
         for (var i = 0; i < checkout.Orders.Count; i++)
-            dto.Orders[i].AllowedActions = AgriculturalOrderPolicy.AllowedActions(checkout.Orders[i], id, _currentUser.Roles.Contains("Manager"));
+            dto.Orders[i].AllowedActions = AgriculturalOrderPolicy.AllowedActions(checkout.Orders[i], id,
+                _currentUser.Roles.Any(x => x is "Manager" or "Admin"));
         return dto;
     }
     private async Task<Status> StatusAsync(string code) => await _statuses.GetAll().SingleOrDefaultAsync(x =>

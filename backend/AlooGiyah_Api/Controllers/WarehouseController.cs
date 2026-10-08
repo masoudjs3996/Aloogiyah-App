@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Application.Commons;
+using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.Warehouse;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Shared.Constants;
@@ -23,7 +23,7 @@ public class WarehouseController : ControllerBase
 
 
     #region Create
-    [Authorize(Roles = "Farmer,Manager")]
+    [Authorize(Roles = "Admin,Farmer,Manager")]
     [HttpPost("Create")]
     public async Task<IActionResult> CreateWarehouse(WarehouseCreateDto createDto)
     {
@@ -42,7 +42,7 @@ public class WarehouseController : ControllerBase
     #endregion
 
     #region GetByFilter
-    [Authorize(Roles = "Farmer,Manager")]
+    [Authorize(Roles = "Admin,Farmer,Manager")]
     [HttpGet("GetByFilter")]
     public async Task<IActionResult> GetByFilterAsync([FromQuery] WarehouseFilterDto filterDto)
     {
@@ -61,7 +61,7 @@ public class WarehouseController : ControllerBase
     #endregion
 
     #region GetByCode
-    [Authorize(Roles = "Farmer,Manager")]
+    [Authorize(Roles = "Admin,Farmer,Manager")]
     [HttpGet("GetByCode")]
     public async Task<IActionResult> GetByCodeAsync([FromQuery] string code)
     {
@@ -79,7 +79,7 @@ public class WarehouseController : ControllerBase
     #endregion
 
     #region Update
-    [Authorize(Roles = "Farmer,Manager")]
+    [Authorize(Roles = "Admin,Farmer,Manager")]
     [HttpPut("Update")]
     public async Task<IActionResult> UpdateWarehouse(WarehouseUpdateDto updateDto)
     {
@@ -101,7 +101,7 @@ public class WarehouseController : ControllerBase
     #endregion
 
     #region Delete
-    [Authorize(Roles = "Farmer,Manager")]
+    [Authorize(Roles = "Admin,Farmer,Manager")]
     [HttpDelete("Delete")]
     public async Task<IActionResult> DeleteWarehouse([FromQuery] string code)
     {

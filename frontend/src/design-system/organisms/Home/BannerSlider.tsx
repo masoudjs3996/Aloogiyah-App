@@ -4,15 +4,10 @@ import { Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import Image from "next/image";
-import { useEffect } from "react";
 import { ISlider } from "@/shared/types/slider";
 import { getImageUrl } from "@/shared/utils/getImageUrl";
 
 export default function BannerSlider({ slider }: { slider: ISlider[] }) {
-  useEffect(() => {
-    console.log(slider);
-  }, []);
-
   return (
     <Swiper
       modules={[Pagination, Autoplay]}

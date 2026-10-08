@@ -8,5 +8,5 @@ public class AgriculturalProductSimilarDto
     public string Description { get; set; } = string.Empty;
     public decimal RetailPrice { get; set; }
     public decimal? WholesalePrice { get; set; }
-    public string ProductImageUrl { get; set; } = string.Empty;
+    public string PrimaryImageUrl { get; set; } = "/placeholder.svg";
 }

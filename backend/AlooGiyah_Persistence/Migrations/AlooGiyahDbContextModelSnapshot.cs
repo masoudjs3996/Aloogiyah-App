@@ -111,7 +111,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("Articles");
@@ -187,10 +187,66 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("AlooGiyah_Domain.Entities.ChatConversation", b =>
+                {
+                    b.Property<int>("ChatConversationId").ValueGeneratedOnAdd().HasColumnType("integer");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ChatConversationId"));
+                    b.Property<string>("Code").IsRequired().HasMaxLength(10).HasColumnType("character varying(10)");
+                    b.Property<DateTimeOffset>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<bool>("IsDeleted").HasColumnType("boolean");
+                    b.Property<DateTimeOffset?>("LastMessageAt").HasColumnType("timestamp with time zone");
+                    b.Property<int>("ParticipantOneId").HasColumnType("integer");
+                    b.Property<int>("ParticipantTwoId").HasColumnType("integer");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.HasKey("ChatConversationId");
+                    b.HasIndex("Code").IsUnique();
+                    b.HasIndex("ParticipantOneId", "ParticipantTwoId").IsUnique();
+                    b.HasIndex("ParticipantTwoId");
+                    b.ToTable("ChatConversations");
+                });
+
+            modelBuilder.Entity("AlooGiyah_Domain.Entities.ChatConversationBlock", b =>
+                {
+                    b.Property<int>("ChatConversationBlockId").ValueGeneratedOnAdd().HasColumnType("integer");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ChatConversationBlockId"));
+                    b.Property<DateTimeOffset>("BlockedAt").HasColumnType("timestamp with time zone");
+                    b.Property<int>("BlockedByUserId").HasColumnType("integer");
+                    b.Property<string>("Code").IsRequired().HasMaxLength(10).HasColumnType("character varying(10)");
+                    b.Property<DateTimeOffset>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<int>("ConversationId").HasColumnType("integer");
+                    b.Property<bool>("IsDeleted").HasColumnType("boolean");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.HasKey("ChatConversationBlockId");
+                    b.HasIndex("Code").IsUnique();
+                    b.HasIndex("ConversationId", "BlockedByUserId").IsUnique();
+                    b.HasIndex("BlockedByUserId");
+                    b.ToTable("ChatConversationBlocks");
+                });
+
+            modelBuilder.Entity("AlooGiyah_Domain.Entities.ChatMessageAttachment", b =>
+                {
+                    b.Property<int>("ChatMessageAttachmentId").ValueGeneratedOnAdd().HasColumnType("integer");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ChatMessageAttachmentId"));
+                    b.Property<string>("Code").IsRequired().HasMaxLength(10).HasColumnType("character varying(10)");
+                    b.Property<string>("ContentType").IsRequired().HasMaxLength(150).HasColumnType("character varying(150)");
+                    b.Property<DateTimeOffset>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<string>("FileName").IsRequired().HasMaxLength(255).HasColumnType("character varying(255)");
+                    b.Property<int>("FileId").HasColumnType("integer");
+                    b.Property<bool>("IsDeleted").HasColumnType("boolean");
+                    b.Property<int>("ChatMessageId").HasColumnType("integer");
+                    b.Property<long>("SizeInBytes").HasColumnType("bigint");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.HasKey("ChatMessageAttachmentId");
+                    b.HasIndex("Code").IsUnique();
+                    b.HasIndex("ChatMessageId", "FileId").IsUnique();
+                    b.HasIndex("FileId");
+                    b.ToTable("ChatMessageAttachments");
                 });
 
             modelBuilder.Entity("AlooGiyah_Domain.Entities.ChatMessage", b =>
@@ -200,6 +256,8 @@ namespace AlooGiyah_Persistence.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ChatMessageId"));
+
+                    b.Property<int>("ConversationId").HasColumnType("integer");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -211,6 +269,9 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("EditedAt").HasColumnType("timestamp with time zone");
+                    b.Property<bool>("IsEdited").HasColumnType("boolean").HasDefaultValue(false);
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("boolean");
@@ -235,8 +296,10 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
+
+                    b.HasIndex("ConversationId", "CreatedAt");
 
                     b.ToTable("ChatMessages");
                 });
@@ -272,6 +335,11 @@ namespace AlooGiyah_Persistence.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsUniqueProductReview")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
                     b.Property<int?>("ParentCommentId")
                         .HasColumnType("integer");
 
@@ -296,10 +364,15 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.HasIndex("EntityCode", "EntityComment");
+
+                    b.HasIndex("UserId", "EntityCode")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Comments_UserId_EntityCode_ProductReview")
+                        .HasFilter("\"IsUniqueProductReview\" AND \"ParentCommentId\" IS NULL AND NOT \"IsDeleted\"");
 
                     b.ToTable("Comments");
                 });
@@ -367,10 +440,26 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("FarmId");
 
-                    b.HasIndex("Code", "IsDeleted")
-                        .IsUnique();
-
                     b.ToTable("Discounts");
+                });
+
+            modelBuilder.Entity("AlooGiyah_Domain.Entities.EntityCodeRegistry", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Code");
+
+                    b.ToTable("EntityCodeRegistry");
                 });
 
             modelBuilder.Entity("AlooGiyah_Domain.Entities.FileType", b =>
@@ -403,7 +492,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasKey("FileTypeId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("FileTypes");
@@ -464,7 +553,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("Files");
@@ -517,7 +606,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("Notifications");
@@ -579,7 +668,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("ExpertId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("QualityAssessments");
@@ -627,7 +716,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("RefreshToken");
@@ -664,6 +753,9 @@ namespace AlooGiyah_Persistence.Migrations
                     b.Property<double?>("GardenArea")
                         .HasColumnType("double precision");
 
+                    b.Property<int?>("AddressId")
+                        .HasColumnType("integer");
+
                     b.Property<double?>("GreenhouseArea")
                         .HasColumnType("double precision");
 
@@ -699,13 +791,15 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("DiscountId");
 
+                    b.HasIndex("AddressId");
+
                     b.HasIndex("ProviderId");
 
                     b.HasIndex("StatusId");
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("ServiceRequests");
@@ -755,7 +849,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasKey("SliderId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.HasIndex("IsActive", "Order");
@@ -799,7 +893,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasKey("StatusId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("Statuses");
@@ -858,7 +952,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.HasIndex("EntityId", "EntityStatus");
@@ -989,7 +1083,7 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasIndex("CheckoutId", "FarmId")
                         .IsUnique();
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.HasIndex("IsHeld", "ApprovalExpiresAt");
@@ -1044,7 +1138,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("AgriculturalOrderId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("AgriculturalOrderHistories");
@@ -1103,7 +1197,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("AgriculturalProductId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("AgriculturalOrderItems");
@@ -1192,7 +1286,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("AgriculturalProducts", (string)null);
@@ -1270,7 +1364,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("WinnerId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("Auctions");
@@ -1314,7 +1408,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("AuctionBids");
@@ -1370,7 +1464,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("Carts", (string)null);
@@ -1420,7 +1514,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("CartId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("CartItems", (string)null);
@@ -1501,7 +1595,7 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasIndex("BuyerId", "IdempotencyKey")
                         .IsUnique();
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.HasIndex("CartId", "IsSubmitted", "IsPaid", "IsExpired");
@@ -1558,7 +1652,7 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasIndex("Reference")
                         .IsUnique();
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("CheckoutPayments");
@@ -1620,7 +1714,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("Farms");
@@ -1687,7 +1781,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("Orders");
@@ -1738,7 +1832,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("OrderItems");
@@ -1804,7 +1898,7 @@ namespace AlooGiyah_Persistence.Migrations
                         .IsUnique()
                         .HasFilter("\"Reference\" IS NOT NULL");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("OrderRefunds");
@@ -1874,7 +1968,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasKey("ProductId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("Products");
@@ -1952,7 +2046,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("VillageId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.HasIndex("UserId", "IsDefault")
@@ -1999,7 +2093,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.HasIndex("CountyId", "Name")
@@ -2045,7 +2139,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.HasIndex("ProvinceId", "Name")
@@ -2091,7 +2185,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("Provinces");
@@ -2140,7 +2234,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.HasIndex("CountyId", "Name")
@@ -2179,10 +2273,71 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasKey("RoleId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("AlooGiyah_Domain.Entities.UserFolder.PhoneOtpChallenge", b =>
+                {
+                    b.Property<int>("PhoneOtpChallengeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PhoneOtpChallengeId"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FailedAttempts")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FName")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LName")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("PhoneOtpChallengeId");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("PhoneNumber", "Purpose", "CreatedAt");
+
+                    b.ToTable("PhoneOtpChallenges");
                 });
 
             modelBuilder.Entity("AlooGiyah_Domain.Entities.UserFolder.User", b =>
@@ -2192,9 +2347,6 @@ namespace AlooGiyah_Persistence.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserId"));
-
-                    b.Property<int>("Age")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -2244,6 +2396,9 @@ namespace AlooGiyah_Persistence.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.Property<int>("TokenVersion")
+                        .HasColumnType("integer");
+
                     b.Property<int>("RoleId")
                         .HasColumnType("integer");
 
@@ -2268,10 +2423,24 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasIndex("UserName")
                         .IsUnique();
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("AlooGiyah_Domain.Entities.UserFolder.UserRole", b =>
+                {
+                    b.Property<int>("UserId").HasColumnType("integer");
+                    b.Property<int>("RoleId").HasColumnType("integer");
+                    b.Property<string>("Code").IsRequired().HasMaxLength(10).HasColumnType("character varying(10)");
+                    b.Property<DateTimeOffset>("CreatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<DateTimeOffset?>("UpdatedAt").HasColumnType("timestamp with time zone");
+                    b.Property<bool>("IsDeleted").HasColumnType("boolean");
+                    b.HasKey("UserId", "RoleId");
+                    b.HasIndex("RoleId");
+                    b.HasIndex("Code").IsUnique();
+                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("AlooGiyah_Domain.Entities.UserFolder.Wallet", b =>
@@ -2316,7 +2485,7 @@ namespace AlooGiyah_Persistence.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("Wallets");
@@ -2365,7 +2534,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("WalletId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("WalletTransactions");
@@ -2409,7 +2578,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("FarmerId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.ToTable("Warehouses");
@@ -2466,7 +2635,7 @@ namespace AlooGiyah_Persistence.Migrations
 
                     b.HasIndex("WarehouseId");
 
-                    b.HasIndex("Code", "IsDeleted")
+                    b.HasIndex("Code")
                         .IsUnique();
 
                     b.HasIndex("EntityId", "EntityWarehouse");
@@ -2597,6 +2766,12 @@ namespace AlooGiyah_Persistence.Migrations
 
             modelBuilder.Entity("AlooGiyah_Domain.Entities.ChatMessage", b =>
                 {
+                    b.HasOne("AlooGiyah_Domain.Entities.ChatConversation", "Conversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("AlooGiyah_Domain.Entities.UserFolder.User", "Receiver")
                         .WithMany("ReceivedMessages")
                         .HasForeignKey("ReceiverId")
@@ -2612,6 +2787,34 @@ namespace AlooGiyah_Persistence.Migrations
                     b.Navigation("Receiver");
 
                     b.Navigation("Sender");
+                    b.Navigation("Conversation");
+                });
+
+            modelBuilder.Entity("AlooGiyah_Domain.Entities.ChatConversation", b =>
+                {
+                    b.HasOne("AlooGiyah_Domain.Entities.UserFolder.User", "ParticipantOne")
+                        .WithMany().HasForeignKey("ParticipantOneId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                    b.HasOne("AlooGiyah_Domain.Entities.UserFolder.User", "ParticipantTwo")
+                        .WithMany().HasForeignKey("ParticipantTwoId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                    b.Navigation("ParticipantOne");
+                    b.Navigation("ParticipantTwo");
+                    b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("AlooGiyah_Domain.Entities.ChatConversationBlock", b =>
+                {
+                    b.HasOne("AlooGiyah_Domain.Entities.UserFolder.User", "BlockedByUser").WithMany().HasForeignKey("BlockedByUserId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                    b.HasOne("AlooGiyah_Domain.Entities.ChatConversation", "Conversation").WithMany().HasForeignKey("ConversationId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                    b.Navigation("BlockedByUser");
+                    b.Navigation("Conversation");
+                });
+
+            modelBuilder.Entity("AlooGiyah_Domain.Entities.ChatMessageAttachment", b =>
+                {
+                    b.HasOne("AlooGiyah_Domain.Entities.ChatMessage", "Message").WithMany().HasForeignKey("ChatMessageId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                    b.HasOne("AlooGiyah_Domain.Entities.Files", "File").WithMany().HasForeignKey("FileId").OnDelete(DeleteBehavior.Restrict).IsRequired();
+                    b.Navigation("Message");
+                    b.Navigation("File");
                 });
 
             modelBuilder.Entity("AlooGiyah_Domain.Entities.Comment", b =>
@@ -2717,6 +2920,11 @@ namespace AlooGiyah_Persistence.Migrations
 
             modelBuilder.Entity("AlooGiyah_Domain.Entities.ServiceRequest", b =>
                 {
+                    b.HasOne("AlooGiyah_Domain.Entities.UserFolder.AddressFolder.Address", "Address")
+                        .WithMany()
+                        .HasForeignKey("AddressId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("AlooGiyah_Domain.Entities.Discount", "Discount")
                         .WithMany("ServiceRequests")
                         .HasForeignKey("DiscountId")
@@ -2740,6 +2948,8 @@ namespace AlooGiyah_Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Discount");
+
+                    b.Navigation("Address");
 
                     b.Navigation("Provider");
 
@@ -3201,6 +3411,18 @@ namespace AlooGiyah_Persistence.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("AlooGiyah_Domain.Entities.UserFolder.UserRole", b =>
+                {
+                    b.HasOne("AlooGiyah_Domain.Entities.UserFolder.Role", "Role")
+                        .WithMany("AdditionalUsers").HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict).IsRequired();
+                    b.HasOne("AlooGiyah_Domain.Entities.UserFolder.User", "User")
+                        .WithMany("AdditionalRoles").HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade).IsRequired();
+                    b.Navigation("Role");
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("AlooGiyah_Domain.Entities.UserFolder.Wallet", b =>
                 {
                     b.HasOne("AlooGiyah_Domain.Entities.UserFolder.User", "User")
@@ -3438,11 +3660,13 @@ namespace AlooGiyah_Persistence.Migrations
             modelBuilder.Entity("AlooGiyah_Domain.Entities.UserFolder.Role", b =>
                 {
                     b.Navigation("Users");
+                    b.Navigation("AdditionalUsers");
                 });
 
             modelBuilder.Entity("AlooGiyah_Domain.Entities.UserFolder.User", b =>
                 {
                     b.Navigation("Addresses");
+                    b.Navigation("AdditionalRoles");
 
                     b.Navigation("AgriculturalOrders");
 

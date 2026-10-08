@@ -2,21 +2,41 @@
   "compilerOptions": {
     "baseUrl": "src",
     "paths": {
-      "@/*": ["*"],
-      "@styles/*": ["shared/styles/*"],
-      "@constants/*": ["shared/constants/*"],
-      "@hooks/*": ["shared/hooks/*"],
-      "@atoms/*": ["design-system/atoms/*"],
-      "@organisms/*": ["design-system/organisms/*"],
-      "@molecules/*": ["design-system/molecules/*"],
-      "@app-hooks/*": ["hooks/*"],
-      "@lib/*": ["lib/*"],
-      "@providers/*": ["shared/providers/*"]
+      "@/*": [
+        "*"
+      ],
+      "@styles/*": [
+        "shared/styles/*"
+      ],
+      "@constants/*": [
+        "shared/constants/*"
+      ],
+      "@hooks/*": [
+        "shared/hooks/*"
+      ],
+      "@atoms/*": [
+        "design-system/atoms/*"
+      ],
+      "@organisms/*": [
+        "design-system/organisms/*"
+      ],
+      "@molecules/*": [
+        "design-system/molecules/*"
+      ],
+      "@app-hooks/*": [
+        "hooks/*"
+      ],
+      "@lib/*": [
+        "lib/*"
+      ],
+      "@providers/*": [
+        "shared/providers/*"
+      ]
     },
     "target": "esnext",
     "module": "esnext",
-    "moduleResolution": "node",
-    "jsx": "preserve",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
     "strict": true,
     "esModuleInterop": true,
     "allowJs": true,
@@ -25,14 +45,30 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "skipLibCheck": true,
-    "types": ["@serwist/next/typings"],
-    "lib": ["dom", "dom.iterable", "esnext", "webworker"],
+    "types": [
+      "@serwist/next/typings"
+    ],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext",
+      "webworker"
+    ],
     "plugins": [
       {
         "name": "next"
       }
     ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "public/sw.js"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "public/sw.js"
+  ]
 }

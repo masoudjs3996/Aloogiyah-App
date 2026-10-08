@@ -10,6 +10,8 @@ namespace AlooGiyah_Application.DTOs.Users
     {
         public string RoleName { get; set; } = string.Empty;
         public string RoleCode { get; set; } = string.Empty;
+        public List<string> RoleNames { get; set; } = [];
+        public List<string> RoleCodes { get; set; } = [];
         
     }
 }

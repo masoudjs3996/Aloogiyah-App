@@ -51,7 +51,7 @@ public class AddressService : IAddressService
     #endregion
 
     private int CurrentUserId => int.Parse(_currentUser.UserId ?? throw new UnauthorizedAccessException("کاربر احراز هویت نشده"));
-    private bool IsManager => _currentUser.Roles?.Contains("Manager") == true;
+    private bool IsManager => _currentUser.Roles?.Any(x => x is "Manager" or "Admin") == true;
 
     public async Task<AddressDto> CreateAsync(AddressCreateDto dto)
     {

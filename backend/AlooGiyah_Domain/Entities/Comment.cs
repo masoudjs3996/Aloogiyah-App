@@ -25,6 +25,9 @@ public class Comment : BaseEntity
     [Range(1, 5)]
     public int? Rating { get; set; }
 
+    // Marks the one enforced product review for a user/product pair.
+    public bool IsUniqueProductReview { get; set; }
+
     [Required]
     public required string EntityCode { get; set; }
 

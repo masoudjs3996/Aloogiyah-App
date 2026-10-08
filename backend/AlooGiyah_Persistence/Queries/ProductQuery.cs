@@ -19,7 +19,9 @@ FROM "Products" t
     {
         var where = new QueryFilter();
         
-        where.Parameters.Add("RetailOnly", _currentUser.IsGuest || _currentUser.Roles.Contains("User") || _currentUser.Roles.Contains("Buyer"));
+        var canSeeWholesale = !_currentUser.IsGuest && _currentUser.Roles.Any(role =>
+            role is "Buyer" or "Farmer" or "Admin" or "Manager");
+        where.Parameters.Add("RetailOnly", !canSeeWholesale);
         return where;
     }
     public Task<ProductDto?> GetByCodeAsync(string code)

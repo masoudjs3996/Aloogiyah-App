@@ -11,6 +11,8 @@ import { LogFormValues } from "./type";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import PhoneOtpForm from "./PhoneOtpForm";
 const schema = yup
   .object({
     userName: yup.string().required("نام کاربری الزامی است"),
@@ -22,6 +24,7 @@ const schema = yup
   .required();
 
 const LoginForm = () => {
+  const [method, setMethod] = useState<"password" | "phone">("password");
   const { loginuser } = useLoginUser();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -43,23 +46,24 @@ const LoginForm = () => {
       onSuccess: (date) => {
 
         if (date?.data?.token && date?.data?.refreshToken) {
-          queryClient.invalidateQueries({
-            queryKey: ["userProfile"],
-          });
+          queryClient.clear();
           Cookies.remove("guestToken");
           Cookies.set("token", date.data.token, {
             expires: 7,
-            secure: true,
-            sameSite: "strict",
+            secure: window.location.protocol === "https:",
+            sameSite: "lax",
           });
           Cookies.set("refreshToken", date.data.refreshToken, {
             expires: 30,
-            secure: true,
-            sameSite: "strict",
+            secure: window.location.protocol === "https:",
+            sameSite: "lax",
           });
         }
         toast.success(date?.message || "فرم با موفقیت ارسال شد ");
-        router.push("/");
+        queryClient.invalidateQueries();
+        const next = new URLSearchParams(window.location.search).get("next");
+        router.push(next && /^\/dashboard(?:\/|$)/.test(next) && !next.includes("\\") ? next : "/dashboard");
+        router.refresh();
       },
       onError: (err) => {
 
@@ -69,6 +73,12 @@ const LoginForm = () => {
   };
 
   return (
+    <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-2 rounded-xl bg-gray-100 p-1" role="tablist" aria-label="روش ورود">
+        <button type="button" role="tab" aria-selected={method === "password"} onClick={() => setMethod("password")} className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${method === "password" ? "bg-white text-emerald-800 shadow-sm" : "text-gray-600"}`}>نام کاربری و رمز</button>
+        <button type="button" role="tab" aria-selected={method === "phone"} onClick={() => setMethod("phone")} className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${method === "phone" ? "bg-white text-emerald-800 shadow-sm" : "text-gray-600"}`}>شماره موبایل</button>
+      </div>
+      {method === "phone" ? <PhoneOtpForm purpose="Login" /> : (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 ">
       <TextField
         label="نام کاربری"
@@ -84,6 +94,8 @@ const LoginForm = () => {
 
       <Button variant="success">ورود </Button>
     </form>
+      )}
+    </div>
   );
 };
 

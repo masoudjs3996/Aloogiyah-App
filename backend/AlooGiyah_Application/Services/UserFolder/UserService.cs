@@ -10,6 +10,7 @@ using AlooGiyah_Domain.Pagination;
 using AlooGiyah_Shared.Exceptions;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -30,6 +31,9 @@ public class UserService : IUserService
     private readonly IConfiguration _config;                        // اضافه شد
     private readonly IMapper _mapper;
     private readonly IUserQuery _userQuery;
+    private readonly IGenericRepository<UserRole> _userRoleRepository;
+    private readonly IGenericRepository<Role> _roleRepository;
+    private readonly IAuthRepository _authRepository;
 
 
     public UserService(
@@ -41,7 +45,10 @@ public class UserService : IUserService
         IMapper mapper,
         IHttpContextAccessor httpContextAccessor,      // تزریق شد
             IConfiguration config,                          // تزریق شد
-            IUserQuery userQuery
+            IUserQuery userQuery,
+            IGenericRepository<UserRole> userRoleRepository,
+            IGenericRepository<Role> roleRepository,
+            IAuthRepository authRepository
         )
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -53,8 +60,44 @@ public class UserService : IUserService
         _httpContextAccessor = httpContextAccessor;
         _config = config;
         _userQuery = userQuery;
+        _userRoleRepository = userRoleRepository;
+        _roleRepository = roleRepository;
+        _authRepository = authRepository;
     }
     #endregion
+
+    public async Task SetAdditionalRolesAsync(string userCode, IReadOnlyCollection<string> roleCodes)
+    {
+        if (!_currentUserService.IsAuthenticated || !_currentUserService.Roles.Any(x => x is "Admin" or "Manager"))
+            throw new ForbiddenException("تغییر نقش کاربران فقط برای مدیریت مجاز است.");
+        if (string.IsNullOrWhiteSpace(userCode)) throw new BadRequestException("کد کاربر الزامی است.");
+        ArgumentNullException.ThrowIfNull(roleCodes);
+        var user = await _userRepository.GetByCodeAsync(userCode)
+            ?? throw new NotFoundException("کاربر پیدا نشد.");
+        var distinctCodes = roleCodes.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).Distinct().ToList();
+        var roles = new List<Role>();
+        var isAdmin = _currentUserService.Roles.Contains("Admin");
+        foreach (var code in distinctCodes)
+        {
+            var role = await _roleRepository.GetByCodeAsync(code)
+                ?? throw new NotFoundException($"نقش با کد {code} پیدا نشد.");
+            if (!isAdmin && (role.Name is "Admin" or "Manager"))
+                throw new ForbiddenException("فقط Admin می‌تواند نقش‌های مدیریتی را واگذار کند.");
+            if (role.RoleId != user.RoleId) roles.Add(role);
+        }
+
+        await using var transaction = await _unitOfWork.BeginTransactionAsync();
+        var existing = await _userRoleRepository.GetAll().Where(x => x.UserId == user.UserId).ToListAsync();
+        foreach (var assignment in existing) await _userRoleRepository.DeleteAsync(assignment);
+        foreach (var role in roles.DistinctBy(x => x.RoleId))
+            await _userRoleRepository.AddAsync(new UserRole { UserId = user.UserId, RoleId = role.RoleId });
+        user.TokenVersion++;
+        user.UpdatedAt = DateTimeOffset.UtcNow;
+        await _userRepository.UpdateAsync(user);
+        await _authRepository.RevokeAllTokensForUserAsync(user.UserId);
+        await _unitOfWork.SaveChangesAsync();
+        await transaction.CommitAsync();
+    }
 
 
     #region Get By Username
@@ -179,12 +222,14 @@ public class UserService : IUserService
         var principal = _httpContextAccessor.HttpContext?.User
             ?? throw new UnauthorizedAccessException("کاربر احراز هویت نشده است.");
 
-        var roleName = principal.FindFirst(ClaimTypes.Role)?.Value;
+        var roleNames = principal.FindAll(ClaimTypes.Role).Select(x => x.Value).Distinct().ToList();
+        var roleCodes = principal.FindAll("RoleCode").Select(x => x.Value).Distinct().ToList();
+        var roleName = roleNames.FirstOrDefault();
 
         if (string.IsNullOrEmpty(roleName))
             throw new BadRequestException("توکن مشکل دارد");
         
-        var roleCode = principal.FindFirst("RoleCode")?.Value;
+        var roleCode = roleCodes.FirstOrDefault();
 
         if (string.IsNullOrEmpty(roleCode))
             throw new BadRequestException("توکن مشکل دارد");
@@ -196,6 +241,8 @@ public class UserService : IUserService
         {
             RoleName = roleName,
             RoleCode = roleCode,
+            RoleNames = roleNames,
+            RoleCodes = roleCodes,
         };
     }
     #endregion

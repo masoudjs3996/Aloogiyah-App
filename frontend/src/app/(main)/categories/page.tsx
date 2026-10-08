@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { Categories } from "@/design-system/organisms/Home";
 
 import { getCategoryTree } from "@/lib/actions/categories";

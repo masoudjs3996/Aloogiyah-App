@@ -20,7 +20,7 @@ namespace AlooGiyah_API.Controllers
         }
 
         #region GetUserByCode
-        [Authorize(Roles = "Manager")]
+        [Authorize(Roles = "Admin,Manager")]
         [HttpGet("GetUserByCode")]
         public async Task<IActionResult> GetUserByCode([FromQuery] string? code)
         {
@@ -39,7 +39,7 @@ namespace AlooGiyah_API.Controllers
         #endregion
 
      
-        [Authorize(Roles = "Manager")]
+        [Authorize(Roles = "Admin,Manager")]
         [HttpGet("GetUserByFilter")]
         public async Task<IActionResult> GetUserByFilterAsync([FromQuery] UserFilterDto userFilter)
         {
@@ -50,6 +50,19 @@ namespace AlooGiyah_API.Controllers
                 IsSuccess = true,
                 Message = users.Items.Any() ? "لیست کاربران با موفقیت دریافت شد" : "کاربری یافت نشد",
                 Data = users
+            });
+        }
+
+        [Authorize(Roles = "Admin,Manager")]
+        [HttpPut("{userCode}/Roles")]
+        public async Task<IActionResult> SetAdditionalRoles(string userCode, [FromBody] UpdateUserRolesDto dto)
+        {
+            await _userService.SetAdditionalRolesAsync(userCode, dto.RoleCodes);
+            return Ok(new ApiResponse<object>
+            {
+                IsSuccess = true,
+                Message = "نقش‌های تکمیلی کاربر به‌روزرسانی شد.",
+                Data = new { userCode, dto.RoleCodes }
             });
         }
 

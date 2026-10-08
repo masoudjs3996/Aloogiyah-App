@@ -10,8 +10,10 @@ import { getImageUrl } from "@/shared/utils/getImageUrl";
 import { truncateText } from "@/shared/utils/truncateText";
 import useDebounce from "@/shared/hooks/useDebounce";
 import AnimatedSearchInput from "@/design-system/atoms/AnimatedSearchInput";
+import { SkeletonBlock } from "@/design-system/molecules/platform/Skeleton";
 
 import Map from "../dashbord/map/Map";
+import ProductPrice from "@/design-system/molecules/public/ProductPrice";
 
 /* -------------------- Types -------------------- */
 
@@ -110,7 +112,7 @@ const FarmDetail = ({ farmId }: FarmDetailProps) => {
   return (
     <div
       dir="rtl"
-      className="mx-auto min-h-screen max-w-md border bg-white pb-24"
+      className="mx-auto min-h-screen w-full max-w-2xl border-x bg-white pb-24 lg:max-w-6xl lg:rounded-2xl lg:border"
     >
       {/* -------------------- مشخصات مزرعه -------------------- */}
 
@@ -118,15 +120,23 @@ const FarmDetail = ({ farmId }: FarmDetailProps) => {
         <BookmarkIcon className="h-4 w-4 shrink-0 text-gray-500" />
 
         <div className="min-w-0 flex-1">
-          <h1 className="text-sm font-semibold">
-            {farmDetailLoading ? "در حال دریافت اطلاعات..." : (name ?? "")}
-          </h1>
-
-          <p className="mt-1 text-xs text-gray-400">{description ?? ""}</p>
+          {farmDetailLoading ? (
+            <div className="space-y-2 py-1" role="status" aria-label="در حال دریافت اطلاعات مزرعه">
+              <SkeletonBlock className="h-4 w-2/3" />
+              <SkeletonBlock className="h-3 w-full max-w-sm" />
+            </div>
+          ) : (
+            <>
+              <h1 className="truncate text-sm font-semibold">{name ?? ""}</h1>
+              <p className="mt-1 line-clamp-2 text-xs text-gray-400">{description ?? ""}</p>
+            </>
+          )}
         </div>
 
         <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-gray-200">
-          {imageUrl && (
+          {farmDetailLoading ? (
+            <SkeletonBlock className="h-full w-full rounded-full" />
+          ) : imageUrl && (
             <Image
               src={getImageUrl(imageUrl)}
               alt={name || "تصویر مزرعه"}
@@ -173,8 +183,17 @@ const FarmDetail = ({ farmId }: FarmDetailProps) => {
 
       <div className="divide-y">
         {isLoading ? (
-          <div className="p-8 text-center text-sm text-gray-500">
-            در حال دریافت محصولات...
+          <div className="divide-y px-3">
+            {Array.from({ length: 4 }, (_, index) => (
+              <div key={index} className="flex items-center gap-4 py-4">
+                <SkeletonBlock className="h-20 w-20 shrink-0 rounded-lg" />
+                <div className="min-w-0 flex-1 space-y-3">
+                  <SkeletonBlock className="h-4 w-2/3" />
+                  <SkeletonBlock className="h-3 w-full" />
+                  <SkeletonBlock className="h-3 w-1/3" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : products?.length ? (
           products.map((product) => (
@@ -198,9 +217,9 @@ const FarmDetail = ({ farmId }: FarmDetailProps) => {
                   {truncateText(product.description || "", 60)}
                 </p>
 
-                <p className="mt-2 text-sm font-semibold">
-                  {product.wholesalePrice} تومان
-                </p>
+                <div className="mt-2 text-sm">
+                  <ProductPrice retailPrice={product.retailPrice} wholesalePrice={product.wholesalePrice} compact />
+                </div>
 
                 <button
                   type="button"
@@ -226,9 +245,7 @@ const FarmDetail = ({ farmId }: FarmDetailProps) => {
         </h2>
 
         {farmDetailLoading ? (
-          <div className="flex h-[200px] items-center justify-center rounded-2xl bg-gray-100 text-sm text-gray-500">
-            در حال دریافت موقعیت مزرعه...
-          </div>
+          <SkeletonBlock className="h-[200px] w-full rounded-2xl sm:h-[280px] lg:h-[350px]" />
         ) : hasLocation ? (
           <Map
             position={{
@@ -248,7 +265,7 @@ const FarmDetail = ({ farmId }: FarmDetailProps) => {
 
       {/* -------------------- نوار پایین -------------------- */}
 
-      <div className="fixed inset-x-0 bottom-0 z-20 mx-auto flex max-w-md items-center justify-between border-t bg-white p-4">
+      <div className="fixed inset-x-0 bottom-0 z-20 mx-auto flex max-w-2xl items-center justify-between border-t bg-white p-3 sm:p-4 lg:max-w-6xl lg:rounded-t-2xl lg:border-x">
         <div className="flex items-center gap-3">
           <button type="button" className="h-8 w-8 rounded-full bg-gray-100">
             -

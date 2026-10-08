@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.Interfaces.Query;
 using AlooGiyah_Application.DTOs.Category;
 using AlooGiyah_Application.DTOs.Comment;
 using AlooGiyah_Application.Interfaces.Service;
@@ -68,7 +68,26 @@ public class CommentService : ICommentService
             parentComment = Comment;
 
             if (parentComment.ParentCommentId.HasValue)
-                throw new InvalidOperationException("پاسخ به ساب‌کامنت مجاز نیست");
+                throw new InvalidOperationException("پاسخ به پاسخ مجاز نیست؛ فقط به دیدگاه اصلی می‌توان پاسخ داد.");
+
+            if (parentComment.EntityCode != dto.EntityCode || parentComment.EntityComment != dto.EntityComment)
+                throw new InvalidOperationException("پاسخ باید برای همان محصول و دیدگاه ثبت شود.");
+
+            if (dto.Rating.HasValue)
+                throw new InvalidOperationException("برای پاسخ به دیدگاه امکان ثبت امتیاز وجود ندارد.");
+
+        }
+
+        if (dto.EntityComment == EntityComment.AgriculturalProduct && parentComment == null)
+        {
+            if (!dto.Rating.HasValue)
+                throw new InvalidOperationException("برای ثبت دیدگاه محصول، انتخاب امتیاز الزامی است.");
+
+            var hasExistingReview = await _commentRepository.ExistsAsync(comment =>
+                comment.UserId == userId && comment.EntityCode == dto.EntityCode &&
+                comment.EntityComment == dto.EntityComment && comment.ParentCommentId == null && !comment.IsDeleted);
+            if (hasExistingReview)
+                throw new ConflictException("شما برای این محصول قبلاً دیدگاه ثبت کرده‌اید؛ همان دیدگاه را ویرایش کنید.");
         }
 
         // اعتبارسنجی Rating
@@ -83,6 +102,7 @@ public class CommentService : ICommentService
             if (parentComment != null)
                 entity.ParentCommentId = parentComment.CommentId;
             entity.UserId = userId;
+            entity.IsUniqueProductReview = dto.EntityComment == EntityComment.AgriculturalProduct && parentComment == null;
             // کامنت در انتضار تایید
             entity.StatusId = 81;
 
@@ -111,17 +131,29 @@ public class CommentService : ICommentService
         if (entity == null)
             return false;
 
-        if (!string.IsNullOrEmpty(dto.StatusCode))
+        var actorId = int.TryParse(_currentUserService.UserId, out var id) ? id : -1;
+        var isManager = _currentUserService.Roles.Any(role => role is "Admin" or "Manager");
+        if (!_currentUserService.IsAuthenticated || _currentUserService.IsGuest || (!isManager && entity.UserId != actorId))
+            throw new ForbiddenException("ویرایش نظر دیگران مجاز نیست.");
+        // An author may edit their own comment, but it must return to moderation.
+        if (!isManager) entity.StatusId = 81;
+        if (isManager && !string.IsNullOrEmpty(dto.StatusCode))
         {
-            var statusId = await _statusRepository.GetIdByCodeAsync(dto.StatusCode, s => s.StatusId);
-            if (statusId == null)
+            var status = await _statusRepository.FirstOrDefaultAsync(s => s.Code == dto.StatusCode && s.EntityStatus == EntityStatus.CommentStatus && !s.IsDeleted);
+            if (status == null)
                 throw new NotFoundException($"وضعیت با کد {dto.StatusCode} پیدا نشد");
-            entity.StatusId = statusId.Value;
+            entity.StatusId = status.StatusId;
         }
 
         // اعتبارسنجی Rating
         if (dto.Rating.HasValue && (dto.Rating < 1 || dto.Rating > 5))
             throw new InvalidOperationException("امتیاز باید بین 1 تا 5 باشد");
+
+        if (entity.EntityComment == EntityComment.AgriculturalProduct && entity.ParentCommentId == null && !dto.Rating.HasValue)
+            throw new InvalidOperationException("برای دیدگاه محصول، انتخاب امتیاز الزامی است.");
+
+        if (entity.ParentCommentId.HasValue && dto.Rating.HasValue)
+            throw new InvalidOperationException("پاسخ به دیدگاه نمی‌تواند امتیاز داشته باشد.");
 
         entity.Content = dto.Content;
         entity.Rating = dto.Rating;
@@ -140,6 +172,10 @@ public class CommentService : ICommentService
         if (entity == null)
             return false;
 
+        var actorId = int.TryParse(_currentUserService.UserId, out var id) ? id : -1;
+        var isManager = _currentUserService.Roles.Any(role => role is "Admin" or "Manager");
+        if (!_currentUserService.IsAuthenticated || _currentUserService.IsGuest || (!isManager && entity.UserId != actorId))
+            throw new ForbiddenException("حذف نظر دیگران مجاز نیست.");
         await _commentRepository.DeleteAsync(entity);
         await _unitOfWork.SaveChangesAsync();
         return true;
@@ -164,6 +200,19 @@ public class CommentService : ICommentService
     public async Task<List<CommentDto>> GetTreeCommentsAsync(CommentTreeFilterDto filter)
     {
         return await _readQuery.GetTreeCommentsAsync(filter);
+    }
+
+    public Task<CommentRatingSummaryDto> GetRatingSummaryAsync(string entityCode, EntityComment entityComment)
+    {
+        return _readQuery.GetRatingSummaryAsync(entityCode, entityComment);
+    }
+
+    public async Task<CommentDto?> GetMyProductReviewAsync(string entityCode, EntityComment entityComment)
+    {
+        if (!int.TryParse(_currentUserService.UserId, out var userId) || !_currentUserService.IsAuthenticated || _currentUserService.IsGuest)
+            throw new ForbiddenException("برای دریافت دیدگاه خودتان باید وارد حساب کاربری شوید.");
+
+        return await _readQuery.GetMyProductReviewAsync(entityCode, entityComment, userId);
     }
 #endregion
 

@@ -5,6 +5,7 @@ using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Domain.Enums;
 using AlooGiyah_Shared.Exceptions;
+using Dapper;
 namespace AlooGiyah_Persistence.Queries;
 public class CommentQuery : BaseQuery, ICommentQuery
 {
@@ -23,7 +24,7 @@ FROM "Comments" t JOIN "Users" u ON u."UserId"=t."UserId" JOIN "Statuses" s ON s
         // Public reads expose approved comments; authors and managers can inspect pending ones.
         RestrictStatus(where);
         var detail = Projection + " || " + """
-jsonb_build_object('SubComments', COALESCE((SELECT jsonb_agg(to_jsonb(sc) || jsonb_build_object('UserCode', su."Code", 'Name', concat_ws(' ', su."FName", su."LName"), 'StatusCode', ss."Code", 'ParentId', sc."ParentCommentId", 'ParentCode', t."Code") ORDER BY sc."CreatedAt",sc."CommentId") FROM "Comments" sc JOIN "Users" su ON su."UserId"=sc."UserId" JOIN "Statuses" ss ON ss."StatusId"=sc."StatusId" WHERE sc."ParentCommentId"=t."CommentId" AND NOT sc."IsDeleted" AND (sc."StatusId"=82 OR @Manager OR sc."UserId"=@Viewer)), '[]'::jsonb))
+jsonb_build_object('SubComments', COALESCE((SELECT jsonb_agg(to_jsonb(sc) || jsonb_build_object('UserCode', su."Code", 'Name', concat_ws(' ', su."FName", su."LName"), 'StatusCode', ss."Code", 'ParentId', sc."ParentCommentId", 'ParentCode', t."Code", 'SubComments', COALESCE((SELECT jsonb_agg(to_jsonb(gc) || jsonb_build_object('UserCode', gu."Code", 'Name', concat_ws(' ', gu."FName", gu."LName"), 'StatusCode', gs."Code", 'ParentId', gc."ParentCommentId", 'ParentCode', sc."Code") ORDER BY gc."CreatedAt",gc."CommentId") FROM "Comments" gc JOIN "Users" gu ON gu."UserId"=gc."UserId" JOIN "Statuses" gs ON gs."StatusId"=gc."StatusId" WHERE gc."ParentCommentId"=sc."CommentId" AND NOT gc."IsDeleted" AND (gc."StatusId"=82 OR @Manager OR gc."UserId"=@Viewer)), '[]'::jsonb)) ORDER BY sc."CreatedAt",sc."CommentId") FROM "Comments" sc JOIN "Users" su ON su."UserId"=sc."UserId" JOIN "Statuses" ss ON ss."StatusId"=sc."StatusId" WHERE sc."ParentCommentId"=t."CommentId" AND NOT sc."IsDeleted" AND (sc."StatusId"=82 OR @Manager OR sc."UserId"=@Viewer)), '[]'::jsonb))
 """;
         return await QueryJsonFirstAsync<CommentDto>($"SELECT ({detail})::text {From} {where.Where}", where.Parameters);
     }
@@ -52,5 +53,32 @@ jsonb_build_object('SubComments', COALESCE((SELECT jsonb_agg(to_jsonb(sc) || jso
 """;
         var page = await QueryJsonPagedAsync<CommentDto>(projection, From, where, "t.\"CreatedAt\" DESC,t.\"CommentId\" DESC", filter.PageNumber, filter.PageSize);
         return page.Items.ToList();
+    }
+
+    public async Task<CommentRatingSummaryDto> GetRatingSummaryAsync(string entityCode, EntityComment entityComment)
+    {
+        const string sql = """
+SELECT COALESCE(ROUND(AVG("Rating")::numeric, 1), 0) AS "AverageRating",
+       COUNT("Rating")::int AS "RatingCount"
+FROM "Comments"
+WHERE "EntityCode" = @EntityCode
+  AND "EntityComment" = @EntityComment
+  AND "StatusId" = 82
+  AND NOT "IsDeleted"
+  AND "ParentCommentId" IS NULL
+  AND "Rating" BETWEEN 1 AND 5;
+""";
+        using var connection = CreateConnection();
+        return await connection.QuerySingleAsync<CommentRatingSummaryDto>(sql, new { EntityCode = entityCode, EntityComment = (int)entityComment });
+    }
+
+    public Task<CommentDto?> GetMyProductReviewAsync(string entityCode, EntityComment entityComment, int userId)
+    {
+        var where = new QueryFilter();
+        where.Add("t.\"UserId\"=@UserId AND t.\"EntityCode\"=@EntityCode AND t.\"EntityComment\"=@EntityComment AND t.\"ParentCommentId\" IS NULL AND NOT t.\"IsDeleted\"",
+            "UserId", userId);
+        where.Parameters.Add("EntityCode", entityCode);
+        where.Parameters.Add("EntityComment", (int)entityComment);
+        return QueryJsonFirstAsync<CommentDto>($"SELECT ({Projection})::text {From} {where.Where} ORDER BY t.\"IsUniqueProductReview\" DESC,t.\"CreatedAt\" DESC LIMIT 1", where.Parameters);
     }
 }

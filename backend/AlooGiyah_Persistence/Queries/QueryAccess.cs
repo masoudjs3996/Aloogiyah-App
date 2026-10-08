@@ -9,7 +9,7 @@ internal static class QueryAccess
             throw new UnauthorizedException("ابتدا وارد حساب کاربری شوید.");
         return id;
     }
-    public static bool IsManager(ICurrentUserService user) => user.Roles.Contains("Manager");
+    public static bool IsManager(ICurrentUserService user) => user.Roles.Contains("Manager") || user.Roles.Contains("Admin");
     public static void Owner(QueryFilter filter, ICurrentUserService user, string column)
     { if (!IsManager(user)) filter.Add(column + " = @CurrentUserId", "CurrentUserId", UserId(user)); }
 }

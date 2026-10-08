@@ -11,7 +11,6 @@ import { FaRegUser } from "react-icons/fa6";
 import { MdDriveFileRenameOutline } from "react-icons/md";
 import { MdOutlineMailOutline } from "react-icons/md";
 import { AiOutlinePhone } from "react-icons/ai";
-import { MdOutlineManageSearch } from "react-icons/md";
 import { useEffect } from "react";
 
 const schema = yup.object().shape({
@@ -22,12 +21,6 @@ const schema = yup.object().shape({
     .matches(/^09\d{9}$/, "شماره موبایل معتبر نیست")
     .required("شماره موبایل لازم است"),
   email: yup.string().required("ایمیل الزامی است").email("ایمیل معتبر نیست"),
-  age: yup
-    .number()
-    .typeError("سن باید عدد باشد")
-    .required("سن لازم است")
-    .min(18, "سن نباید کمتر از ۱۸ باشد")
-    .max(99, "سن نباید بیشتر از ۹۹ باشد"),
 });
 
 export const EditProfileForm = ({
@@ -50,7 +43,6 @@ export const EditProfileForm = ({
       lastName: "",
       email: "",
       phone: "",
-      age: "",
     },
     resolver: yupResolver(schema),
   });
@@ -62,7 +54,6 @@ export const EditProfileForm = ({
         lastName: user?.lName || "",
         email: user?.email || "",
         phone: user?.phoneNumber || "",
-        age: user?.age || "",
       });
     }
   }, [user, reset]);
@@ -73,7 +64,6 @@ export const EditProfileForm = ({
         fName: data.firstName,
         lName: data.lastName,
         email: data.email,
-        age: data.age,
         phoneNumber: data.phone,
       },
       {
@@ -170,24 +160,6 @@ export const EditProfileForm = ({
               onBlur={field.onBlur}
               error={errors.phone?.message}
               icon={<AiOutlinePhone size={24} className="text-slate-700" />}
-            />
-          )}
-        />
-
-        <Controller
-          name="age"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              placeholder=" سن خود را وارد کنید "
-              label=" سن :"
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              error={errors.age?.message}
-              icon={
-                <MdOutlineManageSearch size={24} className="text-slate-700" />
-              }
             />
           )}
         />

@@ -26,6 +26,10 @@ public class ChatMessageConfiguration : IEntityTypeConfiguration<ChatMessage>
         builder.Property(cm => cm.ReceiverId)
             .IsRequired();
 
+        builder.Property(cm => cm.ConversationId).IsRequired();
+        builder.Property(cm => cm.IsEdited).IsRequired().HasDefaultValue(false);
+        builder.HasIndex(cm => new { cm.ConversationId, cm.CreatedAt });
+
         builder.HasOne(cm => cm.Sender)
             .WithMany(u => u.SentMessages)
             .HasForeignKey(cm => cm.SenderId)

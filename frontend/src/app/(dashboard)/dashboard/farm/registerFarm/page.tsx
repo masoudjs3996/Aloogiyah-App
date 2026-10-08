@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import RegisterFarmForm from "@/design-system/organisms/dashbord/RegisterFarmForm";
 import { getProvinces } from "@/lib/actions/city";
 

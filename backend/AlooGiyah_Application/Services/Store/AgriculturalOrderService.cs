@@ -46,7 +46,7 @@ public class AgriculturalOrderService : IAgriculturalOrderService
             throw new UnauthorizedException("ابتدا وارد حساب کاربری شوید.");
         return id;
     }
-    private bool IsManager => _currentUser.Roles.Contains("Manager");
+    private bool IsManager => _currentUser.Roles.Contains("Manager") || _currentUser.Roles.Contains("Admin");
     private IQueryable<AgriculturalOrder> Query() => _orders.GetAll()
         .Include(x => x.Status).Include(x => x.Buyer).Include(x => x.Farm).Include(x => x.Checkout)
         .Include(x => x.Checkout).ThenInclude(x => x!.Payments)

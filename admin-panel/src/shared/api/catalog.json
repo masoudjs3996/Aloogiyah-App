@@ -1,0 +1,6322 @@
+[
+  {
+    "id": "Notification.GetMyNotifications",
+    "controller": "Notification",
+    "method": "GET",
+    "path": "/Notification/MyNotifications",
+    "action": "MyNotifications",
+    "query": [],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Notification.GetMyNotificationByCode",
+    "controller": "Notification",
+    "method": "GET",
+    "path": "/Notification/GetMyNotificationByCode",
+    "action": "GetMyNotificationByCode",
+    "query": [
+      {
+        "name": "notificationCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Notification.MarkAsRead",
+    "controller": "Notification",
+    "method": "PUT",
+    "path": "/Notification/Read",
+    "action": "Read",
+    "query": [
+      {
+        "name": "notificationCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Notification.DeleteNotification",
+    "controller": "Notification",
+    "method": "DELETE",
+    "path": "/Notification/DeleteNotification",
+    "action": "DeleteNotification",
+    "query": [
+      {
+        "name": "notificationCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Notification.CreateNotification",
+    "controller": "Notification",
+    "method": "POST",
+    "path": "/Notification/CreateNotification",
+    "action": "CreateNotification",
+    "query": [],
+    "body": [
+      {
+        "name": "userCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "message",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 1000
+      },
+      {
+        "name": "type",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "maxLength": 50
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "User.GetUserByCode",
+    "controller": "User",
+    "method": "GET",
+    "path": "/User/GetUserByCode",
+    "action": "GetUserByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "User.GetUserByFilterAsync",
+    "controller": "User",
+    "method": "GET",
+    "path": "/User/GetUserByFilter",
+    "action": "GetUserByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "fName",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "lName",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "userName",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "email",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "phoneNumber",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "roleCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "User.SetAdditionalRoles",
+    "controller": "User",
+    "method": "PUT",
+    "path": "/User/{userCode}/Roles",
+    "action": "{userCode}/Roles",
+    "query": [],
+    "body": [
+      {
+        "name": "roleCodes",
+        "type": "json",
+        "required": true,
+        "csType": "List<string>"
+      }
+    ],
+    "params": [
+      {
+        "name": "userCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "User.GetMyProfileAsync",
+    "controller": "User",
+    "method": "GET",
+    "path": "/User/GetMyProfile",
+    "action": "GetMyProfile",
+    "query": [],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "User.GetCurrentUserRole",
+    "controller": "User",
+    "method": "GET",
+    "path": "/User/GetRole",
+    "action": "GetRole",
+    "query": [],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "User.UpdateProfile",
+    "controller": "User",
+    "method": "PUT",
+    "path": "/User/UpdateProfile",
+    "action": "UpdateProfile",
+    "query": [],
+    "body": [
+      {
+        "name": "fName",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "lName",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "email",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "phoneNumber",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "User.UploadProfileImage",
+    "controller": "User",
+    "method": "POST",
+    "path": "/User/UploadProfileImage",
+    "action": "UploadProfileImage",
+    "query": [],
+    "body": [
+      {
+        "name": "file",
+        "type": "file",
+        "required": true,
+        "csType": "IFormFile"
+      }
+    ],
+    "params": [],
+    "encoding": "form",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "File.Upload",
+    "controller": "File",
+    "method": "POST",
+    "path": "/File/UploadFile",
+    "action": "UploadFile",
+    "query": [],
+    "body": [
+      {
+        "name": "file",
+        "type": "file",
+        "required": false,
+        "csType": "IFormFile"
+      },
+      {
+        "name": "fileTypeCode",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "description",
+        "type": "textarea",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "entityFile",
+        "type": "enum",
+        "required": true,
+        "csType": "EntityFile",
+        "options": [
+          "Profile",
+          "ServiceRequest",
+          "Product",
+          "AgriculturalProduct",
+          "Article",
+          "Auction",
+          "Farm",
+          "Category",
+          "Slider"
+        ]
+      },
+      {
+        "name": "entityCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "isPrimary",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": false
+      }
+    ],
+    "params": [],
+    "encoding": "form",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "File.GetFiles",
+    "controller": "File",
+    "method": "GET",
+    "path": "/File/GetFiles",
+    "action": "GetFiles",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "userCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "fileTypeCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "entityFile",
+        "type": "enum",
+        "required": false,
+        "csType": "EntityFile?",
+        "options": [
+          "Profile",
+          "ServiceRequest",
+          "Product",
+          "AgriculturalProduct",
+          "Article",
+          "Auction",
+          "Farm",
+          "Category",
+          "Slider"
+        ]
+      },
+      {
+        "name": "entityCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "searchText",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "File.DeleteFileByCode",
+    "controller": "File",
+    "method": "DELETE",
+    "path": "/File/DeleteFile",
+    "action": "DeleteFile",
+    "query": [
+      {
+        "name": "fileCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Other.GenerateCode",
+    "controller": "Other",
+    "method": "GET",
+    "path": "/Other/GenerateCode",
+    "action": "GenerateCode",
+    "query": [],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Other.GetCurrentTime",
+    "controller": "Other",
+    "method": "GET",
+    "path": "/Other/DateTimeNow",
+    "action": "DateTimeNow",
+    "query": [],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Article.CreateArticle",
+    "controller": "Article",
+    "method": "POST",
+    "path": "/Article/CreateArticle",
+    "action": "CreateArticle",
+    "query": [],
+    "body": [
+      {
+        "name": "title",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "content",
+        "type": "textarea",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "categoryCodes",
+        "type": "json",
+        "required": false,
+        "csType": "List<string>"
+      },
+      {
+        "name": "slug",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "maxLength": 255
+      },
+      {
+        "name": "metaTitle",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "maxLength": 255
+      },
+      {
+        "name": "metaDescription",
+        "type": "textarea",
+        "required": false,
+        "csType": "string",
+        "maxLength": 500
+      },
+      {
+        "name": "metaKeywords",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 255
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "Article.UpdateArticle",
+    "controller": "Article",
+    "method": "PUT",
+    "path": "/Article/UpdateArticle",
+    "action": "UpdateArticle",
+    "query": [],
+    "body": [
+      {
+        "name": "articleCode",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "title",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "content",
+        "type": "textarea",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "categoryCodes",
+        "type": "json",
+        "required": false,
+        "csType": "List<string>"
+      },
+      {
+        "name": "slug",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "metaTitle",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "metaDescription",
+        "type": "textarea",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "metaKeywords",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "Article.GetByFilter",
+    "controller": "Article",
+    "method": "GET",
+    "path": "/Article/GetByFilter",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "searchTerm",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "authorCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "categoryCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Article.GetByCode",
+    "controller": "Article",
+    "method": "GET",
+    "path": "/Article/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Article.DeleteArticle",
+    "controller": "Article",
+    "method": "DELETE",
+    "path": "/Article/DeleteArticle",
+    "action": "DeleteArticle",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "Auth.RequestPhoneCode",
+    "controller": "Auth",
+    "method": "POST",
+    "path": "/Auth/RequestPhoneCode",
+    "action": "RequestPhoneCode",
+    "query": [],
+    "body": [
+      {
+        "name": "phoneNumber",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "purpose",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "fName",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 80
+      },
+      {
+        "name": "lName",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 150
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Auth.VerifyPhoneCode",
+    "controller": "Auth",
+    "method": "POST",
+    "path": "/Auth/VerifyPhoneCode",
+    "action": "VerifyPhoneCode",
+    "query": [],
+    "body": [
+      {
+        "name": "challengeCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Auth.Register",
+    "controller": "Auth",
+    "method": "POST",
+    "path": "/Auth/Register",
+    "action": "Register",
+    "query": [],
+    "body": [
+      {
+        "name": "userName",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 50
+      },
+      {
+        "name": "password",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "fName",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "lName",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Auth.Login",
+    "controller": "Auth",
+    "method": "POST",
+    "path": "/Auth/Login",
+    "action": "Login",
+    "query": [],
+    "body": [
+      {
+        "name": "username",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "password",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Auth.RefreshToken",
+    "controller": "Auth",
+    "method": "POST",
+    "path": "/Auth/RefreshToken",
+    "action": "RefreshToken",
+    "query": [],
+    "body": [
+      {
+        "name": "RefreshToken",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "string",
+    "roles": []
+  },
+  {
+    "id": "Auth.CreateGuestToken",
+    "controller": "Auth",
+    "method": "POST",
+    "path": "/Auth/GuestToken",
+    "action": "GuestToken",
+    "query": [],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Auth.ChangePassword",
+    "controller": "Auth",
+    "method": "PATCH",
+    "path": "/Auth/ChangePassword",
+    "action": "ChangePassword",
+    "query": [],
+    "body": [
+      {
+        "name": "currentPassword",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "newPassword",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Auth.SendVerificationCode",
+    "controller": "Auth",
+    "method": "POST",
+    "path": "/Auth/SendVerificationCodeEmail",
+    "action": "SendVerificationCodeEmail",
+    "query": [],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Auth.VerifyEmail",
+    "controller": "Auth",
+    "method": "PATCH",
+    "path": "/Auth/VerifyEmail",
+    "action": "VerifyEmail",
+    "query": [],
+    "body": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Auth.SendPasswordResetCode",
+    "controller": "Auth",
+    "method": "POST",
+    "path": "/Auth/SendResetPasswordCode",
+    "action": "SendResetPasswordCode",
+    "query": [],
+    "body": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Auth.ResetPassword",
+    "controller": "Auth",
+    "method": "PATCH",
+    "path": "/Auth/resetPassword",
+    "action": "resetPassword",
+    "query": [],
+    "body": [
+      {
+        "name": "resetCode",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "newPassword",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Auth.ChangeUsername",
+    "controller": "Auth",
+    "method": "PATCH",
+    "path": "/Auth/ChangeUsername",
+    "action": "ChangeUsername",
+    "query": [],
+    "body": [
+      {
+        "name": "currentUsername",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "newUsername",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 50
+      },
+      {
+        "name": "password",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "ServiceRequest.CreateServiceRequest",
+    "controller": "ServiceRequest",
+    "method": "POST",
+    "path": "/ServiceRequest/Create",
+    "action": "Create",
+    "query": [],
+    "body": [
+      {
+        "name": "serviceType",
+        "type": "enum",
+        "required": true,
+        "csType": "ServiceRequestType",
+        "options": [
+          "Vase",
+          "Garden",
+          "Greenhouse"
+        ]
+      },
+      {
+        "name": "discountCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "discountAmount",
+        "type": "number",
+        "required": true,
+        "csType": "decimal"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "addressCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "description",
+        "type": "textarea",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "serviceDate",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      },
+      {
+        "name": "numberOfVases",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      },
+      {
+        "name": "gardenArea",
+        "type": "number",
+        "required": false,
+        "csType": "double?"
+      },
+      {
+        "name": "greenhouseArea",
+        "type": "number",
+        "required": false,
+        "csType": "double?"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "ServiceRequest.GetByCodeAsync",
+    "controller": "ServiceRequest",
+    "method": "GET",
+    "path": "/ServiceRequest/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "ServiceRequest.GetByfilter",
+    "controller": "ServiceRequest",
+    "method": "GET",
+    "path": "/ServiceRequest/GetByfilter",
+    "action": "GetByfilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "userCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "code",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "serviceType",
+        "type": "enum",
+        "required": false,
+        "csType": "ServiceRequestType?",
+        "options": [
+          "Vase",
+          "Garden",
+          "Greenhouse"
+        ]
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "ServiceRequest.Update",
+    "controller": "ServiceRequest",
+    "method": "PUT",
+    "path": "/ServiceRequest/Update",
+    "action": "Update",
+    "query": [],
+    "body": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "providerCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "addressCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "price",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      },
+      {
+        "name": "discountCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "discountAmount",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      },
+      {
+        "name": "description",
+        "type": "textarea",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "serviceDate",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      },
+      {
+        "name": "numberOfVases",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      },
+      {
+        "name": "gardenArea",
+        "type": "number",
+        "required": false,
+        "csType": "double?"
+      },
+      {
+        "name": "greenhouseArea",
+        "type": "number",
+        "required": false,
+        "csType": "double?"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "ServiceRequest.AddProvider",
+    "controller": "ServiceRequest",
+    "method": "PATCH",
+    "path": "/ServiceRequest/AddProvider",
+    "action": "AddProvider",
+    "query": [],
+    "body": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "providerCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "ServiceRequest.Delete",
+    "controller": "ServiceRequest",
+    "method": "DELETE",
+    "path": "/ServiceRequest/Delete",
+    "action": "Delete",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Slider.Create",
+    "controller": "Slider",
+    "method": "POST",
+    "path": "/Slider/Create",
+    "action": "Create",
+    "query": [],
+    "body": [
+      {
+        "name": "title",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "description",
+        "type": "textarea",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "linkUrl",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "order",
+        "type": "number",
+        "required": true,
+        "csType": "int"
+      },
+      {
+        "name": "image",
+        "type": "file",
+        "required": false,
+        "csType": "IFormFile"
+      }
+    ],
+    "params": [],
+    "encoding": "form",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Slider.GetActive",
+    "controller": "Slider",
+    "method": "GET",
+    "path": "/Slider/GetActive",
+    "action": "GetActive",
+    "query": [],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Slider.Delete",
+    "controller": "Slider",
+    "method": "DELETE",
+    "path": "/Slider/Delete",
+    "action": "Delete",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Auction.CreateAuction",
+    "controller": "Auction",
+    "method": "POST",
+    "path": "/Auction/CreateAuction",
+    "action": "CreateAuction",
+    "query": [],
+    "body": [
+      {
+        "name": "agriculturalProductCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "startDate",
+        "type": "date",
+        "required": true,
+        "csType": "DateTimeOffset"
+      },
+      {
+        "name": "endDate",
+        "type": "date",
+        "required": true,
+        "csType": "DateTimeOffset"
+      },
+      {
+        "name": "startingPrice",
+        "type": "number",
+        "required": true,
+        "csType": "decimal"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager",
+      "Farmer"
+    ]
+  },
+  {
+    "id": "Auction.GetByFilterAsync",
+    "controller": "Auction",
+    "method": "GET",
+    "path": "/Auction/GetByFilter",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "productCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "winnerCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "startDateFrom",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      },
+      {
+        "name": "startDateTo",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      },
+      {
+        "name": "endDateFrom",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      },
+      {
+        "name": "endDateTo",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      },
+      {
+        "name": "minStartingPrice",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      },
+      {
+        "name": "maxStartingPrice",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Auction.GetByCodeAsync",
+    "controller": "Auction",
+    "method": "GET",
+    "path": "/Auction/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Auction.UpdateAuction",
+    "controller": "Auction",
+    "method": "PUT",
+    "path": "/Auction/UpdateAuction",
+    "action": "UpdateAuction",
+    "query": [],
+    "body": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "winnerCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "Auction.DeleteAuction",
+    "controller": "Auction",
+    "method": "DELETE",
+    "path": "/Auction/DeleteAuction",
+    "action": "DeleteAuction",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager",
+      "Farmer"
+    ]
+  },
+  {
+    "id": "Auction.FinalizeAuction",
+    "controller": "Auction",
+    "method": "POST",
+    "path": "/Auction/FinalizeAuction",
+    "action": "FinalizeAuction",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "ChatMessage.CreateChatMessage",
+    "controller": "ChatMessage",
+    "method": "POST",
+    "path": "/ChatMessage/Create",
+    "action": "Create",
+    "query": [],
+    "body": [
+      {
+        "name": "message",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 4000
+      },
+      {
+        "name": "receiverCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "ChatMessage.GetByFilterAsync",
+    "controller": "ChatMessage",
+    "method": "GET",
+    "path": "/ChatMessage/GetByFilter",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "senderCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "receiverCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "isRead",
+        "type": "boolean",
+        "required": false,
+        "csType": "bool?"
+      },
+      {
+        "name": "startDate",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      },
+      {
+        "name": "endDate",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "ChatMessage.GetByCodeAsync",
+    "controller": "ChatMessage",
+    "method": "GET",
+    "path": "/ChatMessage/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "ChatMessage.UpdateChatMessage",
+    "controller": "ChatMessage",
+    "method": "PUT",
+    "path": "/ChatMessage/Update",
+    "action": "Update",
+    "query": [],
+    "body": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "message",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 4000
+      },
+      {
+        "name": "isRead",
+        "type": "boolean",
+        "required": false,
+        "csType": "bool?"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "ChatMessage.DeleteChatMessage",
+    "controller": "ChatMessage",
+    "method": "DELETE",
+    "path": "/ChatMessage/Delete",
+    "action": "Delete",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "ChatMessage.GetConversationAsync",
+    "controller": "ChatMessage",
+    "method": "GET",
+    "path": "/ChatMessage/GetConversation",
+    "action": "GetConversation",
+    "query": [
+      {
+        "name": "userCode1",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "userCode2",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": false,
+        "csType": "int"
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": false,
+        "csType": "int"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "AgriculturalProduct.CreateAgriculturalProduct",
+    "controller": "AgriculturalProduct",
+    "method": "POST",
+    "path": "/AgriculturalProduct/Create",
+    "action": "Create",
+    "query": [],
+    "body": [
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 255
+      },
+      {
+        "name": "description",
+        "type": "textarea",
+        "required": false,
+        "csType": "string",
+        "maxLength": 1000
+      },
+      {
+        "name": "farmCode",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "maxLength": 10
+      },
+      {
+        "name": "retailPrice",
+        "type": "number",
+        "required": true,
+        "csType": "decimal"
+      },
+      {
+        "name": "wholesalePrice",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      },
+      {
+        "name": "stock",
+        "type": "number",
+        "required": true,
+        "csType": "int"
+      },
+      {
+        "name": "dailyProductionCapacity",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "slug",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 255
+      },
+      {
+        "name": "metaTitle",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 255
+      },
+      {
+        "name": "metaDescription",
+        "type": "textarea",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 500
+      },
+      {
+        "name": "metaKeywords",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 255
+      },
+      {
+        "name": "categoryCodes",
+        "type": "json",
+        "required": false,
+        "csType": "List<string>"
+      },
+      {
+        "name": "images",
+        "type": "files",
+        "required": false,
+        "csType": "List<IFormFile>?"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager",
+      "Farmer"
+    ]
+  },
+  {
+    "id": "AgriculturalProduct.CreateWithImages",
+    "controller": "AgriculturalProduct",
+    "method": "POST",
+    "path": "/AgriculturalProduct/CreateWithImages",
+    "action": "CreateWithImages",
+    "query": [],
+    "body": [
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 255
+      },
+      {
+        "name": "description",
+        "type": "textarea",
+        "required": false,
+        "csType": "string",
+        "maxLength": 1000
+      },
+      {
+        "name": "farmCode",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "maxLength": 10
+      },
+      {
+        "name": "retailPrice",
+        "type": "number",
+        "required": true,
+        "csType": "decimal"
+      },
+      {
+        "name": "wholesalePrice",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      },
+      {
+        "name": "stock",
+        "type": "number",
+        "required": true,
+        "csType": "int"
+      },
+      {
+        "name": "dailyProductionCapacity",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "slug",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 255
+      },
+      {
+        "name": "metaTitle",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 255
+      },
+      {
+        "name": "metaDescription",
+        "type": "textarea",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 500
+      },
+      {
+        "name": "metaKeywords",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 255
+      },
+      {
+        "name": "categoryCodes",
+        "type": "json",
+        "required": false,
+        "csType": "List<string>"
+      },
+      {
+        "name": "images",
+        "type": "files",
+        "required": false,
+        "csType": "List<IFormFile>?"
+      }
+    ],
+    "params": [],
+    "encoding": "form",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager",
+      "Farmer"
+    ]
+  },
+  {
+    "id": "AgriculturalProduct.GetByFilterAsync",
+    "controller": "AgriculturalProduct",
+    "method": "GET",
+    "path": "/AgriculturalProduct/GetByFilter",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "farmCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "minPrice",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      },
+      {
+        "name": "maxPrice",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      },
+      {
+        "name": "minStock",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      },
+      {
+        "name": "maxStock",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      },
+      {
+        "name": "categoryCodes",
+        "type": "json",
+        "required": false,
+        "csType": "List<string>?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "AgriculturalProduct.GetByCodeAsync",
+    "controller": "AgriculturalProduct",
+    "method": "GET",
+    "path": "/AgriculturalProduct/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "AgriculturalProduct.GetSimilarAsync",
+    "controller": "AgriculturalProduct",
+    "method": "GET",
+    "path": "/AgriculturalProduct/GetSimilar",
+    "action": "GetSimilar",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "productCode",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "AgriculturalProduct.UpdateAgriculturalProduct",
+    "controller": "AgriculturalProduct",
+    "method": "PUT",
+    "path": "/AgriculturalProduct/Update",
+    "action": "Update",
+    "query": [],
+    "body": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 255
+      },
+      {
+        "name": "description",
+        "type": "textarea",
+        "required": false,
+        "csType": "string",
+        "maxLength": 1000
+      },
+      {
+        "name": "greenhouseCode",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "retailPrice",
+        "type": "number",
+        "required": true,
+        "csType": "decimal"
+      },
+      {
+        "name": "wholesalePrice",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      },
+      {
+        "name": "stock",
+        "type": "number",
+        "required": true,
+        "csType": "int"
+      },
+      {
+        "name": "dailyProductionCapacity",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "slug",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "maxLength": 255
+      },
+      {
+        "name": "metaTitle",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "maxLength": 255
+      },
+      {
+        "name": "metaDescription",
+        "type": "textarea",
+        "required": false,
+        "csType": "string",
+        "maxLength": 500
+      },
+      {
+        "name": "metaKeywords",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 255
+      },
+      {
+        "name": "categoryCodes",
+        "type": "json",
+        "required": false,
+        "csType": "List<string>"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager",
+      "Farmer"
+    ]
+  },
+  {
+    "id": "AgriculturalProduct.DeleteAgriculturalProduct",
+    "controller": "AgriculturalProduct",
+    "method": "DELETE",
+    "path": "/AgriculturalProduct/Delete",
+    "action": "Delete",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager",
+      "Farmer"
+    ]
+  },
+  {
+    "id": "AgriculturalProduct.AddImages",
+    "controller": "AgriculturalProduct",
+    "method": "POST",
+    "path": "/AgriculturalProduct/AddImages",
+    "action": "AddImages",
+    "query": [
+      {
+        "name": "productCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [
+      {
+        "name": "files",
+        "type": "files",
+        "required": true,
+        "csType": "List<IFormFile>"
+      }
+    ],
+    "params": [],
+    "encoding": "form",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Farmer",
+      "Manager"
+    ]
+  },
+  {
+    "id": "AgriculturalProduct.SetPrimaryImage",
+    "controller": "AgriculturalProduct",
+    "method": "PATCH",
+    "path": "/AgriculturalProduct/SetPrimaryImage",
+    "action": "SetPrimaryImage",
+    "query": [
+      {
+        "name": "productCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [
+      {
+        "name": "fileCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Farmer",
+      "Manager"
+    ]
+  },
+  {
+    "id": "AgriculturalProduct.RemoveImage",
+    "controller": "AgriculturalProduct",
+    "method": "DELETE",
+    "path": "/AgriculturalProduct/RemoveImage",
+    "action": "RemoveImage",
+    "query": [
+      {
+        "name": "productCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "fileCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Farmer",
+      "Manager"
+    ]
+  },
+  {
+    "id": "QualityAssessment.Request",
+    "controller": "QualityAssessment",
+    "method": "POST",
+    "path": "/QualityAssessment/Request",
+    "action": "Request",
+    "query": [],
+    "body": [
+      {
+        "name": "agriculturalProductCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "quantity",
+        "type": "number",
+        "required": true,
+        "csType": "decimal",
+        "min": 0.01,
+        "max": 100000000.0
+      },
+      {
+        "name": "requestDescription",
+        "type": "textarea",
+        "required": true,
+        "csType": "string",
+        "maxLength": 700
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "QualityAssessment.CreateQualityAssessment",
+    "controller": "QualityAssessment",
+    "method": "POST",
+    "path": "/QualityAssessment/Create",
+    "action": "Create",
+    "query": [],
+    "body": [
+      {
+        "name": "agriculturalProductCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "expertCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "qualityDescription",
+        "type": "textarea",
+        "required": true,
+        "csType": "string",
+        "maxLength": 1000
+      },
+      {
+        "name": "qualityGrade",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 50
+      },
+      {
+        "name": "suggestedPrice",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      },
+      {
+        "name": "assessmentDate",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Expert",
+      "Manager",
+      "Admin"
+    ]
+  },
+  {
+    "id": "QualityAssessment.GetByFilterAsync",
+    "controller": "QualityAssessment",
+    "method": "GET",
+    "path": "/QualityAssessment/GetByFilter",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "agriculturalProductCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "expertCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "qualityGrade",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "minSuggestedPrice",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      },
+      {
+        "name": "maxSuggestedPrice",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      },
+      {
+        "name": "startAssessmentDate",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      },
+      {
+        "name": "endAssessmentDate",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "QualityAssessment.GetByCodeAsync",
+    "controller": "QualityAssessment",
+    "method": "GET",
+    "path": "/QualityAssessment/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "QualityAssessment.UpdateQualityAssessment",
+    "controller": "QualityAssessment",
+    "method": "PUT",
+    "path": "/QualityAssessment/Update",
+    "action": "Update",
+    "query": [],
+    "body": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "expertCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "qualityDescription",
+        "type": "textarea",
+        "required": true,
+        "csType": "string",
+        "maxLength": 1000
+      },
+      {
+        "name": "qualityGrade",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 50
+      },
+      {
+        "name": "suggestedPrice",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      },
+      {
+        "name": "assessmentDate",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Expert",
+      "Manager",
+      "Admin"
+    ]
+  },
+  {
+    "id": "QualityAssessment.AddExpert",
+    "controller": "QualityAssessment",
+    "method": "PATCH",
+    "path": "/QualityAssessment/AddExpert",
+    "action": "AddExpert",
+    "query": [],
+    "body": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "expertCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Manager",
+      "Admin"
+    ]
+  },
+  {
+    "id": "QualityAssessment.DeleteQualityAssessment",
+    "controller": "QualityAssessment",
+    "method": "DELETE",
+    "path": "/QualityAssessment/Delete",
+    "action": "Delete",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Location.GetProvinces",
+    "controller": "Location",
+    "method": "GET",
+    "path": "/location/Provinces",
+    "action": "Provinces",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "searchTerm",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Location.CreateProvince",
+    "controller": "Location",
+    "method": "POST",
+    "path": "/location/Province",
+    "action": "Province",
+    "query": [],
+    "body": [
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 100
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "Location.GetCounties",
+    "controller": "Location",
+    "method": "GET",
+    "path": "/location/Counties",
+    "action": "Counties",
+    "query": [
+      {
+        "name": "provinceCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "searchTerm",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Location.CreateCounty",
+    "controller": "Location",
+    "method": "POST",
+    "path": "/location/County",
+    "action": "County",
+    "query": [],
+    "body": [
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 100
+      },
+      {
+        "name": "provinceCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "default": "EA54D94863"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "Location.CreateCity",
+    "controller": "Location",
+    "method": "POST",
+    "path": "/location/City",
+    "action": "City",
+    "query": [],
+    "body": [
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 100
+      },
+      {
+        "name": "countyCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "Location.CreateVillage",
+    "controller": "Location",
+    "method": "POST",
+    "path": "/location/Village",
+    "action": "Village",
+    "query": [],
+    "body": [
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 100
+      },
+      {
+        "name": "countyCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "latitude",
+        "type": "number",
+        "required": false,
+        "csType": "double?"
+      },
+      {
+        "name": "longitude",
+        "type": "number",
+        "required": false,
+        "csType": "double?"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "Location.GetCountyLocations",
+    "controller": "Location",
+    "method": "GET",
+    "path": "/location/CityAndVillage",
+    "action": "CityAndVillage",
+    "query": [
+      {
+        "name": "countyCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "includeVillages",
+        "type": "boolean",
+        "required": false,
+        "csType": "bool?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Product.CreateProduct",
+    "controller": "Product",
+    "method": "POST",
+    "path": "/Product/CreateProduct",
+    "action": "CreateProduct",
+    "query": [],
+    "body": [
+      {
+        "name": "name",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "description",
+        "type": "textarea",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "retailPrice",
+        "type": "number",
+        "required": true,
+        "csType": "decimal"
+      },
+      {
+        "name": "wholesalePrice",
+        "type": "number",
+        "required": true,
+        "csType": "decimal"
+      },
+      {
+        "name": "stock",
+        "type": "number",
+        "required": true,
+        "csType": "int"
+      },
+      {
+        "name": "categoryCodes",
+        "type": "json",
+        "required": false,
+        "csType": "List<string>"
+      },
+      {
+        "name": "slug",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "maxLength": 255
+      },
+      {
+        "name": "metaTitle",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "maxLength": 255
+      },
+      {
+        "name": "metaDescription",
+        "type": "textarea",
+        "required": false,
+        "csType": "string",
+        "maxLength": 500
+      },
+      {
+        "name": "metaKeywords",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 255
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "Product.GetByFilterAsync",
+    "controller": "Product",
+    "method": "GET",
+    "path": "/Product/GetByFilter",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "searchTerm",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "productTypeCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "categoryCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Product.GetByCodeAsync",
+    "controller": "Product",
+    "method": "GET",
+    "path": "/Product/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Product.UpdateProduct",
+    "controller": "Product",
+    "method": "PUT",
+    "path": "/Product/UpdateProduct",
+    "action": "UpdateProduct",
+    "query": [],
+    "body": [
+      {
+        "name": "name",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "description",
+        "type": "textarea",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "retailPrice",
+        "type": "number",
+        "required": true,
+        "csType": "decimal"
+      },
+      {
+        "name": "wholesalePrice",
+        "type": "number",
+        "required": true,
+        "csType": "decimal"
+      },
+      {
+        "name": "stock",
+        "type": "number",
+        "required": true,
+        "csType": "int"
+      },
+      {
+        "name": "categoryCodes",
+        "type": "json",
+        "required": false,
+        "csType": "List<string>"
+      },
+      {
+        "name": "slug",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "maxLength": 255
+      },
+      {
+        "name": "metaTitle",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "maxLength": 255
+      },
+      {
+        "name": "metaDescription",
+        "type": "textarea",
+        "required": false,
+        "csType": "string",
+        "maxLength": 500
+      },
+      {
+        "name": "metaKeywords",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 255
+      },
+      {
+        "name": "productCode",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "Product.DeleteProduct",
+    "controller": "Product",
+    "method": "DELETE",
+    "path": "/Product/DeleteProduct",
+    "action": "DeleteProduct",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "AgriculturalOrderItem.GetByCode",
+    "controller": "AgriculturalOrderItem",
+    "method": "GET",
+    "path": "/AgriculturalOrderItem/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "AgriculturalOrderItem.GetByFilter",
+    "controller": "AgriculturalOrderItem",
+    "method": "GET",
+    "path": "/AgriculturalOrderItem/GetByFilter",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "orderCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "productCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "minQuantity",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      },
+      {
+        "name": "maxQuantity",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      },
+      {
+        "name": "minPrice",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      },
+      {
+        "name": "maxPrice",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "WarehouseInventory.CreateWarehouseInventory",
+    "controller": "WarehouseInventory",
+    "method": "POST",
+    "path": "/WarehouseInventory/Create",
+    "action": "Create",
+    "query": [],
+    "body": [
+      {
+        "name": "warehouseCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "entityCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "entityWarehouse",
+        "type": "enum",
+        "required": true,
+        "csType": "EntityWarehouseInventory",
+        "options": [
+          "AgriculturalProduct",
+          "Product"
+        ]
+      },
+      {
+        "name": "quantity",
+        "type": "number",
+        "required": true,
+        "csType": "int"
+      },
+      {
+        "name": "lastRestockDate",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Farmer",
+      "Manager",
+      "Admin"
+    ]
+  },
+  {
+    "id": "WarehouseInventory.GetByFilterAsync",
+    "controller": "WarehouseInventory",
+    "method": "GET",
+    "path": "/WarehouseInventory/GetByFilter",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "warehouseCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "entityCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "entityWarehouse",
+        "type": "enum",
+        "required": false,
+        "csType": "EntityWarehouseInventory?",
+        "options": [
+          "AgriculturalProduct",
+          "Product"
+        ]
+      },
+      {
+        "name": "minQuantity",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      },
+      {
+        "name": "maxQuantity",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      },
+      {
+        "name": "lastRestockFrom",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      },
+      {
+        "name": "lastRestockTo",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Farmer",
+      "Manager",
+      "Admin"
+    ]
+  },
+  {
+    "id": "WarehouseInventory.GetByCodeAsync",
+    "controller": "WarehouseInventory",
+    "method": "GET",
+    "path": "/WarehouseInventory/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Farmer",
+      "Manager",
+      "Admin"
+    ]
+  },
+  {
+    "id": "WarehouseInventory.UpdateWarehouseInventory",
+    "controller": "WarehouseInventory",
+    "method": "PUT",
+    "path": "/WarehouseInventory/Update",
+    "action": "Update",
+    "query": [],
+    "body": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "quantity",
+        "type": "number",
+        "required": true,
+        "csType": "int"
+      },
+      {
+        "name": "lastRestockDate",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Farmer",
+      "Manager",
+      "Admin"
+    ]
+  },
+  {
+    "id": "WarehouseInventory.DeleteWarehouseInventory",
+    "controller": "WarehouseInventory",
+    "method": "DELETE",
+    "path": "/WarehouseInventory/Delete",
+    "action": "Delete",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Farmer",
+      "Manager",
+      "Admin"
+    ]
+  },
+  {
+    "id": "Address.Create",
+    "controller": "Address",
+    "method": "POST",
+    "path": "/Address/Create",
+    "action": "Create",
+    "query": [],
+    "body": [
+      {
+        "name": "street",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 500
+      },
+      {
+        "name": "postalCode",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 20
+      },
+      {
+        "name": "latitude",
+        "type": "number",
+        "required": false,
+        "csType": "double?"
+      },
+      {
+        "name": "longitude",
+        "type": "number",
+        "required": false,
+        "csType": "double?"
+      },
+      {
+        "name": "isDefault",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": false
+      },
+      {
+        "name": "provinceCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "countyCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "cityCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "villageCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Address.GetByFilter",
+    "controller": "Address",
+    "method": "GET",
+    "path": "/Address/GetByFilter",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "postalCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "searchTerm",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "isDefault",
+        "type": "boolean",
+        "required": false,
+        "csType": "bool?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Address.GetByCode",
+    "controller": "Address",
+    "method": "GET",
+    "path": "/Address/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Address.Update",
+    "controller": "Address",
+    "method": "PUT",
+    "path": "/Address/Update",
+    "action": "Update",
+    "query": [],
+    "body": [
+      {
+        "name": "addressCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "street",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 500
+      },
+      {
+        "name": "postalCode",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 20
+      },
+      {
+        "name": "latitude",
+        "type": "number",
+        "required": false,
+        "csType": "double?"
+      },
+      {
+        "name": "longitude",
+        "type": "number",
+        "required": false,
+        "csType": "double?"
+      },
+      {
+        "name": "isDefault",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool"
+      },
+      {
+        "name": "provinceCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "countyCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "cityCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "villageCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Address.Delete",
+    "controller": "Address",
+    "method": "DELETE",
+    "path": "/Address/Delete",
+    "action": "Delete",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Wallet.GetMyWallet",
+    "controller": "Wallet",
+    "method": "GET",
+    "path": "/Wallet/MyWallet",
+    "action": "MyWallet",
+    "query": [],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Wallet.Deposit",
+    "controller": "Wallet",
+    "method": "POST",
+    "path": "/Wallet/Deposit",
+    "action": "Deposit",
+    "query": [],
+    "body": [
+      {
+        "name": "amount",
+        "type": "number",
+        "required": true,
+        "csType": "decimal",
+        "min": 1000.0,
+        "max": 1000000000.0
+      },
+      {
+        "name": "redirectUrl",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Wallet.DepositCallback",
+    "controller": "Wallet",
+    "method": "GET",
+    "path": "/Wallet/DepositCallback",
+    "action": "DepositCallback",
+    "query": [
+      {
+        "name": "transactionId",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Discount.CreateDiscount",
+    "controller": "Discount",
+    "method": "POST",
+    "path": "/Discount/CreateDiscount",
+    "action": "CreateDiscount",
+    "query": [],
+    "body": [
+      {
+        "name": "discountType",
+        "type": "enum",
+        "required": true,
+        "csType": "DiscountType",
+        "options": [
+          "Percentage",
+          "Fixed"
+        ]
+      },
+      {
+        "name": "value",
+        "type": "number",
+        "required": true,
+        "csType": "decimal"
+      },
+      {
+        "name": "startDate",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      },
+      {
+        "name": "endDate",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      },
+      {
+        "name": "maxUsage",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      },
+      {
+        "name": "maxDiscountAmount",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      },
+      {
+        "name": "isActive",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool"
+      },
+      {
+        "name": "farmCode",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "userCodes",
+        "type": "json",
+        "required": false,
+        "csType": "List<string>"
+      },
+      {
+        "name": "productCodes",
+        "type": "json",
+        "required": false,
+        "csType": "List<string>"
+      },
+      {
+        "name": "categoryCodes",
+        "type": "json",
+        "required": false,
+        "csType": "List<string>"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager",
+      "Farmer"
+    ]
+  },
+  {
+    "id": "Discount.GetByFilterAsync",
+    "controller": "Discount",
+    "method": "GET",
+    "path": "/Discount/GetByFilter",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "searchTerm",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "categoryCodes",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "discountType",
+        "type": "enum",
+        "required": false,
+        "csType": "DiscountType?",
+        "options": [
+          "Percentage",
+          "Fixed"
+        ]
+      },
+      {
+        "name": "isActive",
+        "type": "boolean",
+        "required": false,
+        "csType": "bool?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Discount.GetByCodeAsync",
+    "controller": "Discount",
+    "method": "GET",
+    "path": "/Discount/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Discount.UpdateDiscount",
+    "controller": "Discount",
+    "method": "PUT",
+    "path": "/Discount/UpdateDiscount",
+    "action": "UpdateDiscount",
+    "query": [],
+    "body": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "discountType",
+        "type": "enum",
+        "required": true,
+        "csType": "DiscountType",
+        "options": [
+          "Percentage",
+          "Fixed"
+        ]
+      },
+      {
+        "name": "value",
+        "type": "number",
+        "required": true,
+        "csType": "decimal"
+      },
+      {
+        "name": "startDate",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      },
+      {
+        "name": "endDate",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      },
+      {
+        "name": "maxUsage",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      },
+      {
+        "name": "isActive",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool"
+      },
+      {
+        "name": "usageCount",
+        "type": "number",
+        "required": true,
+        "csType": "int"
+      },
+      {
+        "name": "userCodes",
+        "type": "json",
+        "required": false,
+        "csType": "List<string>"
+      },
+      {
+        "name": "productCodes",
+        "type": "json",
+        "required": false,
+        "csType": "List<string>"
+      },
+      {
+        "name": "categoryCodes",
+        "type": "json",
+        "required": false,
+        "csType": "List<string>"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager",
+      "Farmer"
+    ]
+  },
+  {
+    "id": "Discount.DeleteDiscount",
+    "controller": "Discount",
+    "method": "DELETE",
+    "path": "/Discount/DeleteDiscount",
+    "action": "DeleteDiscount",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager",
+      "Farmer"
+    ]
+  },
+  {
+    "id": "AuctionBid.CreateAuctionBid",
+    "controller": "AuctionBid",
+    "method": "POST",
+    "path": "/AuctionBid/CreateAuctionBid",
+    "action": "CreateAuctionBid",
+    "query": [],
+    "body": [
+      {
+        "name": "auctionCode",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 10
+      },
+      {
+        "name": "bidAmount",
+        "type": "number",
+        "required": true,
+        "csType": "decimal"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "AuctionBid.GetByFilterAsync",
+    "controller": "AuctionBid",
+    "method": "GET",
+    "path": "/AuctionBid/GetByFilter",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "auctionCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "minBidAmount",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      },
+      {
+        "name": "maxBidAmount",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      },
+      {
+        "name": "userCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "AuctionBid.GetByCodeAsync",
+    "controller": "AuctionBid",
+    "method": "GET",
+    "path": "/AuctionBid/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "AuctionBid.UpdateAuctionBid",
+    "controller": "AuctionBid",
+    "method": "PUT",
+    "path": "/AuctionBid/UpdateAuctionBid",
+    "action": "UpdateAuctionBid",
+    "query": [],
+    "body": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "bidAmount",
+        "type": "number",
+        "required": true,
+        "csType": "decimal"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "AuctionBid.DeleteAuctionBid",
+    "controller": "AuctionBid",
+    "method": "DELETE",
+    "path": "/AuctionBid/DeleteAuctionBid",
+    "action": "DeleteAuctionBid",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "OrderItems.CreateOrderItem",
+    "controller": "OrderItems",
+    "method": "POST",
+    "path": "/OrderItems/CreateOrderItem",
+    "action": "CreateOrderItem",
+    "query": [
+      {
+        "name": "orderCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [
+      {
+        "name": "productCode",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "orderCode",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "quantity",
+        "type": "number",
+        "required": true,
+        "csType": "int"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "OrderItems.GetByFilterAsync",
+    "controller": "OrderItems",
+    "method": "GET",
+    "path": "/OrderItems/GetByFilter",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "orderCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "orderCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "productCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "searchTerm",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "OrderItems.GetByCodeAsync",
+    "controller": "OrderItems",
+    "method": "GET",
+    "path": "/OrderItems/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "orderItemCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "OrderItems.UpdateOrderItem",
+    "controller": "OrderItems",
+    "method": "PUT",
+    "path": "/OrderItems/UpdateOrderItem",
+    "action": "UpdateOrderItem",
+    "query": [],
+    "body": [
+      {
+        "name": "orderItemCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "productCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "quantity",
+        "type": "number",
+        "required": true,
+        "csType": "int"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "OrderItems.DeleteOrderItem",
+    "controller": "OrderItems",
+    "method": "DELETE",
+    "path": "/OrderItems/DeleteOrderItem",
+    "action": "DeleteOrderItem",
+    "query": [
+      {
+        "name": "orderItemId",
+        "type": "number",
+        "required": true,
+        "csType": "int"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "AgriculturalOrder.GetByCode",
+    "controller": "AgriculturalOrder",
+    "method": "GET",
+    "path": "/AgriculturalOrder/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "AgriculturalOrder.GetByFilter",
+    "controller": "AgriculturalOrder",
+    "method": "GET",
+    "path": "/AgriculturalOrder/GetByFilter",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "view",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "default": "Buyer"
+      },
+      {
+        "name": "farmCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "includeUnpaid",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "minTotalPrice",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      },
+      {
+        "name": "maxTotalPrice",
+        "type": "number",
+        "required": false,
+        "csType": "decimal?"
+      },
+      {
+        "name": "userCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "startDate",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      },
+      {
+        "name": "endDate",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      },
+      {
+        "name": "productCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "AgriculturalOrder.CreateFromCart",
+    "controller": "AgriculturalOrder",
+    "method": "POST",
+    "path": "/AgriculturalOrder/CreateFromCart",
+    "action": "CreateFromCart",
+    "query": [],
+    "body": [
+      {
+        "name": "addressCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "discountCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "cartId",
+        "type": "text",
+        "required": true,
+        "csType": "Guid?"
+      },
+      {
+        "name": "idempotencyKey",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 100
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "AgriculturalOrder.Action",
+    "controller": "AgriculturalOrder",
+    "method": "POST",
+    "path": "/AgriculturalOrder/{code}/Action",
+    "action": "{code}/Action",
+    "query": [],
+    "body": [
+      {
+        "name": "action",
+        "type": "enum",
+        "required": true,
+        "csType": "AgriculturalOrderAction?",
+        "options": [
+          "Approve",
+          "Reject",
+          "Ship",
+          "ConfirmDelivery"
+        ]
+      },
+      {
+        "name": "reason",
+        "type": "textarea",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 1000
+      },
+      {
+        "name": "shippingMethod",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 100
+      },
+      {
+        "name": "trackingCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 100
+      }
+    ],
+    "params": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "AgriculturalOrder.CompleteRefund",
+    "controller": "AgriculturalOrder",
+    "method": "POST",
+    "path": "/AgriculturalOrder/{code}/Refund/Complete",
+    "action": "{code}/Refund/Complete",
+    "query": [],
+    "body": [
+      {
+        "name": "reference",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 150
+      }
+    ],
+    "params": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "Farm.CreateGreenhouse",
+    "controller": "Farm",
+    "method": "POST",
+    "path": "/Farm/Create",
+    "action": "Create",
+    "query": [],
+    "body": [
+      {
+        "name": "name",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "description",
+        "type": "textarea",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "address",
+        "type": "json",
+        "required": false,
+        "csType": "AddressCreateDto?"
+      },
+      {
+        "name": "capacity",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      },
+      {
+        "name": "minPurchase",
+        "type": "number",
+        "required": true,
+        "csType": "decimal"
+      },
+      {
+        "name": "image",
+        "type": "file",
+        "required": false,
+        "csType": "IFormFile?"
+      }
+    ],
+    "params": [],
+    "encoding": "form",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager",
+      "Farmer"
+    ]
+  },
+  {
+    "id": "Farm.GetMyGreenhouse",
+    "controller": "Farm",
+    "method": "GET",
+    "path": "/Farm/GetMyFarm",
+    "action": "GetMyFarm",
+    "query": [
+      {
+        "name": "name",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "addressCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager",
+      "Farmer"
+    ]
+  },
+  {
+    "id": "Farm.GetByFilter",
+    "controller": "Farm",
+    "method": "GET",
+    "path": "/Farm/GetByFilter",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "addressCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "userCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Farm.GetByCodeAsync",
+    "controller": "Farm",
+    "method": "GET",
+    "path": "/Farm/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Farm.UpdateGreenhouse",
+    "controller": "Farm",
+    "method": "PUT",
+    "path": "/Farm/Update",
+    "action": "Update",
+    "query": [],
+    "body": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "description",
+        "type": "textarea",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "address",
+        "type": "json",
+        "required": false,
+        "csType": "AddressUpdateDto?"
+      },
+      {
+        "name": "capacity",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      },
+      {
+        "name": "minPurchase",
+        "type": "number",
+        "required": true,
+        "csType": "decimal"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager",
+      "Farmer"
+    ]
+  },
+  {
+    "id": "Farm.ChangeFarmImagAsinc",
+    "controller": "Farm",
+    "method": "PATCH",
+    "path": "/Farm/UploadImage",
+    "action": "UploadImage",
+    "query": [],
+    "body": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "file",
+        "type": "file",
+        "required": true,
+        "csType": "IFormFile"
+      }
+    ],
+    "params": [],
+    "encoding": "form",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager",
+      "Farmer"
+    ]
+  },
+  {
+    "id": "Farm.DeleteGreenhouse",
+    "controller": "Farm",
+    "method": "DELETE",
+    "path": "/Farm/Delete",
+    "action": "Delete",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager",
+      "Farmer"
+    ]
+  },
+  {
+    "id": "Cart.GetCarts",
+    "controller": "Cart",
+    "method": "GET",
+    "path": "/Cart",
+    "action": "",
+    "query": [],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Cart.AddToCart",
+    "controller": "Cart",
+    "method": "POST",
+    "path": "/Cart/Add",
+    "action": "Add",
+    "query": [],
+    "body": [
+      {
+        "name": "productCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "quantity",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Cart.UpdateCartItem",
+    "controller": "Cart",
+    "method": "PUT",
+    "path": "/Cart/UpdateItem",
+    "action": "UpdateItem",
+    "query": [],
+    "body": [
+      {
+        "name": "cartId",
+        "type": "text",
+        "required": true,
+        "csType": "Guid"
+      },
+      {
+        "name": "itemCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "quantity",
+        "type": "number",
+        "required": true,
+        "csType": "int"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Cart.RemoveCartItem",
+    "controller": "Cart",
+    "method": "DELETE",
+    "path": "/Cart/RemoveItem",
+    "action": "RemoveItem",
+    "query": [],
+    "body": [
+      {
+        "name": "cartId",
+        "type": "text",
+        "required": true,
+        "csType": "Guid"
+      },
+      {
+        "name": "itemCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Cart.ClearCart",
+    "controller": "Cart",
+    "method": "DELETE",
+    "path": "/Cart/Clear",
+    "action": "Clear",
+    "query": [],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Category.CreateCategory",
+    "controller": "Category",
+    "method": "POST",
+    "path": "/Category/Create",
+    "action": "Create",
+    "query": [],
+    "body": [
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 255
+      },
+      {
+        "name": "parentCategoryCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "slug",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "maxLength": 255
+      },
+      {
+        "name": "icon",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 255
+      },
+      {
+        "name": "metaTitle",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "maxLength": 255
+      },
+      {
+        "name": "metaDescription",
+        "type": "textarea",
+        "required": false,
+        "csType": "string",
+        "maxLength": 500
+      },
+      {
+        "name": "metaKeywords",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 255
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "maxLength": 10,
+        "default": "1A4ADD0E7B"
+      },
+      {
+        "name": "sortOrder",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "Category.GetByFilterAsync",
+    "controller": "Category",
+    "method": "GET",
+    "path": "/Category/GetByFilter",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "searchTerm",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "parentCategoryCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "statusName",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "sortOrder",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Category.GetByCodeAsync",
+    "controller": "Category",
+    "method": "GET",
+    "path": "/Category/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Category.GetCategoriesByTypeAsync",
+    "controller": "Category",
+    "method": "GET",
+    "path": "/Category/GetCategoriesByType",
+    "action": "GetCategoriesByType",
+    "query": [
+      {
+        "name": "type",
+        "type": "text",
+        "required": true,
+        "csType": "CategoryFetchType"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Category.GetCategoryTreeAsync",
+    "controller": "Category",
+    "method": "GET",
+    "path": "/Category/CategoryTree",
+    "action": "CategoryTree",
+    "query": [],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Category.UpdateCategory",
+    "controller": "Category",
+    "method": "PUT",
+    "path": "/Category/Update",
+    "action": "Update",
+    "query": [],
+    "body": [
+      {
+        "name": "categoryCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 255
+      },
+      {
+        "name": "parentCategoryCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "slug",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "maxLength": 255
+      },
+      {
+        "name": "icon",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 255
+      },
+      {
+        "name": "metaTitle",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "maxLength": 255
+      },
+      {
+        "name": "metaDescription",
+        "type": "textarea",
+        "required": false,
+        "csType": "string",
+        "maxLength": 500
+      },
+      {
+        "name": "metaKeywords",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 255
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string",
+        "maxLength": 10
+      },
+      {
+        "name": "sortOrder",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "Category.UploadCategoryImage",
+    "controller": "Category",
+    "method": "POST",
+    "path": "/Category/UploadImage",
+    "action": "UploadImage",
+    "query": [],
+    "body": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "file",
+        "type": "file",
+        "required": true,
+        "csType": "IFormFile"
+      }
+    ],
+    "params": [],
+    "encoding": "form",
+    "bodyType": "object",
+    "roles": [
+      "Admin"
+    ]
+  },
+  {
+    "id": "Category.DeleteCategory",
+    "controller": "Category",
+    "method": "DELETE",
+    "path": "/Category/{code}",
+    "action": "{code}",
+    "query": [],
+    "body": [],
+    "params": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  },
+  {
+    "id": "Checkout.Create",
+    "controller": "Checkout",
+    "method": "POST",
+    "path": "/Checkout/CreateFromCart",
+    "action": "CreateFromCart",
+    "query": [],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Checkout.Get",
+    "controller": "Checkout",
+    "method": "GET",
+    "path": "/Checkout/{code}",
+    "action": "{code}",
+    "query": [],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Checkout.Pay",
+    "controller": "Checkout",
+    "method": "POST",
+    "path": "/Checkout/{code}/Pay/Wallet",
+    "action": "{code}/Pay/Wallet",
+    "query": [],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Checkout.Cancel",
+    "controller": "Checkout",
+    "method": "POST",
+    "path": "/Checkout/{code}/Cancel",
+    "action": "{code}/Cancel",
+    "query": [],
+    "body": [],
+    "params": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Warehouse.CreateWarehouse",
+    "controller": "Warehouse",
+    "method": "POST",
+    "path": "/Warehouse/Create",
+    "action": "Create",
+    "query": [],
+    "body": [
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 100
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 500
+      },
+      {
+        "name": "farmerCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Farmer",
+      "Manager",
+      "Admin"
+    ]
+  },
+  {
+    "id": "Warehouse.GetByFilterAsync",
+    "controller": "Warehouse",
+    "method": "GET",
+    "path": "/Warehouse/GetByFilter",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "farmerCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Farmer",
+      "Manager",
+      "Admin"
+    ]
+  },
+  {
+    "id": "Warehouse.GetByCodeAsync",
+    "controller": "Warehouse",
+    "method": "GET",
+    "path": "/Warehouse/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Farmer",
+      "Manager",
+      "Admin"
+    ]
+  },
+  {
+    "id": "Warehouse.UpdateWarehouse",
+    "controller": "Warehouse",
+    "method": "PUT",
+    "path": "/Warehouse/Update",
+    "action": "Update",
+    "query": [],
+    "body": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 100
+      },
+      {
+        "name": "address",
+        "type": "text",
+        "required": false,
+        "csType": "string?",
+        "maxLength": 500
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Farmer",
+      "Manager",
+      "Admin"
+    ]
+  },
+  {
+    "id": "Warehouse.DeleteWarehouse",
+    "controller": "Warehouse",
+    "method": "DELETE",
+    "path": "/Warehouse/Delete",
+    "action": "Delete",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Farmer",
+      "Manager",
+      "Admin"
+    ]
+  },
+  {
+    "id": "Comment.CreateComment",
+    "controller": "Comment",
+    "method": "POST",
+    "path": "/Comment/Create",
+    "action": "Create",
+    "query": [],
+    "body": [
+      {
+        "name": "content",
+        "type": "textarea",
+        "required": true,
+        "csType": "string",
+        "maxLength": 1000
+      },
+      {
+        "name": "rating",
+        "type": "number",
+        "required": false,
+        "csType": "int?",
+        "min": 1.0,
+        "max": 5.0
+      },
+      {
+        "name": "entityCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "parentCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "entityComment",
+        "type": "enum",
+        "required": true,
+        "csType": "EntityComment",
+        "options": [
+          "Product",
+          "AgriculturalProduct",
+          "Article",
+          "Auction",
+          "ServiceRequest"
+        ]
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Comment.GetByFilterAsync",
+    "controller": "Comment",
+    "method": "GET",
+    "path": "/Comment/GetByFilter",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "entityCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "entityComment",
+        "type": "enum",
+        "required": false,
+        "csType": "EntityComment?",
+        "options": [
+          "Product",
+          "AgriculturalProduct",
+          "Article",
+          "Auction",
+          "ServiceRequest"
+        ]
+      },
+      {
+        "name": "minRating",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      },
+      {
+        "name": "maxRating",
+        "type": "number",
+        "required": false,
+        "csType": "int?"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "startDate",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      },
+      {
+        "name": "endDate",
+        "type": "date",
+        "required": false,
+        "csType": "DateTimeOffset?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Comment.GetTreeCommentsAsync",
+    "controller": "Comment",
+    "method": "GET",
+    "path": "/Comment/GetTreeComments",
+    "action": "GetTreeComments",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "entityCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "entityComment",
+        "type": "enum",
+        "required": false,
+        "csType": "EntityComment?",
+        "options": [
+          "Product",
+          "AgriculturalProduct",
+          "Article",
+          "Auction",
+          "ServiceRequest"
+        ]
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Comment.GetByCodeAsync",
+    "controller": "Comment",
+    "method": "GET",
+    "path": "/Comment/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Comment.UpdateComment",
+    "controller": "Comment",
+    "method": "PUT",
+    "path": "/Comment/Update",
+    "action": "Update",
+    "query": [],
+    "body": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 10
+      },
+      {
+        "name": "content",
+        "type": "textarea",
+        "required": true,
+        "csType": "string",
+        "maxLength": 1000
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": true,
+        "csType": "string",
+        "maxLength": 10
+      },
+      {
+        "name": "rating",
+        "type": "number",
+        "required": false,
+        "csType": "int?",
+        "min": 1.0,
+        "max": 5.0
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Comment.DeleteComment",
+    "controller": "Comment",
+    "method": "DELETE",
+    "path": "/Comment/Delete",
+    "action": "Delete",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Order.CreateOrder",
+    "controller": "Order",
+    "method": "POST",
+    "path": "/Order/CreateOrder",
+    "action": "CreateOrder",
+    "query": [],
+    "body": [
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string"
+      },
+      {
+        "name": "addressCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "discountCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "items",
+        "type": "json",
+        "required": false,
+        "csType": "List<OrderItemCreateDto>"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Order.GetByFilterAsync",
+    "controller": "Order",
+    "method": "GET",
+    "path": "/Order/GetByFilter",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 1
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": true,
+        "csType": "int",
+        "default": 20
+      },
+      {
+        "name": "sortColumn",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "sortDescending",
+        "type": "boolean",
+        "required": true,
+        "csType": "bool",
+        "default": true
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "searchTerm",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "userCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Order.GetByCodeAsync",
+    "controller": "Order",
+    "method": "GET",
+    "path": "/Order/GetByCode",
+    "action": "GetByCode",
+    "query": [
+      {
+        "name": "code",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "Order.UpdateOrder",
+    "controller": "Order",
+    "method": "PUT",
+    "path": "/Order/UpdateOrder",
+    "action": "UpdateOrder",
+    "query": [],
+    "body": [
+      {
+        "name": "orderCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "statusCode",
+        "type": "text",
+        "required": true,
+        "csType": "string"
+      },
+      {
+        "name": "discountCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "addressCode",
+        "type": "text",
+        "required": false,
+        "csType": "string?"
+      },
+      {
+        "name": "items",
+        "type": "json",
+        "required": true,
+        "csType": "List<OrderItemUpdateDto>"
+      }
+    ],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": []
+  },
+  {
+    "id": "StatusChangeLog.Audit",
+    "controller": "StatusChangeLog",
+    "method": "GET",
+    "path": "/Admin/Audit",
+    "action": "GetByFilter",
+    "query": [
+      {
+        "name": "pageNumber",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "pageSize",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "entityId",
+        "type": "number",
+        "required": false
+      },
+      {
+        "name": "entityStatus",
+        "type": "enum",
+        "required": false,
+        "options": [
+          "OrderStatus",
+          "AgriculturalOrderStatus",
+          "ServiceRequestStatus",
+          "AuctionStatus",
+          "ChangeLogStatus",
+          "Category",
+          "Location",
+          "AgriculturalProduct",
+          "CommentStatus",
+          "FarmStatus"
+        ]
+      }
+    ],
+    "body": [],
+    "params": [],
+    "encoding": "json",
+    "bodyType": "object",
+    "roles": [
+      "Admin",
+      "Manager"
+    ]
+  }
+]

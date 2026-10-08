@@ -1,0 +1,6780 @@
+{
+  "CountyLocationItemDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "type",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "latitude",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    },
+    {
+      "name": "longitude",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "CountyLocationsFilterDto": [
+    {
+      "name": "countyCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "includeVillages",
+      "type": "boolean",
+      "required": false,
+      "csType": "bool?"
+    }
+  ],
+  "VillageCreateDto": [
+    {
+      "name": "name",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 100
+    },
+    {
+      "name": "countyCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "latitude",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    },
+    {
+      "name": "longitude",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "CityCreateDto": [
+    {
+      "name": "name",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 100
+    },
+    {
+      "name": "countyCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "ProvinceCreateDto": [
+    {
+      "name": "name",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 100
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "ProvinceDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "countiesCount",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    }
+  ],
+  "LocationFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "searchTerm",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "CityDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "countyCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "countyName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "provinceCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "ProvinceListDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "ProvinceUpdateDto": [
+    {
+      "name": "name",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 100
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 10
+    }
+  ],
+  "CountyDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "provinceCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "provinceName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "VillageDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "countyCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "countyName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "latitude",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    },
+    {
+      "name": "longitude",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "CountyCreateDto": [
+    {
+      "name": "name",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 100
+    },
+    {
+      "name": "provinceCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "default": "EA54D94863"
+    }
+  ],
+  "StatusChangeLogFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "entityId",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "entityStatus",
+      "type": "enum",
+      "required": false,
+      "csType": "EntityStatus?",
+      "options": [
+        "OrderStatus",
+        "AgriculturalOrderStatus",
+        "ServiceRequestStatus",
+        "AuctionStatus",
+        "ChangeLogStatus",
+        "Category",
+        "Location",
+        "AgriculturalProduct",
+        "CommentStatus",
+        "FarmStatus"
+      ]
+    },
+    {
+      "name": "userCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "startDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "endDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    }
+  ],
+  "StatusChangeLogCreateDto": [
+    {
+      "name": "entityId",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "entityStatus",
+      "type": "enum",
+      "required": true,
+      "csType": "EntityStatus",
+      "options": [
+        "OrderStatus",
+        "AgriculturalOrderStatus",
+        "ServiceRequestStatus",
+        "AuctionStatus",
+        "ChangeLogStatus",
+        "Category",
+        "Location",
+        "AgriculturalProduct",
+        "CommentStatus",
+        "FarmStatus"
+      ]
+    },
+    {
+      "name": "comments",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "oldStatusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "newStatusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "StatusChangeLogUpdateDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "comments",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "oldStatusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "newStatusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "userCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "StatusChangeLogDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "entityId",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "entityStatus",
+      "type": "enum",
+      "required": true,
+      "csType": "EntityStatus",
+      "options": [
+        "OrderStatus",
+        "AgriculturalOrderStatus",
+        "ServiceRequestStatus",
+        "AuctionStatus",
+        "ChangeLogStatus",
+        "Category",
+        "Location",
+        "AgriculturalProduct",
+        "CommentStatus",
+        "FarmStatus"
+      ]
+    },
+    {
+      "name": "comments",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "oldStatusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "newStatusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "userCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "changeDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    }
+  ],
+  "ArticleListDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "title",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "authorCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "categoryCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "slug",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "ArticleUpdateDto": [
+    {
+      "name": "articleCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "title",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "content",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "categoryCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    },
+    {
+      "name": "slug",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "metaTitle",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "metaDescription",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "metaKeywords",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "ArticleFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "searchTerm",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "authorCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "categoryCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "ArticleDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "title",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "content",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "authorCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "categoryCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "slug",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "metaTitle",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "metaDescription",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "metaKeywords",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "ArticleCreateDto": [
+    {
+      "name": "title",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "content",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "categoryCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    },
+    {
+      "name": "slug",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "maxLength": 255
+    },
+    {
+      "name": "metaTitle",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "maxLength": 255
+    },
+    {
+      "name": "metaDescription",
+      "type": "textarea",
+      "required": false,
+      "csType": "string",
+      "maxLength": 500
+    },
+    {
+      "name": "metaKeywords",
+      "type": "text",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 255
+    }
+  ],
+  "StatusFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "entityStatus",
+      "type": "enum",
+      "required": false,
+      "csType": "EntityStatus?",
+      "options": [
+        "OrderStatus",
+        "AgriculturalOrderStatus",
+        "ServiceRequestStatus",
+        "AuctionStatus",
+        "ChangeLogStatus",
+        "Category",
+        "Location",
+        "AgriculturalProduct",
+        "CommentStatus",
+        "FarmStatus"
+      ]
+    }
+  ],
+  "StatusDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "entityStatus",
+      "type": "enum",
+      "required": true,
+      "csType": "EntityStatus",
+      "options": [
+        "OrderStatus",
+        "AgriculturalOrderStatus",
+        "ServiceRequestStatus",
+        "AuctionStatus",
+        "ChangeLogStatus",
+        "Category",
+        "Location",
+        "AgriculturalProduct",
+        "CommentStatus",
+        "FarmStatus"
+      ]
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "updatedAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    }
+  ],
+  "StatusCreateDto": [
+    {
+      "name": "name",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 50
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 500
+    },
+    {
+      "name": "entityStatus",
+      "type": "enum",
+      "required": true,
+      "csType": "EntityStatus",
+      "options": [
+        "OrderStatus",
+        "AgriculturalOrderStatus",
+        "ServiceRequestStatus",
+        "AuctionStatus",
+        "ChangeLogStatus",
+        "Category",
+        "Location",
+        "AgriculturalProduct",
+        "CommentStatus",
+        "FarmStatus"
+      ]
+    }
+  ],
+  "StatusUpdateDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 50
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 500
+    },
+    {
+      "name": "entityStatus",
+      "type": "enum",
+      "required": true,
+      "csType": "EntityStatus",
+      "options": [
+        "OrderStatus",
+        "AgriculturalOrderStatus",
+        "ServiceRequestStatus",
+        "AuctionStatus",
+        "ChangeLogStatus",
+        "Category",
+        "Location",
+        "AgriculturalProduct",
+        "CommentStatus",
+        "FarmStatus"
+      ]
+    }
+  ],
+  "ApproveOrderDto": [
+    {
+      "name": "orderCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "OrderDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "userCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "addressCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "discountCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "discountAmount",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "isPaid",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    },
+    {
+      "name": "paymentDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "paymentReference",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "totalPrice",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "items",
+      "type": "json",
+      "required": false,
+      "csType": "List<OrderItemDto>"
+    }
+  ],
+  "OrderCreateDto": [
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "addressCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "discountCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "items",
+      "type": "json",
+      "required": false,
+      "csType": "List<OrderItemCreateDto>"
+    }
+  ],
+  "OrderUpdateDto": [
+    {
+      "name": "orderCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "discountCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "addressCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "items",
+      "type": "json",
+      "required": true,
+      "csType": "List<OrderItemUpdateDto>"
+    }
+  ],
+  "OrderFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "searchTerm",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "userCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "ServiceRequestUpdateDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "providerCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "addressCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "price",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "discountCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "discountAmount",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "serviceDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "numberOfVases",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "gardenArea",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    },
+    {
+      "name": "greenhouseArea",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    }
+  ],
+  "AddProviderDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "providerCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    }
+  ],
+  "ServiceRequestDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "serviceType",
+      "type": "enum",
+      "required": true,
+      "csType": "ServiceRequestType",
+      "options": [
+        "Vase",
+        "Garden",
+        "Greenhouse"
+      ]
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "userCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "providerCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "addressCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "addressStreet",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "addressProvince",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "addressCounty",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "addressCity",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "price",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "discountCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "discountAmount",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "serviceDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "numberOfVases",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "gardenArea",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    },
+    {
+      "name": "greenhouseArea",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    }
+  ],
+  "ServiceRequestFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "userCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "serviceType",
+      "type": "enum",
+      "required": false,
+      "csType": "ServiceRequestType?",
+      "options": [
+        "Vase",
+        "Garden",
+        "Greenhouse"
+      ]
+    }
+  ],
+  "ServiceRequestCreateDto": [
+    {
+      "name": "serviceType",
+      "type": "enum",
+      "required": true,
+      "csType": "ServiceRequestType",
+      "options": [
+        "Vase",
+        "Garden",
+        "Greenhouse"
+      ]
+    },
+    {
+      "name": "discountCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "discountAmount",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "addressCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "serviceDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "numberOfVases",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "gardenArea",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    },
+    {
+      "name": "greenhouseArea",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    }
+  ],
+  "CreateNotificationDto": [
+    {
+      "name": "userCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "message",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 1000
+    },
+    {
+      "name": "type",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "maxLength": 50
+    }
+  ],
+  "NotificationDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "userCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "isPublic",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    },
+    {
+      "name": "message",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "type",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "isRead",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    }
+  ],
+  "BaseFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    }
+  ],
+  "ChatMessageCreateDto": [
+    {
+      "name": "message",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 4000
+    },
+    {
+      "name": "receiverCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    }
+  ],
+  "ChatMessageUpdateDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "message",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 4000
+    },
+    {
+      "name": "isRead",
+      "type": "boolean",
+      "required": false,
+      "csType": "bool?"
+    }
+  ],
+  "ChatMessageFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "senderCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "receiverCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "isRead",
+      "type": "boolean",
+      "required": false,
+      "csType": "bool?"
+    },
+    {
+      "name": "startDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "endDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    }
+  ],
+  "ChatMessageDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "message",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "senderCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "receiverCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "isRead",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    }
+  ],
+  "CategoryFeaturedDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "imageUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "icon",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "sortOrder",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "slug",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "UploadCategoryImageDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "file",
+      "type": "file",
+      "required": true,
+      "csType": "IFormFile"
+    }
+  ],
+  "CategoryUpdateDto": [
+    {
+      "name": "categoryCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 255
+    },
+    {
+      "name": "parentCategoryCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "slug",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "maxLength": 255
+    },
+    {
+      "name": "icon",
+      "type": "text",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 255
+    },
+    {
+      "name": "metaTitle",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "maxLength": 255
+    },
+    {
+      "name": "metaDescription",
+      "type": "textarea",
+      "required": false,
+      "csType": "string",
+      "maxLength": 500
+    },
+    {
+      "name": "metaKeywords",
+      "type": "text",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 255
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "maxLength": 10
+    },
+    {
+      "name": "sortOrder",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    }
+  ],
+  "CategoryDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "parentCategoryCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "imageUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "icon",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "slug",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "metaTitle",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "metaDescription",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "metaKeywords",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "sortOrder",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "subCategories",
+      "type": "json",
+      "required": false,
+      "csType": "List<CategoryDto>?"
+    }
+  ],
+  "CategoryListDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "parentCategoryCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "imageUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "icon",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "slug",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "CategoryCreateDto": [
+    {
+      "name": "name",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 255
+    },
+    {
+      "name": "parentCategoryCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "slug",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "maxLength": 255
+    },
+    {
+      "name": "icon",
+      "type": "text",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 255
+    },
+    {
+      "name": "metaTitle",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "maxLength": 255
+    },
+    {
+      "name": "metaDescription",
+      "type": "textarea",
+      "required": false,
+      "csType": "string",
+      "maxLength": 500
+    },
+    {
+      "name": "metaKeywords",
+      "type": "text",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 255
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "maxLength": 10,
+      "default": "1A4ADD0E7B"
+    },
+    {
+      "name": "sortOrder",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    }
+  ],
+  "CategoryFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "searchTerm",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "parentCategoryCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "sortOrder",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    }
+  ],
+  "PaymentResultDto": [
+    {
+      "name": "success",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    },
+    {
+      "name": "method",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "paymentUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "transactionId",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "message",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "CheckoutDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "payableAmount",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "isPaid",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    },
+    {
+      "name": "isSubmitted",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    },
+    {
+      "name": "isExpired",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    },
+    {
+      "name": "expiresAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "orders",
+      "type": "json",
+      "required": false,
+      "csType": "List<AgriculturalOrderDto>"
+    }
+  ],
+  "AgriculturalOrderCreateDto": [
+    {
+      "name": "addressCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "discountCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "orderItems",
+      "type": "json",
+      "required": true,
+      "csType": "List<AgriculturalOrderItemCreateDto>"
+    }
+  ],
+  "AgriculturalOrderDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "checkoutCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "farmCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "farmName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusTitle",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "subtotal",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "shippingAmount",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "address",
+      "type": "json",
+      "required": false,
+      "csType": "OrderAddressDto?"
+    },
+    {
+      "name": "rejectionReason",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "shippingMethod",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "trackingCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "shippedAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "deliveredAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "refundStatus",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "default": "None"
+    },
+    {
+      "name": "refundAmount",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "refundReference",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "refundCompletedAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "paymentReference",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "paymentDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "allowedActions",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    },
+    {
+      "name": "history",
+      "type": "json",
+      "required": false,
+      "csType": "List<OrderHistoryDto>"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "buyerCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "totalPrice",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "discountAmount",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "isPaid",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    },
+    {
+      "name": "isHeld",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    },
+    {
+      "name": "approvalExpiresAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "heldAmount",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "orderItems",
+      "type": "json",
+      "required": false,
+      "csType": "List<AgriculturalOrderItemDto>"
+    }
+  ],
+  "CompleteRefundDto": [
+    {
+      "name": "reference",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 150
+    }
+  ],
+  "OrderActionDto": [
+    {
+      "name": "action",
+      "type": "enum",
+      "required": true,
+      "csType": "AgriculturalOrderAction?",
+      "options": [
+        "Approve",
+        "Reject",
+        "Ship",
+        "ConfirmDelivery"
+      ]
+    },
+    {
+      "name": "reason",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 1000
+    },
+    {
+      "name": "shippingMethod",
+      "type": "text",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 100
+    },
+    {
+      "name": "trackingCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 100
+    }
+  ],
+  "OrderAddressDto": [
+    {
+      "name": "recipient",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "phoneNumber",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "province",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "county",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "city",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "village",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "street",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "postalCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "latitude",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    },
+    {
+      "name": "longitude",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    }
+  ],
+  "AgriculturalOrderUpdateDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    }
+  ],
+  "AgriculturalOrderFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "view",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "default": "Buyer"
+    },
+    {
+      "name": "farmCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "includeUnpaid",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "minTotalPrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "maxTotalPrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "userCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "startDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "endDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "productCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "OrderHistoryDto": [
+    {
+      "name": "action",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "fromStatusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "toStatusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "actorId",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "reason",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "CheckoutFromCartDto": [
+    {
+      "name": "addressCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "discountCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "cartId",
+      "type": "text",
+      "required": true,
+      "csType": "Guid?"
+    },
+    {
+      "name": "idempotencyKey",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 100
+    }
+  ],
+  "FileFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "userCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "fileTypeCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "entityFile",
+      "type": "enum",
+      "required": false,
+      "csType": "EntityFile?",
+      "options": [
+        "Profile",
+        "ServiceRequest",
+        "Product",
+        "AgriculturalProduct",
+        "Article",
+        "Auction",
+        "Farm",
+        "Category",
+        "Slider"
+      ]
+    },
+    {
+      "name": "entityCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "searchText",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "FileUploadDto": [
+    {
+      "name": "file",
+      "type": "file",
+      "required": false,
+      "csType": "IFormFile"
+    },
+    {
+      "name": "fileTypeCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "entityFile",
+      "type": "enum",
+      "required": true,
+      "csType": "EntityFile",
+      "options": [
+        "Profile",
+        "ServiceRequest",
+        "Product",
+        "AgriculturalProduct",
+        "Article",
+        "Auction",
+        "Farm",
+        "Category",
+        "Slider"
+      ]
+    },
+    {
+      "name": "entityCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "isPrimary",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": false
+    }
+  ],
+  "FileDto": [
+    {
+      "name": "fileCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "fileTypeCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "userCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "url",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "entityFile",
+      "type": "enum",
+      "required": true,
+      "csType": "EntityFile",
+      "options": [
+        "Profile",
+        "ServiceRequest",
+        "Product",
+        "AgriculturalProduct",
+        "Article",
+        "Auction",
+        "Farm",
+        "Category",
+        "Slider"
+      ]
+    },
+    {
+      "name": "entityCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "isPrimary",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": false
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    }
+  ],
+  "ProductFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "searchTerm",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "productTypeCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "categoryCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "ProductDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "retailPrice",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "wholesalePrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "stock",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "categoryCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    },
+    {
+      "name": "slug",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "metaTitle",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "metaDescription",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "metaKeywords",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "ProductUpdateDto": [
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "retailPrice",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "wholesalePrice",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "stock",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "categoryCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    },
+    {
+      "name": "slug",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "maxLength": 255
+    },
+    {
+      "name": "metaTitle",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "maxLength": 255
+    },
+    {
+      "name": "metaDescription",
+      "type": "textarea",
+      "required": false,
+      "csType": "string",
+      "maxLength": 500
+    },
+    {
+      "name": "metaKeywords",
+      "type": "text",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 255
+    },
+    {
+      "name": "productCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "ProductCreateDto": [
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "retailPrice",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "wholesalePrice",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "stock",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "categoryCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    },
+    {
+      "name": "slug",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "maxLength": 255
+    },
+    {
+      "name": "metaTitle",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "maxLength": 255
+    },
+    {
+      "name": "metaDescription",
+      "type": "textarea",
+      "required": false,
+      "csType": "string",
+      "maxLength": 500
+    },
+    {
+      "name": "metaKeywords",
+      "type": "text",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 255
+    }
+  ],
+  "RemoveCartItemDto": [
+    {
+      "name": "cartId",
+      "type": "text",
+      "required": true,
+      "csType": "Guid"
+    },
+    {
+      "name": "itemCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    }
+  ],
+  "CartItemDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "productCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "productName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "productSlug",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "quantity",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "unitPrice",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "availableStock",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "primaryImageUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "CartDto": [
+    {
+      "name": "cartId",
+      "type": "text",
+      "required": false,
+      "csType": "Guid"
+    },
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "farms",
+      "type": "json",
+      "required": false,
+      "csType": "List<FarmCartDto>"
+    },
+    {
+      "name": "isGuest",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    }
+  ],
+  "AddToCartDto": [
+    {
+      "name": "productCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "quantity",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    }
+  ],
+  "FarmCartDto": [
+    {
+      "name": "farmCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "farmName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "totalPrice",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "discountAmount",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "imageUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "province",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "county",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "items",
+      "type": "json",
+      "required": false,
+      "csType": "List<CartItemDto>"
+    }
+  ],
+  "UpdateCartItemDto": [
+    {
+      "name": "cartId",
+      "type": "text",
+      "required": true,
+      "csType": "Guid"
+    },
+    {
+      "name": "itemCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "quantity",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    }
+  ],
+  "FarmListDto": [
+    {
+      "name": "farmCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "farmName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "farmImageUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "userCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "userFullName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "userImageUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "UploadFarmImageDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "file",
+      "type": "file",
+      "required": true,
+      "csType": "IFormFile"
+    }
+  ],
+  "FarmDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "ownerCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "address",
+      "type": "json",
+      "required": false,
+      "csType": "AddressDto?"
+    },
+    {
+      "name": "capacity",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "minPurchase",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "imageUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "GetMyFarmDto": [
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "addressCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    }
+  ],
+  "FarmFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "addressCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "userCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "FarmCreateDto": [
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "address",
+      "type": "json",
+      "required": false,
+      "csType": "AddressCreateDto?"
+    },
+    {
+      "name": "capacity",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "minPurchase",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "image",
+      "type": "file",
+      "required": false,
+      "csType": "IFormFile?"
+    }
+  ],
+  "FarmUpdateDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "address",
+      "type": "json",
+      "required": false,
+      "csType": "AddressUpdateDto?"
+    },
+    {
+      "name": "capacity",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "minPurchase",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    }
+  ],
+  "MyFarmlistDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "capacity",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "provinceName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "countyName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "farmImageUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "firstProductName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "AuctionBidFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "auctionCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "minBidAmount",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "maxBidAmount",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "userCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "AuctionBidDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "bidAmount",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    }
+  ],
+  "AuctionBidUpdateDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "bidAmount",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    }
+  ],
+  "AuctionBidCreateDto": [
+    {
+      "name": "auctionCode",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 10
+    },
+    {
+      "name": "bidAmount",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    }
+  ],
+  "AuctionFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "productCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "winnerCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "startDateFrom",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "startDateTo",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "endDateFrom",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "endDateTo",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "minStartingPrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "maxStartingPrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    }
+  ],
+  "AuctionCreateDto": [
+    {
+      "name": "agriculturalProductCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "startDate",
+      "type": "date",
+      "required": true,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "endDate",
+      "type": "date",
+      "required": true,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "startingPrice",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    }
+  ],
+  "AuctionDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "agriculturalProductCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "startDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "endDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "startingPrice",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "currentPrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "winnerCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "bids",
+      "type": "json",
+      "required": false,
+      "csType": "List<AuctionBidDto>"
+    }
+  ],
+  "AuctionUpdateDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "winnerCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "ProfileResponseDto": [
+    {
+      "name": "isGuest",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    },
+    {
+      "name": "cartId",
+      "type": "text",
+      "required": false,
+      "csType": "Guid?"
+    },
+    {
+      "name": "user",
+      "type": "json",
+      "required": false,
+      "csType": "UserDto?"
+    }
+  ],
+  "RequestPhoneCodeDto": [
+    {
+      "name": "phoneNumber",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "purpose",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "fName",
+      "type": "text",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 80
+    },
+    {
+      "name": "lName",
+      "type": "text",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 150
+    }
+  ],
+  "UserDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "fName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "lName",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "email",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "userName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "isEmailConfirmed",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    },
+    {
+      "name": "roleCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "roleName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "phoneNumber",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "updatedAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "profileImageUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "UserFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "fName",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "lName",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "userName",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "email",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "phoneNumber",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "roleCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "VerifyPhoneCodeDto": [
+    {
+      "name": "challengeCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    }
+  ],
+  "CurrentUserRoleDto": [
+    {
+      "name": "roleName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "roleCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "roleNames",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    },
+    {
+      "name": "roleCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    }
+  ],
+  "ResetPasswordDto": [
+    {
+      "name": "resetCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "newPassword",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "ChangeProfilePhotoDto": [
+    {
+      "name": "file",
+      "type": "file",
+      "required": true,
+      "csType": "IFormFile"
+    }
+  ],
+  "ChangePasswordDto": [
+    {
+      "name": "currentPassword",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "newPassword",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    }
+  ],
+  "LoginDto": [
+    {
+      "name": "username",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "password",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "RegisterUserDto": [
+    {
+      "name": "userName",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 50
+    },
+    {
+      "name": "password",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "fName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "lName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "ResetPasswordRequestDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "PhoneCodeResponseDto": [
+    {
+      "name": "challengeCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "expiresAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "testCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "UpdateProfileDto": [
+    {
+      "name": "fName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "lName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "email",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "phoneNumber",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "VerifyEmailDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    }
+  ],
+  "ChangeUsernameDto": [
+    {
+      "name": "currentUsername",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "newUsername",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 50
+    },
+    {
+      "name": "password",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    }
+  ],
+  "UpdateUserRolesDto": [
+    {
+      "name": "roleCodes",
+      "type": "json",
+      "required": true,
+      "csType": "List<string>"
+    }
+  ],
+  "WarehouseInventoryDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "warehouseCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "entityCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "entityWarehouse",
+      "type": "enum",
+      "required": true,
+      "csType": "EntityWarehouseInventory",
+      "options": [
+        "AgriculturalProduct",
+        "Product"
+      ]
+    },
+    {
+      "name": "quantity",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "lastRestockDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "updatedAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    }
+  ],
+  "WarehouseInventoryUpdateDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "quantity",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "lastRestockDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    }
+  ],
+  "WarehouseInventoryFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "warehouseCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "entityCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "entityWarehouse",
+      "type": "enum",
+      "required": false,
+      "csType": "EntityWarehouseInventory?",
+      "options": [
+        "AgriculturalProduct",
+        "Product"
+      ]
+    },
+    {
+      "name": "minQuantity",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "maxQuantity",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "lastRestockFrom",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "lastRestockTo",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    }
+  ],
+  "WarehouseInventoryCreateDto": [
+    {
+      "name": "warehouseCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "entityCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "entityWarehouse",
+      "type": "enum",
+      "required": true,
+      "csType": "EntityWarehouseInventory",
+      "options": [
+        "AgriculturalProduct",
+        "Product"
+      ]
+    },
+    {
+      "name": "quantity",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "lastRestockDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    }
+  ],
+  "DepositWalletDto": [
+    {
+      "name": "amount",
+      "type": "number",
+      "required": true,
+      "csType": "decimal",
+      "min": 1000.0,
+      "max": 1000000000.0
+    },
+    {
+      "name": "redirectUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "DepositResultDto": [
+    {
+      "name": "transactionId",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "paymentUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "newBalance",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    }
+  ],
+  "WalletDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "balance",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "heldAmount",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    }
+  ],
+  "AgriculturalProductDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "retailPrice",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "wholesalePrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "stock",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "greenhouseCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "slug",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "metaTitle",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "metaDescription",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "metaKeywords",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "dailyProductionCapacity",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "categoryCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    }
+  ],
+  "AgriculturalProductDetailDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "retailPrice",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "wholesalePrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "stock",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "farmCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "slug",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "primaryImageUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "dailyProductionCapacity",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "metaTitle",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "metaDescription",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "metaKeywords",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "categoryCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    },
+    {
+      "name": "imageUrls",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>?"
+    }
+  ],
+  "AgriculturalProductFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "farmCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "minPrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "maxPrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "minStock",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "maxStock",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "categoryCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>?"
+    }
+  ],
+  "AgriculturalProductCreateDto": [
+    {
+      "name": "name",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 255
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string",
+      "maxLength": 1000
+    },
+    {
+      "name": "farmCode",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "maxLength": 10
+    },
+    {
+      "name": "retailPrice",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "wholesalePrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "stock",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "dailyProductionCapacity",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "slug",
+      "type": "text",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 255
+    },
+    {
+      "name": "metaTitle",
+      "type": "text",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 255
+    },
+    {
+      "name": "metaDescription",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 500
+    },
+    {
+      "name": "metaKeywords",
+      "type": "text",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 255
+    },
+    {
+      "name": "categoryCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    },
+    {
+      "name": "images",
+      "type": "files",
+      "required": false,
+      "csType": "List<IFormFile>?"
+    }
+  ],
+  "AgriculturalProductSimilarFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "productCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "SetPrimaryProductImageDto": [
+    {
+      "name": "fileCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    }
+  ],
+  "AgriculturalProductListItemDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "retailPrice",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "wholesalePrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "stock",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "farmCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "slug",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "primaryImageUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "AgriculturalProductUpdateDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 255
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string",
+      "maxLength": 1000
+    },
+    {
+      "name": "greenhouseCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "retailPrice",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "wholesalePrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "stock",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "dailyProductionCapacity",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "slug",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "maxLength": 255
+    },
+    {
+      "name": "metaTitle",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "maxLength": 255
+    },
+    {
+      "name": "metaDescription",
+      "type": "textarea",
+      "required": false,
+      "csType": "string",
+      "maxLength": 500
+    },
+    {
+      "name": "metaKeywords",
+      "type": "text",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 255
+    },
+    {
+      "name": "categoryCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    }
+  ],
+  "AgriculturalProductSimilarDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "retailPrice",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "wholesalePrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "primaryImageUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string",
+      "default": "/placeholder.svg"
+    }
+  ],
+  "AddProductImagesDto": [
+    {
+      "name": "productCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "files",
+      "type": "files",
+      "required": true,
+      "csType": "List<IFormFile>"
+    }
+  ],
+  "QualityAssessmentUpdateDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "expertCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "qualityDescription",
+      "type": "textarea",
+      "required": true,
+      "csType": "string",
+      "maxLength": 1000
+    },
+    {
+      "name": "qualityGrade",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 50
+    },
+    {
+      "name": "suggestedPrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "assessmentDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    }
+  ],
+  "QualityAssessmentRequestDto": [
+    {
+      "name": "agriculturalProductCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "quantity",
+      "type": "number",
+      "required": true,
+      "csType": "decimal",
+      "min": 0.01,
+      "max": 100000000.0
+    },
+    {
+      "name": "requestDescription",
+      "type": "textarea",
+      "required": true,
+      "csType": "string",
+      "maxLength": 700
+    }
+  ],
+  "QualityAssessmentCreateDto": [
+    {
+      "name": "agriculturalProductCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "expertCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "qualityDescription",
+      "type": "textarea",
+      "required": true,
+      "csType": "string",
+      "maxLength": 1000
+    },
+    {
+      "name": "qualityGrade",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 50
+    },
+    {
+      "name": "suggestedPrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "assessmentDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    }
+  ],
+  "QualityAssessmentFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "agriculturalProductCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "expertCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "qualityGrade",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "minSuggestedPrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "maxSuggestedPrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "startAssessmentDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "endAssessmentDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    }
+  ],
+  "AddExpertDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "expertCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    }
+  ],
+  "QualityAssessmentDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "agriculturalProductCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "expertCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "qualityDescription",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "qualityGrade",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "suggestedPrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "assessmentDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    }
+  ],
+  "AgriculturalOrderItemFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "orderCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "productCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "minQuantity",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "maxQuantity",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "minPrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "maxPrice",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    }
+  ],
+  "AgriculturalOrderItemDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "agriculturalProductCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "productName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "productSlug",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "lineTotal",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "quantity",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "price",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    }
+  ],
+  "AgriculturalOrderItemCreateDto": [
+    {
+      "name": "agriculturalProductCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "quantity",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    }
+  ],
+  "AgriculturalOrderItemUpdateDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "agriculturalProductCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "quantity",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "price",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    }
+  ],
+  "OrderItemDto": [
+    {
+      "name": "orderItemCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "productCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "productName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "quantity",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "price",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "priceType",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "orderCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    }
+  ],
+  "OrderItemUpdateDto": [
+    {
+      "name": "orderItemCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "productCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "quantity",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    }
+  ],
+  "OrderItemFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "orderCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "productCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "searchTerm",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "OrderItemCreateDto": [
+    {
+      "name": "productCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "orderCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "quantity",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    }
+  ],
+  "CommentTreeFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "entityCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "entityComment",
+      "type": "enum",
+      "required": false,
+      "csType": "EntityComment?",
+      "options": [
+        "Product",
+        "AgriculturalProduct",
+        "Article",
+        "Auction",
+        "ServiceRequest"
+      ]
+    }
+  ],
+  "CommentFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "entityCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "entityComment",
+      "type": "enum",
+      "required": false,
+      "csType": "EntityComment?",
+      "options": [
+        "Product",
+        "AgriculturalProduct",
+        "Article",
+        "Auction",
+        "ServiceRequest"
+      ]
+    },
+    {
+      "name": "minRating",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "maxRating",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "startDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "endDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    }
+  ],
+  "CommentUpdateDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 10
+    },
+    {
+      "name": "content",
+      "type": "textarea",
+      "required": true,
+      "csType": "string",
+      "maxLength": 1000
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 10
+    },
+    {
+      "name": "rating",
+      "type": "number",
+      "required": false,
+      "csType": "int?",
+      "min": 1.0,
+      "max": 5.0
+    }
+  ],
+  "CommentDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "content",
+      "type": "textarea",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "userCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "rating",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "parentId",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "parentCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "entityCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "statusCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "entityComment",
+      "type": "enum",
+      "required": true,
+      "csType": "EntityComment",
+      "options": [
+        "Product",
+        "AgriculturalProduct",
+        "Article",
+        "Auction",
+        "ServiceRequest"
+      ]
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "subComments",
+      "type": "json",
+      "required": false,
+      "csType": "List<CommentDto>"
+    }
+  ],
+  "CommentCreateDto": [
+    {
+      "name": "content",
+      "type": "textarea",
+      "required": true,
+      "csType": "string",
+      "maxLength": 1000
+    },
+    {
+      "name": "rating",
+      "type": "number",
+      "required": false,
+      "csType": "int?",
+      "min": 1.0,
+      "max": 5.0
+    },
+    {
+      "name": "entityCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "parentCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "entityComment",
+      "type": "enum",
+      "required": true,
+      "csType": "EntityComment",
+      "options": [
+        "Product",
+        "AgriculturalProduct",
+        "Article",
+        "Auction",
+        "ServiceRequest"
+      ]
+    }
+  ],
+  "AddressDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "userCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "street",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "postalCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "latitude",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    },
+    {
+      "name": "longitude",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    },
+    {
+      "name": "isDefault",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    },
+    {
+      "name": "provinceCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "provinceName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "countyCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "countyName",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "cityCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "cityName",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "villageCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "villageName",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "updatedAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    }
+  ],
+  "AddressUpdateDto": [
+    {
+      "name": "addressCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "street",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 500
+    },
+    {
+      "name": "postalCode",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 20
+    },
+    {
+      "name": "latitude",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    },
+    {
+      "name": "longitude",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    },
+    {
+      "name": "isDefault",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    },
+    {
+      "name": "provinceCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "countyCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "cityCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "villageCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "AddressFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "postalCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "searchTerm",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "isDefault",
+      "type": "boolean",
+      "required": false,
+      "csType": "bool?"
+    }
+  ],
+  "AddressCreateDto": [
+    {
+      "name": "street",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 500
+    },
+    {
+      "name": "postalCode",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 20
+    },
+    {
+      "name": "latitude",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    },
+    {
+      "name": "longitude",
+      "type": "number",
+      "required": false,
+      "csType": "double?"
+    },
+    {
+      "name": "isDefault",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": false
+    },
+    {
+      "name": "provinceCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "countyCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "cityCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "villageCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "WarehouseCreateDto": [
+    {
+      "name": "name",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 100
+    },
+    {
+      "name": "address",
+      "type": "text",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 500
+    },
+    {
+      "name": "farmerCode",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    }
+  ],
+  "WarehouseFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "farmerCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "WarehouseUpdateDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": true,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": true,
+      "csType": "string",
+      "maxLength": 100
+    },
+    {
+      "name": "address",
+      "type": "text",
+      "required": false,
+      "csType": "string?",
+      "maxLength": 500
+    }
+  ],
+  "WarehouseDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "address",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "farmerCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset"
+    },
+    {
+      "name": "updatedAt",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    }
+  ],
+  "DiscountFilterDto": [
+    {
+      "name": "pageNumber",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 1
+    },
+    {
+      "name": "pageSize",
+      "type": "number",
+      "required": true,
+      "csType": "int",
+      "default": 20
+    },
+    {
+      "name": "sortColumn",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "sortDescending",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool",
+      "default": true
+    },
+    {
+      "name": "searchTerm",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "categoryCodes",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "discountType",
+      "type": "enum",
+      "required": false,
+      "csType": "DiscountType?",
+      "options": [
+        "Percentage",
+        "Fixed"
+      ]
+    },
+    {
+      "name": "isActive",
+      "type": "boolean",
+      "required": false,
+      "csType": "bool?"
+    }
+  ],
+  "DiscountDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "discountType",
+      "type": "enum",
+      "required": true,
+      "csType": "DiscountType",
+      "options": [
+        "Percentage",
+        "Fixed"
+      ]
+    },
+    {
+      "name": "value",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "startDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "endDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "maxUsage",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "usageCount",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "isActive",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    },
+    {
+      "name": "maxDiscountAmount",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "userCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>?"
+    },
+    {
+      "name": "productCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>?"
+    },
+    {
+      "name": "categoryCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>?"
+    },
+    {
+      "name": "rootCategoryCodes",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "rootCategoryNames",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "farmCode",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "DiscountCreateDto": [
+    {
+      "name": "discountType",
+      "type": "enum",
+      "required": true,
+      "csType": "DiscountType",
+      "options": [
+        "Percentage",
+        "Fixed"
+      ]
+    },
+    {
+      "name": "value",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "startDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "endDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "maxUsage",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "maxDiscountAmount",
+      "type": "number",
+      "required": false,
+      "csType": "decimal?"
+    },
+    {
+      "name": "isActive",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    },
+    {
+      "name": "farmCode",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "userCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    },
+    {
+      "name": "productCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    },
+    {
+      "name": "categoryCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    }
+  ],
+  "DiscountUpdateDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "discountType",
+      "type": "enum",
+      "required": true,
+      "csType": "DiscountType",
+      "options": [
+        "Percentage",
+        "Fixed"
+      ]
+    },
+    {
+      "name": "value",
+      "type": "number",
+      "required": true,
+      "csType": "decimal"
+    },
+    {
+      "name": "startDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "endDate",
+      "type": "date",
+      "required": false,
+      "csType": "DateTimeOffset?"
+    },
+    {
+      "name": "maxUsage",
+      "type": "number",
+      "required": false,
+      "csType": "int?"
+    },
+    {
+      "name": "isActive",
+      "type": "boolean",
+      "required": true,
+      "csType": "bool"
+    },
+    {
+      "name": "usageCount",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "userCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    },
+    {
+      "name": "productCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    },
+    {
+      "name": "categoryCodes",
+      "type": "json",
+      "required": false,
+      "csType": "List<string>"
+    }
+  ],
+  "SliderDto": [
+    {
+      "name": "code",
+      "type": "text",
+      "required": false,
+      "csType": "string"
+    },
+    {
+      "name": "title",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "linkUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "order",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "imageUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    }
+  ],
+  "CreateSliderDto": [
+    {
+      "name": "title",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "linkUrl",
+      "type": "text",
+      "required": false,
+      "csType": "string?"
+    },
+    {
+      "name": "order",
+      "type": "number",
+      "required": true,
+      "csType": "int"
+    },
+    {
+      "name": "image",
+      "type": "file",
+      "required": false,
+      "csType": "IFormFile"
+    }
+  ]
+}

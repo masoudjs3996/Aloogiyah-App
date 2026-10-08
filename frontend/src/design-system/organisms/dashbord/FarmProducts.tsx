@@ -5,6 +5,7 @@ import ProductCard from "@/design-system/molecules/dashbord/FarmProductCard";
 import { useProducts } from "@/hooks/queries/useProduct";
 import { IAgriculturalProduct } from "@/shared/types/product";
 import { getImageUrl } from "@/shared/utils/getImageUrl";
+import ProductPrice from "@/design-system/molecules/public/ProductPrice";
 
 import {
   ChevronDown,
@@ -23,94 +24,14 @@ import {
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-const MOCK_PRODUCTS = [
-  {
-    code: "mock-tomato",
-    name: "گوجه فرنگی",
-    category: "سبزیجات",
-    retailPrice: 40000,
-    primaryImageUrl:
-      "https://images.unsplash.com/photo-1546094096-0df4bcaaa337?auto=format&fit=crop&w=800&q=80",
-    isActive: true,
-  },
-  {
-    code: "mock-cucumber",
-    name: "خیار سبز",
-    category: "سبزیجات",
-    retailPrice: 20000,
-    primaryImageUrl:
-      "https://images.unsplash.com/photo-1449300079323-02e209d9d3a6?auto=format&fit=crop&w=800&q=80",
-    isActive: true,
-  },
-  {
-    code: "mock-potato",
-    name: "سیب زمینی",
-    category: "سبزیجات",
-    retailPrice: 18000,
-    primaryImageUrl:
-      "https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=800&q=80",
-    isActive: true,
-  },
-  {
-    code: "mock-lettuce",
-    name: "کاهو تازه",
-    category: "سبزیجات",
-    retailPrice: 15000,
-    primaryImageUrl:
-      "https://images.unsplash.com/photo-1622205313162-be1d5712a43c?auto=format&fit=crop&w=800&q=80",
-    isActive: true,
-  },
-  {
-    code: "mock-orange",
-    name: "پرتقال",
-    category: "میوه‌ها",
-    retailPrice: 30000,
-    primaryImageUrl:
-      "https://images.unsplash.com/photo-1547514701-42782101795e?auto=format&fit=crop&w=800&q=80",
-    isActive: true,
-  },
-  {
-    code: "mock-apple",
-    name: "سیب قرمز",
-    category: "میوه‌ها",
-    retailPrice: 35000,
-    primaryImageUrl:
-      "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=800&q=80",
-    isActive: true,
-  },
-  {
-    code: "mock-strawberry",
-    name: "توت فرنگی",
-    category: "میوه‌ها",
-    retailPrice: 38000,
-    primaryImageUrl:
-      "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?auto=format&fit=crop&w=800&q=80",
-    isActive: true,
-  },
-  {
-    code: "mock-basil",
-    name: "ریحان تازه",
-    category: "سبزیجات",
-    retailPrice: 12000,
-    primaryImageUrl:
-      "https://images.unsplash.com/photo-1618375569909-3c8616cf7733?auto=format&fit=crop&w=800&q=80",
-    isActive: true,
-  },
-];
-
 type ProductItem = {
   code: string;
   name: string;
   category: string;
   retailPrice: number;
+  wholesalePrice?: number;
   primaryImageUrl?: string;
   isActive: boolean;
-};
-
-const formatPrice = (price?: number) => {
-  if (!price) return "۰ تومان";
-
-  return `${new Intl.NumberFormat("fa-IR").format(price)} تومان`;
 };
 
 const FarmProducts = ({ fermCode }: { fermCode: string }) => {
@@ -124,9 +45,6 @@ const FarmProducts = ({ fermCode }: { fermCode: string }) => {
   const [view, setView] = useState<"grid" | "list">("grid");
   const [page, setPage] = useState(1);
 
-  /**
-   * محصولات API
-   */
   const dynamicProducts: ProductItem[] = useMemo(() => {
     if (!products) return [];
 
@@ -135,21 +53,14 @@ const FarmProducts = ({ fermCode }: { fermCode: string }) => {
       name: product.name,
       category: "محصولات مزرعه",
       retailPrice: product.retailPrice,
+      wholesalePrice: product.wholesalePrice,
       primaryImageUrl: product.primaryImageUrl,
       isActive: true,
     }));
   }, [products]);
 
-  /**
-   * ترکیب Mock + API
-   */
-  const allProducts = useMemo<ProductItem[]>(() => {
-    return [...MOCK_PRODUCTS, ...dynamicProducts];
-  }, [dynamicProducts]);
+  const allProducts = dynamicProducts;
 
-  /**
-   * دسته‌بندی‌ها
-   */
   const categories = useMemo(() => {
     const uniqueCategories = Array.from(
       new Set(allProducts.map((product) => product.category)),
@@ -158,9 +69,6 @@ const FarmProducts = ({ fermCode }: { fermCode: string }) => {
     return ["همه دسته‌ها", ...uniqueCategories];
   }, [allProducts]);
 
-  /**
-   * Search + Filter + Sort
-   */
   const filteredProducts = useMemo(() => {
     let result = [...allProducts];
 
@@ -385,8 +293,15 @@ const FarmProducts = ({ fermCode }: { fermCode: string }) => {
           {Array.from({ length: 8 }).map((_, index) => (
             <div
               key={index}
-              className="h-[290px] animate-pulse rounded-2xl border border-gray-100 bg-white"
-            />
+              className="overflow-hidden rounded-2xl border border-gray-100 bg-white p-3"
+            >
+              <div className="h-36 animate-pulse rounded-xl bg-gray-200 sm:h-44" />
+              <div className="space-y-3 p-2 pt-4">
+                <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200" />
+                <div className="h-3 w-1/2 animate-pulse rounded bg-gray-100" />
+                <div className="h-10 w-full animate-pulse rounded-lg bg-gray-100" />
+              </div>
+            </div>
           ))}
         </div>
       ) : filteredProducts.length === 0 ? (
@@ -514,8 +429,8 @@ const FarmProducts = ({ fermCode }: { fermCode: string }) => {
                     <span>{product.category}</span>
                   </div>
 
-                  <div className="mt-3 text-base font-bold text-green-600">
-                    {formatPrice(product.retailPrice)}
+                  <div className="mt-3 text-base">
+                    <ProductPrice retailPrice={product.retailPrice} wholesalePrice={product.wholesalePrice} compact />
                   </div>
                 </Link>
 
@@ -541,7 +456,7 @@ const FarmProducts = ({ fermCode }: { fermCode: string }) => {
                   </button>
 
                   <Link
-                    href={`/dashboard/farm/myFarms/${fermCode}/farmProducts/${product.code}`}
+                    href={`/dashboard/farm/myFarms/${encodeURIComponent(fermCode)}/farmProducts/${encodeURIComponent(product.code)}/edit`}
                     className="
                       flex
                       h-9
@@ -615,12 +530,12 @@ const FarmProducts = ({ fermCode }: { fermCode: string }) => {
                 <p className="mt-1 text-xs text-gray-400">{product.category}</p>
               </div>
 
-              <div className="font-bold text-green-600">
-                {formatPrice(product.retailPrice)}
+              <div className="text-base">
+                <ProductPrice retailPrice={product.retailPrice} wholesalePrice={product.wholesalePrice} compact />
               </div>
 
               <Link
-                href={`/dashboard/farm/myFarms/${fermCode}/farmProducts/${product.code}`}
+                href={`/dashboard/farm/myFarms/${encodeURIComponent(fermCode)}/farmProducts/${encodeURIComponent(product.code)}/edit`}
                 className="rounded-lg p-2 text-green-600 hover:bg-green-50"
               >
                 <Pencil size={18} />
@@ -726,43 +641,3 @@ const FarmProducts = ({ fermCode }: { fermCode: string }) => {
 };
 
 export default FarmProducts;
-
-// "use client";
-// import Button from "@/design-system/atoms/Button";
-// import ProductCard from "@/design-system/molecules/dashbord/FarmProductCard";
-// import { useProducts } from "@/hooks/queries/useProduct";
-// import { IAgriculturalProduct } from "@/shared/types/product";
-// import { getImageUrl } from "@/shared/utils/getImageUrl";
-// import Link from "next/link";
-// const FarmProducts = ({ fermCode }: { fermCode: string }) => {
-//   const { products, isLoading } = useProducts({ farmCode: fermCode });
-
-//   return (
-//     <div className="flex flex-col justify-between h-full">
-//       <div className="flex flex-col gap-4 mt-4">
-//         {products &&
-//           products.map((product: IAgriculturalProduct) => (
-//             <Link
-//               href={`/dashboard/farm/myFarms/${fermCode}/farmProducts/${product?.code}`}
-//               key={product.code}
-//             >
-//               <ProductCard
-//                 key={product.code}
-//                 name={product?.name}
-//                 img={getImageUrl(product?.primaryImageUrl)}
-//                 price={product?.retailPrice}
-//               />
-//             </Link>
-//           ))}
-//       </div>
-
-//       <Link
-//         href={`/dashboard/farm/myFarms/${fermCode}/farmProducts/addFarmProducts`}
-//       >
-//         <Button variant="success">+ ثبت محصول جدید</Button>
-//       </Link>
-//     </div>
-//   );
-// };
-
-// export default FarmProducts;

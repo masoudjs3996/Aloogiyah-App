@@ -24,7 +24,7 @@ public class AuctionBidController : ControllerBase
 
 
     #region CreateAuctionBid
-    [Authorize]
+    [Authorize(Policy = "NotGuest")]
     [HttpPost("CreateAuctionBid")]
     public async Task<IActionResult> CreateAuctionBid([FromBody] AuctionBidCreateDto createDto)
     {
@@ -43,7 +43,7 @@ public class AuctionBidController : ControllerBase
     #endregion
 
     #region GetByFilter
-    [Authorize]
+    [Authorize(Policy = "NotGuest")]
     [HttpGet("GetByFilter")]
     public async Task<IActionResult> GetByFilterAsync([FromQuery] AuctionBidFilterDto filterDto)
     {
@@ -62,7 +62,7 @@ public class AuctionBidController : ControllerBase
     #endregion
 
     #region GetByCode
-    [Authorize]
+    [Authorize(Policy = "NotGuest")]
     [HttpGet("GetByCode")]
     public async Task<IActionResult> GetByCodeAsync([FromQuery] string code)
     {
@@ -80,7 +80,7 @@ public class AuctionBidController : ControllerBase
     #endregion
 
     #region UpdateAuctionBid
-    [Authorize]
+    [Authorize(Policy = "NotGuest")]
     [HttpPut("UpdateAuctionBid")]
     public async Task<IActionResult> UpdateAuctionBid(AuctionBidUpdateDto updateDto)
     {
@@ -99,7 +99,7 @@ public class AuctionBidController : ControllerBase
     #endregion
 
     #region DeleteAuctionBid
-    [Authorize(Roles ="Admin,Maneger")]
+    [Authorize(Roles ="Admin,Manager")]
     [HttpDelete("DeleteAuctionBid")]
     public async Task<IActionResult> DeleteAuctionBid([FromQuery] string code)
     {

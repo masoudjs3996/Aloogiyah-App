@@ -4,6 +4,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { Sidebar } from "../organisms/dashbord/Sidebar";
 import { useUser } from "@/hooks/queries/useUser";
 import Header from "../organisms/dashbord/Header";
+import ChatRealtimeProvider from "@/shared/providers/ChatRealtimeProvider";
 
 interface DashboardTemplateProps {
   children: ReactNode;
@@ -43,10 +44,11 @@ const DashboardTemplate = ({ children }: DashboardTemplateProps) => {
   }, [mobileOpen]);
 
   return (
-    <div className="flex h-screen justify-end py-2 gap-x-10">
+    <div className="flex h-dvh min-h-0 justify-end gap-x-3 overflow-hidden bg-slate-50 p-2 md:gap-x-5">
       {roulData?.data?.roleName && (
         <Sidebar
           role={roulData?.data?.roleName}
+          roles={roulData?.data?.roleNames}
           collapsed={collapsed}
           isMobile={isMobile}
           mobileOpen={mobileOpen}
@@ -54,7 +56,7 @@ const DashboardTemplate = ({ children }: DashboardTemplateProps) => {
         />
       )}
 
-      <div className="flex flex-col w-full min-w-0">
+      <div className="flex min-h-0 w-full min-w-0 flex-col">
         <Header
           setCollapsed={setCollapsed}
           collapsed={collapsed}
@@ -62,7 +64,9 @@ const DashboardTemplate = ({ children }: DashboardTemplateProps) => {
           mobileOpen={mobileOpen}
           setMobileOpen={setMobileOpen}
         />
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto">{children}</main>
+        <main className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-4 md:p-8">
+          <ChatRealtimeProvider>{children}</ChatRealtimeProvider>
+        </main>
       </div>
     </div>
   );

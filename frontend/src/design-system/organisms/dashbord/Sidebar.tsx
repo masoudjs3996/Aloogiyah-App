@@ -8,6 +8,7 @@ import { FaLeaf } from "react-icons/fa";
 
 interface SidebarProps {
   role: string;
+  roles?: string[];
   collapsed: boolean;
   isMobile: boolean;
   mobileOpen: boolean;
@@ -16,13 +17,14 @@ interface SidebarProps {
 
 export const Sidebar = ({
   role,
+  roles,
   collapsed,
   isMobile,
   mobileOpen,
   setMobileOpen,
 }: SidebarProps) => {
   const filteredMenu = dashboardMenu.filter((menu) =>
-    menu.roles.includes(role),
+    menu.roles.some((menuRole) => roles?.includes(menuRole) ?? menuRole === role),
   );
 
   if (isMobile) {
@@ -46,7 +48,7 @@ export const Sidebar = ({
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
-              className="fixed top-0 right-0 h-full w-64 bg-white shadow-2xl z-50 flex flex-col p-4"
+              className="fixed top-0 right-0 h-full w-64 overflow-y-auto bg-white shadow-2xl z-50 flex flex-col p-4"
             >
               {/* Close button */}
               <div className="flex justify-between items-center mb-6">
@@ -83,9 +85,9 @@ export const Sidebar = ({
 
   return (
     <motion.aside
-      animate={{ width: collapsed ? 60 : 160 }}
+      animate={{ width: collapsed ? 68 : 210 }}
       transition={{ duration: 0.3 }}
-      className="text-primary-700 flex flex-col p-2 overflow-hidden shrink-0 bg-white rounded-xl"
+      className="text-primary-700 flex flex-col p-2 overflow-y-auto shrink-0 bg-white rounded-xl"
     >
       <nav className="flex flex-col gap-4 ">
         <div className="flex items-center gap-2">

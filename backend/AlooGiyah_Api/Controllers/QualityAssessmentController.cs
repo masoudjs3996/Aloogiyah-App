@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Application.Commons;
+using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.QualityAssessment;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Shared.Constants;
@@ -22,8 +22,16 @@ public class QualityAssessmentController : ControllerBase
     #endregion
 
 
+    [Authorize(Policy = "NotGuest")]
+    [HttpPost("Request")]
+    public async Task<IActionResult> Request([FromBody] QualityAssessmentRequestDto dto)
+    {
+        var result = await _qualityAssessmentService.RequestAsync(dto);
+        return Ok(new ApiResponse<object> { IsSuccess = true, Message = "درخواست تعیین کیفیت ثبت شد", Data = result });
+    }
+
     #region Create
-    [Authorize]
+    [Authorize(Roles = "Expert,Manager,Admin")]
     [HttpPost("Create")]
     public async Task<IActionResult> CreateQualityAssessment(QualityAssessmentCreateDto createDto)
     {
@@ -79,7 +87,7 @@ public class QualityAssessmentController : ControllerBase
     #endregion
 
     #region Update
-    [Authorize]
+    [Authorize(Roles = "Expert,Manager,Admin")]
     [HttpPut("Update")]
     public async Task<IActionResult> UpdateQualityAssessment(QualityAssessmentUpdateDto updateDto)
     {
@@ -98,7 +106,7 @@ public class QualityAssessmentController : ControllerBase
     #endregion
 
     #region Update
-    [Authorize]
+    [Authorize(Roles = "Manager,Admin")]
     [HttpPatch("AddExpert")]
     public async Task<IActionResult> AddExpert(AddExpertDto updateDto)
     {

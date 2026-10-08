@@ -17,9 +17,9 @@ const RewardsFilters = ({
   const { data } = useRewards();
   const [active, setActive] = useState<string>("all");
   const filteredRewards = useMemo(() => {
-    if (!categories) return [];
-    if (active === "all") return data?.data;
-    return data?.data?.filter((item) => item.rootCategoryCodes === active);
+    const rewards = data?.data ?? [];
+    if (active === "all") return rewards;
+    return rewards.filter((item) => item.rootCategoryCodes === active);
   }, [active, data]);
 
 
@@ -48,7 +48,7 @@ const RewardsFilters = ({
         </div>
 
         <div className="space-y-4">
-          {filteredRewards?.map((dis) => {
+          {filteredRewards.map((dis) => {
             const end = new Date(dis.endDate);
             const now = new Date();
             const daysLeft = Math.ceil(
@@ -56,17 +56,15 @@ const RewardsFilters = ({
             );
             const remainingUsage = dis.maxUsage - dis.usageCount;
             return (
-              <>
-                <DiscountCard
-                  key={dis.code}
-                  title={dis.description}
-                  daysLeft={daysLeft}
-                  remainingUsage={remainingUsage}
-                  code={dis.code}
-                  icon={<GiFlowerPot className="text-xl" />}
-                  bg="bg-pink-100 text-pink-700"
-                />
-              </>
+              <DiscountCard
+                key={dis.code}
+                title={dis.description}
+                daysLeft={daysLeft}
+                remainingUsage={remainingUsage}
+                code={dis.code}
+                icon={<GiFlowerPot className="text-xl" />}
+                bg="bg-pink-100 text-pink-700"
+              />
             );
           })}
         </div>

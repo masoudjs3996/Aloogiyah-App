@@ -8,6 +8,8 @@ public interface IAuthService
     Task<(string accessToken, RefreshToken refreshToken)> RegisterUserAsync(RegisterUserDto dto);
     Task<(string newAccessToken, RefreshToken newRefreshToken)> RefreshAccessTokenAsync(string refreshToken);
     Task<(string accessToken, RefreshToken refreshToken)> LoginUserAsync(LoginDto loginDto);
+    Task<PhoneCodeResponseDto> RequestPhoneCodeAsync(RequestPhoneCodeDto dto);
+    Task<(string accessToken, RefreshToken refreshToken, bool isNewUser)> VerifyPhoneCodeAsync(VerifyPhoneCodeDto dto);
     string GenerateAccessToken(User user);
     RefreshToken GenerateRefreshToken();
     string GenerateGuestToken();

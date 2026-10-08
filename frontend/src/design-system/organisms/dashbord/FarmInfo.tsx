@@ -24,7 +24,7 @@ const formatNumber = (value?: number | null) => {
 const FarmInfoSkeleton = () => {
   return (
     <div className="mx-auto w-full max-w-5xl animate-pulse overflow-hidden rounded-3xl bg-white shadow-sm">
-      <div className="h-80 bg-gray-200" />
+      <div className="h-52 bg-gray-200 sm:h-64 lg:h-80" />
 
       <div className="space-y-5 p-6 md:p-8">
         <div className="h-8 w-52 rounded-lg bg-gray-200" />

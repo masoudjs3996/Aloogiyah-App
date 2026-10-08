@@ -36,6 +36,9 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
             .HasColumnType("int")
             .HasAnnotation("CheckConstraint", "Rating BETWEEN 1 AND 5");
 
+        builder.Property(c => c.IsUniqueProductReview)
+            .HasDefaultValue(false);
+
         builder.HasOne(c => c.User)
             .WithMany(u => u.Comments)
             .HasForeignKey(c => c.UserId)
@@ -49,5 +52,9 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
 
         builder.HasIndex(c => new { c.EntityCode, c.EntityComment });
         builder.HasIndex(c => c.UserId);
+        builder.HasIndex(c => new { c.UserId, c.EntityCode })
+            .IsUnique()
+            .HasDatabaseName("IX_Comments_UserId_EntityCode_ProductReview")
+            .HasFilter("\"IsUniqueProductReview\" AND \"ParentCommentId\" IS NULL AND NOT \"IsDeleted\"");
     }
 }

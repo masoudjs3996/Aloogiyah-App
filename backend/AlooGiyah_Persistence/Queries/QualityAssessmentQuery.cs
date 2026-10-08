@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Application.DTOs.QualityAssessment;
+using AlooGiyah_Application.DTOs.QualityAssessment;
 using AlooGiyah_Domain.Pagination;
 using AlooGiyah_Application.Interfaces.Query;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
@@ -18,8 +18,9 @@ FROM "QualityAssessments" t LEFT JOIN "AgriculturalProducts" p ON p."Agricultura
     private QueryFilter BaseFilter()
     {
         var where = new QueryFilter();
-        
-        
+        var id = QueryAccess.UserId(_currentUser);
+        if (!QueryAccess.IsManager(_currentUser) && !_currentUser.Roles.Contains("Admin"))
+            where.Add("(t.\"QualityGrade\" <> 'PENDING' OR t.\"ApplicantId\"=@CurrentUserId OR t.\"ExpertId\"=@CurrentUserId)", "CurrentUserId", id);
         return where;
     }
     public Task<QualityAssessmentDto?> GetByCodeAsync(string code)

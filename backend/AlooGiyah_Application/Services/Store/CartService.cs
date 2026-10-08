@@ -1,4 +1,4 @@
-using AlooGiyah_Application.Interfaces.Query;
+﻿using AlooGiyah_Application.Interfaces.Query;
 using AlooGiyah_Application.DTOs.Cart;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Application.Interfaces.Service.Store;
@@ -140,9 +140,11 @@ public class CartService : ICartService
 
         await _unitOfWork.SaveChangesAsync();
 
-        _priceCalculator.CalculateCart(cart, CurrentRole);
 
-        return BuildCartDto(cart);
+        // Use the same read/pricing path as GET: all roles and discount relations
+        // must be evaluated identically after add, update and remove.
+        return await _readQuery.GetCartByIdAsync(cart.CartId)
+            ?? throw new NotFoundException("سبد خرید یافت نشد");
     }
 
 
@@ -159,11 +161,13 @@ public class CartService : ICartService
 
         item.Quantity = dto.Quantity;
 
-        _priceCalculator.CalculateCart(cart, CurrentRole);
 
         await _unitOfWork.SaveChangesAsync();
 
-        return BuildCartDto(cart);
+        // Use the same read/pricing path as GET: all roles and discount relations
+        // must be evaluated identically after add, update and remove.
+        return await _readQuery.GetCartByIdAsync(cart.CartId)
+            ?? throw new NotFoundException("سبد خرید یافت نشد");
     }
 
     public async Task<CartDto> RemoveCartItemAsync(RemoveCartItemDto dto)
@@ -177,11 +181,13 @@ public class CartService : ICartService
         cart.CartItems.Remove(item);
         await _cartItemRepo.DeleteAsync(item);
 
-        _priceCalculator.CalculateCart(cart, CurrentRole);
 
         await _unitOfWork.SaveChangesAsync();
 
-        return BuildCartDto(cart);
+        // Use the same read/pricing path as GET: all roles and discount relations
+        // must be evaluated identically after add, update and remove.
+        return await _readQuery.GetCartByIdAsync(cart.CartId)
+            ?? throw new NotFoundException("سبد خرید یافت نشد");
     }
 
     public async Task ClearCartAsync()

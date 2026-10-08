@@ -1,49 +1,23 @@
 "use client";
 
-import Button from "@/design-system/atoms/Button";
-import { BottomSheetModal } from "@/design-system/molecules/dashbord/BottomSheetModal";
 import { WalletSummary } from "@/design-system/molecules/dashbord/WalletSummary";
+import QueryState from "@/design-system/molecules/platform/QueryState";
 import { useWallet } from "@/hooks/queries/useWallet";
-import { useState } from "react";
 
 export default function WalletPage() {
-  const [open, setOpen] = useState(false);
-  const { data } = useWallet();
+  const { data, error, isLoading, refetch } = useWallet();
   return (
-    <div className="p-4 space-y-6">
-      <WalletSummary
-        balance={data?.data?.balance ?? 0}
-        pendingAmount={data?.data?.heldAmount ?? 0}
-      />
-
-      <Button onClick={() => setOpen(true)}>افزایش موجودی</Button>
-
-      <BottomSheetModal
-        isOpen={open}
-        onClose={() => setOpen(false)}
-        title="پرداخت به صورت آنلاین"
-      >
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-2">
-            {["50,000", "70,000", "90,000"].map((item) => (
-              <button
-                key={item}
-                className="px-4 py-2 rounded-xl border text-gray-700"
-              >
-                {item} ریال
-              </button>
-            ))}
-          </div>
-          <input
-            className="w-full p-3 border rounded-xl text-right"
-            placeholder="مبلغ دلخواه"
-          />
-
-          <Button onClick={() => console.log("submit")}>
-            تایید مبلغ شارژ حساب
-          </Button>
-        </div>
-      </BottomSheetModal>
+    <div className="space-y-6 p-4">
+      <QueryState loading={isLoading} error={error} retry={() => refetch()}>
+        {data?.data && <WalletSummary
+          balance={data.data.balance}
+          pendingAmount={data.data.heldAmount}
+        />}
+      </QueryState>
+      <p className="rounded-2xl border border-slate-200 bg-white p-5 text-sm leading-7 text-slate-600">
+        شارژ آنلاین کیف پول هنوز فعال نشده است. می‌توانید با موجودی فعلی خرید کنید.
+        وجه خرید تا تأیید فروشنده رزرو می‌شود؛ در صورت رد یا پایان مهلت تأیید، رزرو آزاد می‌شود.
+      </p>
     </div>
   );
 }

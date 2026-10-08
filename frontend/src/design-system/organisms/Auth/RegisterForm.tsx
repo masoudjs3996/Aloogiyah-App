@@ -10,6 +10,8 @@ import { useRouter } from "next/navigation";
 import { TextField } from "@/design-system/molecules/public";
 import Button from "@/design-system/atoms/Button";
 import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import PhoneOtpForm from "./PhoneOtpForm";
 const schema = yup
   .object({
     firstName: yup.string().required("نام الزامی است"),
@@ -30,6 +32,7 @@ const schema = yup
   .required();
 
 const RegisterForm = () => {
+  const [method, setMethod] = useState<"password" | "phone">("password");
   const { registeruser } = useRegisterUser();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -51,22 +54,23 @@ const RegisterForm = () => {
     registeruser.mutate(data, {
       onSuccess: (date) => {
         if (date?.data?.token && date?.data?.refreshToken) {
-          queryClient.invalidateQueries({
-            queryKey: ["userProfile"],
-          });
+          queryClient.clear();
           Cookies.remove("guestToken");
           Cookies.set("token", date.data.token, {
             expires: 7,
-            secure: true,
-            sameSite: "strict",
+            secure: window.location.protocol === "https:",
+            sameSite: "lax",
           });
           Cookies.set("refreshToken", date.data.refreshToken, {
             expires: 30,
-            secure: true,
-            sameSite: "strict",
+            secure: window.location.protocol === "https:",
+            sameSite: "lax",
           });
           toast.success(date?.message || "فرم با موفقیت ارسال شد ");
-          router.push("/");
+          queryClient.invalidateQueries();
+        const next = new URLSearchParams(window.location.search).get("next");
+        router.push(next && /^\/dashboard(?:\/|$)/.test(next) && !next.includes("\\") ? next : "/dashboard");
+        router.refresh();
         }
       },
       onError: (err) => {
@@ -77,6 +81,12 @@ const RegisterForm = () => {
   };
 
   return (
+    <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-2 rounded-xl bg-gray-100 p-1" role="tablist" aria-label="روش ثبت‌نام">
+        <button type="button" role="tab" aria-selected={method === "password"} onClick={() => setMethod("password")} className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${method === "password" ? "bg-white text-emerald-800 shadow-sm" : "text-gray-600"}`}>نام کاربری و رمز</button>
+        <button type="button" role="tab" aria-selected={method === "phone"} onClick={() => setMethod("phone")} className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${method === "phone" ? "bg-white text-emerald-800 shadow-sm" : "text-gray-600"}`}>شماره موبایل</button>
+      </div>
+      {method === "phone" ? <PhoneOtpForm purpose="Register" /> : (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
       <TextField
         label="نام"
@@ -108,6 +118,8 @@ const RegisterForm = () => {
 
       <Button variant="success">ثبت‌نام</Button>
     </form>
+      )}
+    </div>
   );
 };
 export default RegisterForm;

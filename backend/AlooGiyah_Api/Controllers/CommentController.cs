@@ -41,6 +41,26 @@ public class CommentController : ControllerBase
     }
     #endregion
 
+    #region CreateReply
+    [Authorize(Policy = "NotGuest")]
+    [HttpPost("Reply")]
+    public async Task<IActionResult> CreateReply([FromQuery] string parentCode, [FromBody] CommentCreateDto createDto)
+    {
+        if (string.IsNullOrWhiteSpace(parentCode))
+            return BadRequest("کد دیدگاه اصلی الزامی است");
+
+        createDto.ParentCode = parentCode;
+        createDto.Rating = null;
+        var result = await _commentService.CreateAsync(createDto);
+        return Ok(new ApiResponse<object>
+        {
+            IsSuccess = true,
+            Message = "پاسخ با موفقیت ثبت شد و پس از بررسی منتشر خواهد شد",
+            Data = result
+        });
+    }
+    #endregion
+
     #region GetByFilter
     [Authorize]
     [HttpGet("GetByFilter")]
@@ -74,6 +94,42 @@ public class CommentController : ControllerBase
         {
             IsSuccess = true,
             Message = "لیست نظرات با موفقیت دریافت شد",
+            Data = result
+        });
+    }
+    #endregion
+
+    #region GetRatingSummary
+    [AllowAnonymous]
+    [HttpGet("GetRatingSummary")]
+    public async Task<IActionResult> GetRatingSummaryAsync([FromQuery] string entityCode, [FromQuery] AlooGiyah_Domain.Enums.EntityComment entityComment)
+    {
+        if (string.IsNullOrWhiteSpace(entityCode))
+            return BadRequest("کد محصول الزامی است");
+
+        var result = await _commentService.GetRatingSummaryAsync(entityCode, entityComment);
+        return Ok(new ApiResponse<object>
+        {
+            IsSuccess = true,
+            Message = "میانگین امتیاز با موفقیت دریافت شد",
+            Data = result
+        });
+    }
+    #endregion
+
+    #region GetMyProductReview
+    [Authorize(Policy = "NotGuest")]
+    [HttpGet("GetMyProductReview")]
+    public async Task<IActionResult> GetMyProductReviewAsync([FromQuery] string entityCode, [FromQuery] AlooGiyah_Domain.Enums.EntityComment entityComment)
+    {
+        if (string.IsNullOrWhiteSpace(entityCode))
+            return BadRequest("کد محصول الزامی است");
+
+        var result = await _commentService.GetMyProductReviewAsync(entityCode, entityComment);
+        return Ok(new ApiResponse<object>
+        {
+            IsSuccess = true,
+            Message = result == null ? "دیدگاهی ثبت نشده است" : "دیدگاه شما دریافت شد",
             Data = result
         });
     }

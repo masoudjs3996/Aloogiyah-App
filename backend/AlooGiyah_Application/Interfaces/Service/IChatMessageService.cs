@@ -10,5 +10,9 @@ public interface IChatMessageService
     Task<bool> DeleteAsync(string code);
     Task<ChatMessageDto?> GetByCodeAsync(string code);
     Task<PagedResult<ChatMessageDto>> GetByFilterAsync(ChatMessageFilterDto filter);
-    Task<PagedResult<ChatMessageDto>> GetConversationAsync(string userCode1, string userCode2, int pageNumber, int pageSize);
+    Task<PagedResult<ChatMessageDto>> GetConversationAsync(string conversationCode, int pageNumber, int pageSize);
+    Task<ChatConversationDto> GetOrCreateConversationAsync(string receiverCode);
+    Task<ChatConversationDto?> GetConversationInfoAsync(string conversationCode);
+    Task<ChatContactDto?> GetContactAsync(string code);
+    Task<List<ChatConversationSummaryDto>> GetConversationsAsync();
 }

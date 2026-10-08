@@ -1,15 +1,12 @@
 "use client";
 
-import Button from "@/design-system/atoms/Button";
-import useCart from "@/hooks/mutations/useCart";
 import { useProducts } from "@/hooks/queries/useProduct";
 import { getImageUrl } from "@/shared/utils/getImageUrl";
 import Image from "next/image";
 import Link from "next/link";
-import toast from "react-hot-toast";
-import { BiHeart } from "react-icons/bi";
-import { FaShoppingCart } from "react-icons/fa";
 import { useSelector } from "react-redux";
+import { CardSkeleton } from "@/design-system/molecules/platform/Skeleton";
+import ProductPrice from "@/design-system/molecules/public/ProductPrice";
 
 export default function ProductCard() {
   const { categories, search } = useSelector(
@@ -21,35 +18,13 @@ export default function ProductCard() {
     name: search,
   });
 
-  const { addCart } = useCart();
-
-  const addToCart = (productCode: string) => {
-    addCart.mutate(
-      {
-        productCode,
-        quantity: 1,
-      },
-      {
-        onSuccess: (data) => {
-          toast.success(data?.message);
-        },
-        onError: (error) => {
-          console.error(error);
-          toast.error("افزودن محصول به سبد خرید انجام نشد");
-        },
-      },
-    );
-  };
-
-  const formatPrice = (price: number) => {
-    return `${new Intl.NumberFormat("fa-IR").format(price)} تومان`;
-  };
-
   if (isLoading) {
     return (
-      <div className="py-10 text-center text-gray-500">
-        در حال بارگذاری محصولات...
-      </div>
+      <>
+        {Array.from({ length: 4 }, (_, index) => (
+          <CardSkeleton key={index} />
+        ))}
+      </>
     );
   }
 
@@ -62,14 +37,12 @@ export default function ProductCard() {
   return (
     <>
       {products.map((product) => {
-        const hasDiscount = product.wholesalePrice < product.retailPrice;
-
         const isOutOfStock = product.stock === 0;
 
         return (
           <article
             key={product.code}
-            className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-md"
+            className="group relative overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg"
           >
             {/* با کلیک روی هر قسمت کارت، وارد جزئیات محصول می‌شود */}
             <Link
@@ -78,12 +51,12 @@ export default function ProductCard() {
               className="absolute inset-0 z-10"
             />
 
-            <div className="relative aspect-square min-h-[250px] overflow-hidden bg-gray-500">
+            <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-emerald-50 to-lime-100">
               {product.primaryImageUrl ? (
                 <Image
                   src={
                     getImageUrl(product.primaryImageUrl) ??
-                    "/images/default-product.jpg"
+                    "/placeholder.svg"
                   }
                   alt={product.name}
                   fill
@@ -91,7 +64,7 @@ export default function ProductCard() {
                 />
               ) : (
                 <Image
-                  src="/images/default-product.jpg"
+                  src="/placeholder.svg"
                   alt={product.name}
                   fill
                   className="object-cover"
@@ -110,67 +83,32 @@ export default function ProductCard() {
                 </div>
               )}
 
-              {/* این دکمه بالاتر از لینک کارت قرار دارد */}
-              <button
-                type="button"
-                aria-label="افزودن به علاقه‌مندی‌ها"
-                className="absolute left-2 top-2 z-20 rounded-full bg-white/80 p-2 shadow backdrop-blur-sm transition hover:bg-white"
-              >
-                <BiHeart className="h-4 w-4 text-gray-600" />
-              </button>
             </div>
 
-            <div className="space-y-2 p-3">
-              <h3 className="line-clamp-2 text-base font-bold leading-tight text-gray-900">
+            <div className="space-y-3 p-4">
+              <h3 className="line-clamp-2 min-h-12 text-sm font-bold leading-6 text-slate-900 sm:text-base">
                 {product.name}
               </h3>
 
-              <p className="my-4 h-14 line-clamp-2 text-xs">
+              <p className="line-clamp-2 min-h-10 text-xs leading-5 text-slate-500">
                 {product.description || "گل تازه و معطر"}
               </p>
 
-              <div className="flex flex-col justify-between">
-                <span className="text-lg font-bold text-green-600">
-                  {formatPrice(product.retailPrice)}
+              <div className="flex flex-wrap items-end justify-between gap-2 border-t border-slate-100 pt-3">
+                <ProductPrice
+                  retailPrice={product.retailPrice}
+                  wholesalePrice={product.wholesalePrice}
+                  compact
+                />
+                <span className="text-[11px] text-slate-400">
+                  {isOutOfStock ? "ناموجود" : `موجودی ${product.stock.toLocaleString("fa-IR")}`}
                 </span>
-
-                <div className="mt-1 flex h-6 items-center justify-between">
-                  {hasDiscount ? (
-                    <>
-                      <span className="text-xs text-gray-400 line-through">
-                        {formatPrice(product.wholesalePrice)}
-                      </span>
-
-                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">
-                        تخفیف
-                      </span>
-                    </>
-                  ) : (
-                    <span className="invisible text-xs">بدون تخفیف</span>
-                  )}
-                </div>
               </div>
 
-              {/* چون از Link جداست، باعث نویگیت نمی‌شود */}
-              <div className="relative z-20">
-                <Button
-                  onClick={() => {
-                    if (!isOutOfStock) {
-                      addToCart(product.code);
-                    }
-                  }}
-                >
-                  <FaShoppingCart className="h-4 w-4" />
-
-                  <span>
-                    {isOutOfStock
-                      ? "ناموجود"
-                      : addCart.isPending
-                        ? "در حال افزودن..."
-                        : "افزودن"}
-                  </span>
-                </Button>
-              </div>
+              <span className="flex items-center justify-center gap-2 rounded-xl bg-emerald-700 px-3 py-2.5 text-xs font-bold text-white transition group-hover:bg-emerald-800">
+                مشاهده جزئیات
+                <span aria-hidden="true">←</span>
+              </span>
             </div>
           </article>
         );

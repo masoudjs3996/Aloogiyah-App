@@ -1,4 +1,5 @@
 using AlooGiyah_API.Middlewares;
+using AlooGiyah_Api.Realtime;
 using AlooGiyah_Application.Interfaces.Query;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Application.Interfaces.Service.Store;
@@ -52,6 +53,40 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero
         };
+        opts.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"].ToString();
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrWhiteSpace(accessToken) && path.StartsWithSegments("/ws/chat"))
+                    context.Token = accessToken.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
+                        ? accessToken[7..].Trim()
+                        : accessToken.Trim();
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = async context =>
+            {
+                var principal = context.Principal;
+                var userId = principal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (!int.TryParse(userId, out var id)) return;
+
+                var tokenVersion = principal?.FindFirst("TokenVersion")?.Value;
+                if (!int.TryParse(tokenVersion, out var version))
+                {
+                    context.Fail("توکن نیاز به ورود مجدد دارد.");
+                    return;
+                }
+
+                var db = context.HttpContext.RequestServices.GetRequiredService<AlooGiyahDbContext>();
+                var currentVersion = await db.Users.AsNoTracking()
+                    .Where(user => user.UserId == id && !user.IsDeleted)
+                    .Select(user => (int?)user.TokenVersion)
+                    .SingleOrDefaultAsync(context.HttpContext.RequestAborted);
+                if (currentVersion != version)
+                    context.Fail("توکن منقضی شده است. دوباره وارد شوید.");
+            }
+        };
     });
 
 #endregion
@@ -76,7 +111,6 @@ builder.Services.AddCors(o => o.AddPolicy("AllowAll", p =>
 #endregion
 
 // — Controllers
-builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 #region Swagger
@@ -108,6 +142,7 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
+builder.Services.AddSingleton<ChatConnectionManager>();
 #endregion
 
 #region DI
@@ -153,7 +188,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRepositoryFactory, RepositoryFactory>();
 builder.Services.AddScoped<IServiceRequestRepository, ServiceRequestRepository>();
 builder.Services.AddScoped<ICartRepository,CartRepository>();
-builder.Services.AddScoped<IDbConnectionFactory, SqlConnectionFactory>();
+builder.Services.AddScoped<IDbConnectionFactory, PostgresConnectionFactory>();
 
 
 builder.Services.AddScoped<IAddressQuery, AddressQuery>();
@@ -211,6 +246,7 @@ app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseWebSockets();
 
 app.UseMiddleware<ExceptionMiddleware>();
 
@@ -225,22 +261,43 @@ app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(uploadPath),
     RequestPath = "/uploads",
-    ServeUnknownFileTypes = true,
-    DefaultContentType = "application/octet-stream"
+    ServeUnknownFileTypes = false,
+    DefaultContentType = "application/octet-stream",
+    OnPrepareResponse = context => context.Context.Response.Headers["X-Content-Type-Options"] = "nosniff"
 });
 
-app.UseFileServer(new FileServerOptions
-{
-    FileProvider = new PhysicalFileProvider(uploadPath),
-    RequestPath = "/uploads",
-    EnableDirectoryBrowsing = false
-});
 #endregion
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.MapControllers();
+app.Map("/ws/chat", async context =>
+{
+    if (context.User.Identity?.IsAuthenticated != true || context.User.IsInRole("Guest"))
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        return;
+    }
+    var userCode = context.User.FindFirst("Code")?.Value;
+    if (string.IsNullOrWhiteSpace(userCode) || !context.WebSockets.IsWebSocketRequest)
+    {
+        context.Response.StatusCode = StatusCodes.Status400BadRequest;
+        return;
+    }
+    using var socket = await context.WebSockets.AcceptWebSocketAsync();
+    var db = context.RequestServices.GetRequiredService<AlooGiyahDbContext>();
+    async Task<string?> ResolveRoomPeer(string roomCode, CancellationToken cancellationToken) =>
+        await db.ChatConversations.AsNoTracking()
+            .Where(room => room.Code == roomCode && !room.IsDeleted &&
+                (room.ParticipantOne.Code == userCode || room.ParticipantTwo.Code == userCode))
+            .Select(room => room.ParticipantOne.Code == userCode
+                ? room.ParticipantTwo.Code
+                : room.ParticipantOne.Code)
+            .SingleOrDefaultAsync(cancellationToken);
+
+    await context.RequestServices.GetRequiredService<ChatConnectionManager>()
+        .RunAsync(userCode, socket, ResolveRoomPeer, context.RequestAborted);
+});
 
 app.Run();
-

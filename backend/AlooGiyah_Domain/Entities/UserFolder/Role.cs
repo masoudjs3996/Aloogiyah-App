@@ -19,5 +19,6 @@ public class Role : BaseEntity
 
     #region Relations
     public List<User> Users { get; set; } = null!;
+    public List<UserRole> AdditionalUsers { get; set; } = [];
     #endregion
 }

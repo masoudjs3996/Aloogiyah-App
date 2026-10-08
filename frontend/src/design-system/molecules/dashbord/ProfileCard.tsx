@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { SmallText, Text, Title } from "@/design-system/atoms/Typography";
 import { ProfileImageUploader } from "./ProfileImageUploader";
-import { BiLeaf, BiPencil } from "react-icons/bi";
+import { BiLeaf } from "react-icons/bi";
 import { LiaCalendarDaySolid } from "react-icons/lia";
 import { BsShieldCheck } from "react-icons/bs";
 import { EditProfileForm } from "@/design-system/organisms/dashbord/EditProfileForm";
@@ -84,17 +84,17 @@ export const ProfileCard = ({ user }: { user: any }) => {
               />
             </div>
           </div>
-          <div className="mr-[145px] min-h-[120px] pt-1">
-            <Title>{user?.fName || "امیر حسین"}</Title>
+          <div className="mr-0 min-h-[130px] pt-12 sm:mr-[145px] sm:min-h-[120px] sm:pt-1">
+            <Title>{user?.fName || "نام ثبت نشده"}</Title>
 
             <Text>{getPersianRole(user?.roleName || "نامشخص")}</Text>
 
-            <div className="mt-4 flex items-center gap-5 text-sm text-gray-500">
-              <span>{user?.email || "amir20008588@gmail.com"}</span>
+            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-gray-500">
+              <span>{user?.email || "ایمیل ثبت نشده"}</span>
 
               <span className="text-gray-300">|</span>
 
-              <span>{user?.phoneNumber || "0912 345 6789"}</span>
+              <span>{user?.phoneNumber || "شماره همراه ثبت نشده"}</span>
             </div>
           </div>
 
@@ -117,9 +117,9 @@ export const ProfileCard = ({ user }: { user: any }) => {
               </div>
 
               <div>
-                <SmallText>مزرعه فعال</SmallText>
+                <SmallText>نام کاربری</SmallText>
 
-                <Text>{user?.activeFarms || 3}</Text>
+                <Text>{user?.userName || "ثبت نشده"}</Text>
               </div>
             </div>
 

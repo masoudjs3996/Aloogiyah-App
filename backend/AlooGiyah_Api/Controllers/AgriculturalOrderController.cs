@@ -45,7 +45,7 @@ public class AgriculturalOrderController : ControllerBase
         return Ok(new ApiResponse<AgriculturalOrderDto> { IsSuccess = true, Message = "عملیات سفارش ثبت شد", Data = result });
     }
     [HttpPost("{code}/Refund/Complete")]
-    [Authorize(Roles = "Manager")]
+    [Authorize(Roles = "Admin,Manager")]
     public async Task<IActionResult> CompleteRefund(string code, [FromBody] CompleteRefundDto dto)
     {
         var result = await _service.CompleteRefundAsync(code, dto);

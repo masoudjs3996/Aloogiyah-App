@@ -15,6 +15,8 @@ public class ChatMessage : BaseEntity
     public string Message { get; set; } = string.Empty;
 
     public bool IsRead { get; set; } = false;
+    public bool IsEdited { get; set; }
+    public DateTimeOffset? EditedAt { get; set; }
     #endregion
 
 
@@ -26,6 +28,10 @@ public class ChatMessage : BaseEntity
     public int ReceiverId { get; set; }
     [ForeignKey(nameof(ReceiverId))]
     public User Receiver { get; set; } = null!;
+
+    public int ConversationId { get; set; }
+    [ForeignKey(nameof(ConversationId))]
+    public ChatConversation Conversation { get; set; } = null!;
     #endregion
 
 }

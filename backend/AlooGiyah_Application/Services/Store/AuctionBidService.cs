@@ -10,6 +10,8 @@ using AlooGiyah_Shared.Commons;
 using AlooGiyah_Shared.Exceptions;
 using AutoMapper;
 using System.Linq.Expressions;
+using System.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace AlooGiyah_Application.Services.Store;
 
@@ -45,27 +47,24 @@ public class AuctionBidService : IAuctionBidService
     #region Create
     public async Task<AuctionBidDto> CreateAsync(AuctionBidCreateDto dto)
     {
-        if (string.IsNullOrEmpty(_currentUserService.UserId))
-            throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
-
-        // اعتبارسنجی حراج
-        var auction = await _auctionRepository.GetByCodeAsync(dto.auctionCode);
+        var userId = CurrentUserId();
+        if (dto.BidAmount <= 0) throw new BadRequestException("مبلغ پیشنهاد باید بیشتر از صفر باشد.");
+        await using var tx = await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable);
+        var auction = await _auctionRepository.GetAll()
+            .Include(x => x.AgriculturalProduct).ThenInclude(x => x.Farm)
+            .SingleOrDefaultAsync(x => x.Code == dto.auctionCode);
         if (auction == null)
             throw new NotFoundException($"حراج با کد {dto.auctionCode} پیدا نشد");
-
-        // چک کردن اینکه حراج فعال است
-        if (auction.StartDate > DateTime.UtcNow || auction.EndDate < DateTime.UtcNow)
-            throw new InvalidOperationException("حراج در حال حاضر فعال نیست");
-
-        // اعتبارسنجی کاربر
-        var userId = int.Parse(_currentUserService.UserId);
-
-        // اعتبارسنجی مبلغ پیشنهادی
-        if (dto.BidAmount <= auction.StartingPrice)
-            throw new InvalidOperationException($"مبلغ پیشنهادی باید بیشتر از قیمت اولیه ({auction.StartingPrice}) باشد");
-
-        if (auction.CurrentPrice.HasValue && dto.BidAmount <= auction.CurrentPrice.Value)
-            throw new InvalidOperationException($"مبلغ پیشنهادی باید بیشتر از قیمت جاری ({auction.CurrentPrice.Value}) باشد");
+        var now = DateTimeOffset.UtcNow;
+        if (auction.StartDate > now || auction.EndDate <= now || auction.WinnerId != null)
+            throw new BadRequestException("حراج در حال حاضر فعال نیست.");
+        if (auction.AgriculturalProduct.Farm.OwnerId == userId)
+            throw new ForbiddenException("مالک محصول نمی‌تواند در حراج خودش پیشنهاد ثبت کند.");
+        var currentPrice = await _auctionBidRepository.GetAll().Where(b => b.AuctionId == auction.AuctionId)
+            .Select(b => (decimal?)b.BidAmount).MaxAsync();
+        var minimum = currentPrice ?? auction.StartingPrice;
+        if (dto.BidAmount <= minimum)
+            throw new BadRequestException($"مبلغ پیشنهادی باید بیشتر از قیمت جاری ({minimum}) باشد.");
 
         var entity = _mapper.Map<AuctionBid>(dto);
         entity.AuctionId = auction.AuctionId;
@@ -78,6 +77,7 @@ public class AuctionBidService : IAuctionBidService
         await _auctionRepository.UpdateAsync(auction);
 
         await _unitOfWork.SaveChangesAsync();
+        await tx.CommitAsync();
 
         var bidDto = _mapper.Map<AuctionBidDto>(entity);
 
@@ -88,46 +88,17 @@ public class AuctionBidService : IAuctionBidService
     #region Update
     public async Task<bool> UpdateAsync(AuctionBidUpdateDto dto)
     {
-        var entity = await _auctionBidRepository.GetByCodeAsync(dto.Code);
-        if (entity == null)
-            return false;
-
-        var auction = await _auctionRepository.GetByIdAsync(entity.AuctionId);
-        if (auction == null)
-            throw new NotFoundException("حراج مرتبط پیدا نشد");
-
-        // چک کردن اینکه حراج فعال است
-        if (auction.StartDate > DateTime.UtcNow || auction.EndDate < DateTime.UtcNow)
-            throw new InvalidOperationException("حراج در حال حاضر فعال نیست");
-
-        // اعتبارسنجی مبلغ پیشنهادی
-        if (dto.BidAmount <= auction.StartingPrice)
-            throw new InvalidOperationException($"مبلغ پیشنهادی باید بیشتر از قیمت اولیه ({auction.StartingPrice}) باشد");
-
-        if (auction.CurrentPrice.HasValue && dto.BidAmount <= auction.CurrentPrice.Value && dto.BidAmount != entity.BidAmount)
-            throw new InvalidOperationException($"مبلغ پیشنهادی باید بیشتر از قیمت جاری ({auction.CurrentPrice.Value}) باشد");
-
-        entity.BidAmount = dto.BidAmount;
-
-        await _auctionBidRepository.UpdateAsync(entity);
-
-        // به‌روزرسانی قیمت جاری حراج
-        var highestBidResult = await _auctionBidRepository.GetPagedAsync(
-            filter: b => b.AuctionId == auction.AuctionId,
-            pageNumber: 1,
-            pageSize: 1,
-            orderBy: b => b.BidAmount);
-        auction.CurrentPrice = highestBidResult.Items.OrderByDescending(b => b.BidAmount).FirstOrDefault()?.BidAmount;
-        await _auctionRepository.UpdateAsync(auction);
-
-        await _unitOfWork.SaveChangesAsync();
-        return true;
+        CurrentUserId();
+        throw new BadRequestException("پیشنهاد ثبت‌شده قابل ویرایش نیست؛ پیشنهاد جدید ثبت کنید.");
     }
     #endregion
 
     #region Delete
     public async Task<bool> DeleteAsync(string code)
     {
+        CurrentUserId();
+        if (!IsManager) throw new ForbiddenException("حذف پیشنهاد فقط برای مدیریت مجاز است.");
+        await using var tx = await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable);
         var entity = await _auctionBidRepository.GetByCodeAsync(code);
         if (entity == null)
             return false;
@@ -136,20 +107,28 @@ public class AuctionBidService : IAuctionBidService
         if (auction == null)
             throw new NotFoundException("حراج مرتبط پیدا نشد");
 
+        if (auction.WinnerId != null)
+            throw new BadRequestException("پس از نهایی‌شدن حراج، پیشنهاد قابل حذف نیست.");
         await _auctionBidRepository.DeleteAsync(entity);
-
-        // به‌روزرسانی قیمت جاری حراج
-        var highestBidResult = await _auctionBidRepository.GetPagedAsync(
-            filter: b => b.AuctionId == auction.AuctionId,
-            pageNumber: 1,
-            pageSize: 1,
-            orderBy: b => b.BidAmount);
-        auction.CurrentPrice = highestBidResult.Items.OrderByDescending(b => b.BidAmount).FirstOrDefault()?.BidAmount;
+        auction.CurrentPrice = await _auctionBidRepository.GetAll()
+            .Where(b => b.AuctionId == auction.AuctionId && b.AuctionBidId != entity.AuctionBidId)
+            .Select(b => (decimal?)b.BidAmount).MaxAsync();
         await _auctionRepository.UpdateAsync(auction);
 
         await _unitOfWork.SaveChangesAsync();
+        await tx.CommitAsync();
         return true;
     }
+
+    private int CurrentUserId()
+    {
+        if (!_currentUserService.IsAuthenticated || _currentUserService.IsGuest ||
+            !int.TryParse(_currentUserService.UserId, out var id))
+            throw new AlooGiyah_Shared.Exceptions.UnauthorizedException("ابتدا وارد حساب کاربری شوید.");
+        return id;
+    }
+
+    private bool IsManager => _currentUserService.Roles.Contains("Manager") || _currentUserService.Roles.Contains("Admin");
     #endregion
 
     #region Get By Code

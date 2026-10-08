@@ -10,8 +10,10 @@ namespace AlooGiyah_Persistence.Context;
 public class AlooGiyahDbContext : DbContext
 {
     public DbSet<Files> Files { get; set; }
+    public DbSet<EntityCodeRegistry> EntityCodeRegistry { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<PhoneOtpChallenge> PhoneOtpChallenges { get; set; }
     public DbSet<Checkout> Checkouts { get; set; }
     public DbSet<CheckoutPayment> CheckoutPayments { get; set; }
     public DbSet<OrderRefund> OrderRefunds { get; set; }
@@ -26,6 +28,9 @@ public class AlooGiyahDbContext : DbContext
     public DbSet<AuctionBid> AuctionBids { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<ChatMessage> ChatMessages { get; set; }
+    public DbSet<ChatConversation> ChatConversations { get; set; }
+    public DbSet<ChatConversationBlock> ChatConversationBlocks { get; set; }
+    public DbSet<ChatMessageAttachment> ChatMessageAttachments { get; set; }
     public DbSet<FileType> FileTypes { get; set; }
     public DbSet<Farm> Farms { get; set; }
     public DbSet<Notification> Notifications { get; set; }
@@ -34,6 +39,7 @@ public class AlooGiyahDbContext : DbContext
     public DbSet<Product> Products { get; set; }
     public DbSet<QualityAssessment> QualityAssessments { get; set; }
     public DbSet<Role> Roles { get; set; }
+    public DbSet<UserRole> UserRoles { get; set; }
     public DbSet<ServiceRequest> ServiceRequests { get; set; }
     public DbSet<Status> Statuses { get; set; }
     public DbSet<StatusChangeLog> StatusChangeLogs { get; set; }
@@ -60,14 +66,14 @@ public class AlooGiyahDbContext : DbContext
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AlooGiyahDbContext).Assembly);
 
-        // ⭐ index روی Code + IsDeleted برای همه BaseEntity ها
+        // کد هر رکورد باید در کل جدول یکتا بماند، حتی بعد از حذف نرم.
         var entityTypes = modelBuilder.Model.GetEntityTypes()
             .Where(e => typeof(BaseEntity).IsAssignableFrom(e.ClrType));
 
         foreach (var entityType in entityTypes)
         {
             modelBuilder.Entity(entityType.ClrType)
-                .HasIndex(new[] { nameof(BaseEntity.Code), nameof(BaseEntity.IsDeleted) })
+                .HasIndex(nameof(BaseEntity.Code))
                 .IsUnique(); 
         }
     }

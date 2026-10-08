@@ -8,7 +8,6 @@ public class UpdateProfileDto
     public string LName { get; set; } = string.Empty;
     [EmailAddress]
     public string Email { get; set; } = string.Empty;
-    public byte Age { get; set; }
     [Phone]
     public string PhoneNumber { get; set; } = string.Empty;
 

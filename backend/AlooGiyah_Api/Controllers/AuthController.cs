@@ -22,6 +22,40 @@ public class AuthController : ControllerBase
     }
     #endregion
 
+    #region Phone OTP
+    [AllowAnonymous]
+    [HttpPost("RequestPhoneCode")]
+    public async Task<IActionResult> RequestPhoneCode([FromBody] RequestPhoneCodeDto dto)
+    {
+        var result = await _authService.RequestPhoneCodeAsync(dto);
+        return Ok(new ApiResponse<PhoneCodeResponseDto>
+        {
+            IsSuccess = true,
+            Message = "کد یک‌بارمصرف آماده شد.",
+            Data = result
+        });
+    }
+
+    [AllowAnonymous]
+    [HttpPost("VerifyPhoneCode")]
+    public async Task<IActionResult> VerifyPhoneCode([FromBody] VerifyPhoneCodeDto dto)
+    {
+        var (accessToken, refreshToken, isNewUser) = await _authService.VerifyPhoneCodeAsync(dto);
+        return Ok(new ApiResponse<object>
+        {
+            IsSuccess = true,
+            Message = isNewUser ? "ثبت‌نام و ورود با موفقیت انجام شد." : "ورود موفقیت‌آمیز بود.",
+            Data = new
+            {
+                Token = $"Bearer {accessToken}",
+                RefreshToken = refreshToken.Token,
+                refreshToken.Expires,
+                IsNewUser = isNewUser
+            }
+        });
+    }
+    #endregion
+
 
     #region Register
     [Authorize]

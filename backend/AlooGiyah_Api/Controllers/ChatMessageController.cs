@@ -5,6 +5,7 @@ using AlooGiyah_Shared.Constants;
 using AlooGiyah_Shared.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using AlooGiyah_Api.Realtime;
 
 namespace AlooGiyah_Api.Controllers;
 
@@ -14,10 +15,12 @@ public class ChatMessageController : ControllerBase
 {
     #region Constructor
     private readonly IChatMessageService _chatMessageService;
+    private readonly ChatConnectionManager _chatConnections;
 
-    public ChatMessageController(IChatMessageService chatMessageService)
+    public ChatMessageController(IChatMessageService chatMessageService, ChatConnectionManager chatConnections)
     {
         _chatMessageService = chatMessageService;
+        _chatConnections = chatConnections;
     }
     #endregion
 
@@ -31,6 +34,9 @@ public class ChatMessageController : ControllerBase
             return BadRequest(ModelState);
 
         var result = await _chatMessageService.CreateAsync(createDto);
+        await Task.WhenAll(
+            _chatConnections.PublishMessageAsync(result.SenderCode, result, HttpContext.RequestAborted),
+            _chatConnections.PublishMessageAsync(result.ReceiverCode, result, HttpContext.RequestAborted));
 
         return Ok(new ApiResponse<object>
         {
@@ -48,7 +54,7 @@ public class ChatMessageController : ControllerBase
     {
         var result = await _chatMessageService.GetByFilterAsync(filterDto);
 
-        if (result == null || !result.Items.Any())
+        if (result == null)
             throw new NotFoundException(ErrorMessages.ErrorNullChatMessage);
 
         return Ok(new ApiResponse<object>
@@ -88,6 +94,12 @@ public class ChatMessageController : ControllerBase
         if (!result)
             throw new NotFoundException(ErrorMessages.ErrorChatMessageUpdate);
 
+        var updated = await _chatMessageService.GetByCodeAsync(updateDto.Code);
+        if (updated != null)
+            await Task.WhenAll(
+                _chatConnections.PublishMessageAsync(updated.SenderCode, updated, HttpContext.RequestAborted),
+                _chatConnections.PublishMessageAsync(updated.ReceiverCode, updated, HttpContext.RequestAborted));
+
         return Ok(new ApiResponse<object>
         {
             IsSuccess = true,
@@ -119,11 +131,11 @@ public class ChatMessageController : ControllerBase
     #region GetConversation
     [Authorize]
     [HttpGet("GetConversation")]
-    public async Task<IActionResult> GetConversationAsync([FromQuery] string userCode1, [FromQuery] string userCode2, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetConversationAsync([FromQuery] string conversationCode, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 30)
     {
-        var result = await _chatMessageService.GetConversationAsync(userCode1, userCode2, pageNumber, pageSize);
+        var result = await _chatMessageService.GetConversationAsync(conversationCode, pageNumber, pageSize);
 
-        if (result == null || !result.Items.Any())
+        if (result == null)
             throw new NotFoundException(ErrorMessages.ErrorNullChatMessage);
 
         return Ok(new ApiResponse<object>
@@ -133,5 +145,57 @@ public class ChatMessageController : ControllerBase
             Data = result
         });
     }
+
+    [Authorize(Policy = "NotGuest")]
+    [HttpPost("GetOrCreateConversation")]
+    public async Task<IActionResult> GetOrCreateConversation([FromQuery] string receiverCode)
+    {
+        var result = await _chatMessageService.GetOrCreateConversationAsync(receiverCode);
+        result.PeerOnline = _chatConnections.IsUserOnline(result.PeerCode);
+        var currentCode = User.FindFirst("Code")?.Value;
+        if (!string.IsNullOrWhiteSpace(currentCode))
+            await Task.WhenAll(
+                _chatConnections.PublishConversationAsync(currentCode, result, HttpContext.RequestAborted),
+                _chatConnections.PublishConversationAsync(result.PeerCode, result, HttpContext.RequestAborted));
+        return Ok(new ApiResponse<ChatConversationDto> { IsSuccess = true, Message = "گفت‌وگو آماده است", Data = result });
+    }
+
+    [Authorize(Policy = "NotGuest")]
+    [HttpGet("GetConversationInfo")]
+    public async Task<IActionResult> GetConversationInfo([FromQuery] string conversationCode)
+    {
+        var result = await _chatMessageService.GetConversationInfoAsync(conversationCode);
+        if (result == null) throw new NotFoundException("گفت‌وگو پیدا نشد.");
+        result.PeerOnline = _chatConnections.IsUserOnline(result.PeerCode);
+        return Ok(new ApiResponse<ChatConversationDto> { IsSuccess = true, Message = "گفت‌وگو دریافت شد", Data = result });
+    }
     #endregion
+
+    [Authorize(Policy = "NotGuest")]
+    [HttpGet("GetContact")]
+    public async Task<IActionResult> GetContact([FromQuery] string code)
+    {
+        var result = await _chatMessageService.GetContactAsync(code);
+        if (result == null)
+            throw new NotFoundException("مخاطب گفت‌وگو پیدا نشد.");
+        return Ok(new ApiResponse<ChatContactDto>
+        {
+            IsSuccess = true,
+            Message = "اطلاعات مخاطب دریافت شد",
+            Data = result
+        });
+    }
+
+    [Authorize(Policy = "NotGuest")]
+    [HttpGet("GetMyConversations")]
+    public async Task<IActionResult> GetMyConversations()
+    {
+        var result = await _chatMessageService.GetConversationsAsync();
+        return Ok(new ApiResponse<List<ChatConversationSummaryDto>>
+        {
+            IsSuccess = true,
+            Message = "فهرست گفت‌وگوها دریافت شد",
+            Data = result
+        });
+    }
 }

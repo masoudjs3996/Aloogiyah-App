@@ -1,50 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { middlewareAuth } from "./shared/utils/middlewareAuth";
-
-export async function middleware(request: NextRequest) {
-  const roleResponse = await middlewareAuth(request);
-
-  // توکن وجود ندارد، منقضی شده یا پاسخ API نامعتبر است
-  if (!roleResponse) {
-    const loginUrl = new URL("/Login", request.url);
-
-    const response = NextResponse.redirect(loginUrl);
-
-    response.cookies.delete("token");
-    response.cookies.delete("guestToken");
-
-    return response;
+// احراز هویت و مالکیت واقعی در API انجام می‌شود؛ Middleware فقط ورود به پنل را محافظت می‌کند.
+// بررسی شبکه‌ای GetRole در هر navigation باعث خروج اشتباه در قطعی سرور و جلوگیری از refresh می‌شد.
+export function middleware(request: NextRequest) {
+  if (
+    !request.cookies.get("token")?.value &&
+    !request.cookies.get("refreshToken")?.value
+  ) {
+    const login = new URL("/Login", request.url);
+    login.searchParams.set(
+      "next",
+      request.nextUrl.pathname + request.nextUrl.search,
+    );
+    return NextResponse.redirect(login);
   }
-
-  if (roleResponse.data?.roleCode === "47C2D51E0F") {
-    return NextResponse.redirect(new URL("/Login", request.url));
-  }
-
   return NextResponse.next();
 }
-
-export const config = {
-  matcher: ["/dashboard/:path*"],
-};
-
-// import { NextRequest, NextResponse } from "next/server";
-// import { middlewareAuth } from "./shared/utils/middlewareAuth";
-
-// export async function middleware(request: NextRequest) {
-//   const { pathname } = request.nextUrl;
-
-//   if (pathname.startsWith("/dashboard")) {
-//     const RoulCode = await middlewareAuth(request);
-
-//     if (RoulCode?.data?.roleCode === "47C2D51E0F") {
-//       return NextResponse.redirect(new URL("/Login", request?.nextUrl));
-//     }
-//     return NextResponse.next();
-//   }
-
-//   return NextResponse.next();
-// }
-
-// export const config = {
-//   matcher: ["/dashboard/:path*"],
-// };
+export const config = { matcher: ["/dashboard/:path*"] };

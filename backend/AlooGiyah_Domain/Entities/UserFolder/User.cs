@@ -31,13 +31,13 @@ public class User : BaseEntity
     [MaxLength(256)]
     public string Password { get; set; } = string.Empty;
 
-    public int Age { get; set; }
-
     [MaxLength(20)]
     public string PhoneNumber { get; set; } = string.Empty;
 
     [Required]
     public int RoleId { get; set; }
+
+    public int TokenVersion { get; set; }
 
     [MaxLength(50)]
     public string? EmailVerificationCode { get; set; }
@@ -78,6 +78,7 @@ public class User : BaseEntity
     public List<Discount> Discounts { get; set; } = null!;
     public List<Address> Addresses { get; set; } = null!;
     public List<Cart> Carts { get; set; } = null!;
+    public List<UserRole> AdditionalRoles { get; set; } = [];
 
     #endregion
 }

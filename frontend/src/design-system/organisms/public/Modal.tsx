@@ -22,8 +22,6 @@ const Modal = ({
   children,
   open,
   bg,
-  //   withBtn = false,
-  //   onConfirm,
 }: ModalProps) => {
   const [mounted, setMounted] = useState(false);
   const ref = useOutsideClick<HTMLDivElement>(
@@ -76,31 +74,12 @@ const Modal = ({
             >
               x
             </button>
-            {/* <CloseButton
-              className="hover:text-red-500 text-xl ho hover:bg-slate-100 p-1.5 rounded-md"
-              onClick={onClose}
-            /> */}
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 pb-5 hide_scroll">
           {children}
         </div>
-        {/* {withBtn && (
-          <div className="p-5 flex gap-x-3 justify-end">
-            <Button variant="solid" onClick={onClose}>
-              لغو
-            </Button>
-            <Button
-              onClick={onConfirm}
-              variant="solid"
-              color="#ef4444"
-              className=" bg-red-500 text-white "
-            >
-              حذف
-            </Button>
-          </div>
-        )} */}
       </div>
     </div>,
     document.body,

@@ -1,0 +1,31 @@
+import raw from '../shared/api/catalog.json';
+import type {Endpoint,Resource} from '../shared/types';
+export const endpoints=raw as Endpoint[];
+export const resources:Resource[]=[
+{id:'Comment',title:'نظرات کاربران',description:'بررسی، تأیید و رد نظرات و پاسخ‌ها',group:'رسیدگی',icon:'MessageSquare',columns:['name','content','rating','statusCode','createdAt'],statusEntity:'CommentStatus',disabledActions:['Update']},
+{id:'ServiceRequest',title:'درخواست خدمات',description:'رسیدگی به گیاهان و تخصیص ارائه‌دهنده',group:'رسیدگی',icon:'Sprout',columns:['code','serviceType','description','providerCode','statusCode'],statusEntity:'ServiceRequestStatus',disabledActions:['Create'],note:'قیمت خدمت را سرور محاسبه می‌کند. نشانی درخواست مشتری از این پنل قابل تغییر نیست.'},
+{id:'QualityAssessment',title:'ارزیابی کیفیت',description:'تخصیص کارشناس و ثبت نتیجه ارزیابی محصولات',group:'رسیدگی',icon:'BadgeCheck',columns:['code','agriculturalProductCode','expertCode','qualityGrade','suggestedPrice'],disabledActions:['Request']},
+{id:'AgriculturalOrder',title:'سفارش‌های کشاورزی',description:'بررسی سفارش، ارسال، تحویل و بازپرداخت',group:'رسیدگی',icon:'ShoppingBag',columns:['code','farmName','statusTitle','totalPrice','paymentStatus'],statusEntity:'AgriculturalOrderStatus',defaults:{view:'Manager',includeUnpaid:true},disabledActions:['CreateFromCart']},
+{id:'User',title:'کاربران و دسترسی‌ها',description:'جست‌وجوی کاربران و مدیریت نقش‌های تکمیلی',group:'مدیریت',icon:'Users',columns:['code','fName','lName','phoneNumber','roleName'],listAction:'GetUserByFilter',detailAction:'GetUserByCode',disabledActions:['UpdateProfile','UploadProfileImage']},
+{id:'Farm',title:'گلخانه‌ها',description:'مدیریت اطلاعات و تصاویر گلخانه‌ها',group:'فروشگاه',icon:'House',columns:['code','name','ownerCode','capacity','createdAt'],statusEntity:'FarmStatus'},
+{id:'AgriculturalProduct',title:'محصولات کشاورزی',description:'مدیریت محصول، موجودی و تصاویر',group:'فروشگاه',icon:'Leaf',columns:['code','name','greenhouseCode','retailPrice','stock'],statusEntity:'AgriculturalProduct',disabledActions:['Create']},
+{id:'Product',title:'محصولات فروشگاه',description:'مدیریت کالاهای عمومی فروشگاه',group:'فروشگاه',icon:'Package',columns:['code','name','retailPrice','stock','createdAt']},
+{id:'Category',title:'دسته‌بندی‌ها',description:'ساختار دسته‌ها، ترتیب نمایش و تنظیمات جست‌وجو',group:'فروشگاه',icon:'Layers',columns:['code','name','parentCategoryCode','sortOrder','statusCode'],statusEntity:'Category'},
+{id:'Auction',title:'حراجی‌ها',description:'مدیریت حراج و نهایی‌کردن نتیجه',group:'فروشگاه',icon:'Gavel',columns:['code','agriculturalProductCode','startingPrice','endDate','statusCode'],statusEntity:'AuctionStatus'},
+{id:'AuctionBid',title:'پیشنهادهای حراج',description:'بررسی پیشنهادهای ثبت‌شده در حراج',group:'فروشگاه',icon:'Gavel',columns:['code','auctionCode','userCode','bidAmount','createdAt']},
+{id:'Discount',title:'کدهای تخفیف',description:'مدیریت اعتبار و شرایط تخفیف',group:'فروشگاه',icon:'TicketPercent',columns:['code','discountType','value','usageCount','endDate']},
+{id:'Warehouse',title:'انبارها',description:'مدیریت اطلاعات انبارهای فروشگاه',group:'فروشگاه',icon:'Warehouse',columns:['code','name','address','createdAt']},
+{id:'WarehouseInventory',title:'موجودی انبار',description:'بررسی و ویرایش موجودی کالاها',group:'فروشگاه',icon:'Boxes',columns:['code','warehouseCode','entityCode','quantity']},
+{id:'Order',title:'سفارش‌های عمومی',description:'مدیریت سفارش‌های کالاهای عمومی',group:'فروشگاه',icon:'ShoppingCart',columns:['code','userCode','totalPrice','statusCode','createdAt'],statusEntity:'OrderStatus',disabledActions:['CreateOrder']},
+{id:'Article',title:'مقالات',description:'ثبت و ویرایش محتوای آموزشی',group:'محتوا',icon:'FileText',columns:['code','title','authorCode','createdAt']},
+{id:'Slider',title:'بنرها و اسلایدرها',description:'مدیریت بنرهای فعال صفحه اصلی',group:'محتوا',icon:'Image',columns:['code','title','order','imageUrl'],listAction:'GetActive'},
+{id:'ChatMessage',title:'پیام‌ها',description:'بررسی پیام‌ها با رعایت سطح دسترسی API',group:'محتوا',icon:'MessagesSquare',columns:['code','senderCode','receiverCode','message','createdAt'],note:'دسترسی به گفتگوها تابع مجوز بک‌اند است؛ API فعلی سامانه گزارش تخلف مستقلی ندارد.'},
+{id:'File',title:'فایل‌ها',description:'آپلود و مدیریت فایل‌های متصل به موجودیت‌ها',group:'محتوا',icon:'Files',columns:['code','entityFile','url','entityCode','createdAt'],listAction:'GetFiles'},
+{id:'Notification',title:'اعلان‌ها',description:'ارسال اعلان و مشاهده اعلان‌های حساب مدیریت',group:'محتوا',icon:'Bell',columns:['code','type','message','isRead','createdAt'],listAction:'MyNotifications',detailAction:'GetMyNotificationByCode',note:'فهرست فعلی فقط اعلان‌های همین حساب را نمایش می‌دهد.'},
+{id:'StatusChangeLog',title:'تاریخچه وضعیت‌ها',description:'مشاهده سوابق تغییر وضعیت و تصمیم مدیران',group:'سیستم',icon:'History',columns:['code','entityStatus','oldStatusCode','newStatusCode','comments','changeDate'],disabledActions:['Create','Update','Delete']},
+{id:'Location',title:'مناطق جغرافیایی',description:'ثبت استان، شهرستان، شهر و روستا',group:'سیستم',icon:'MapPin',columns:['code','name'],listAction:'Provinces',statusEntity:'Location'},
+];
+export function resourceEndpoints(r:Resource){return endpoints.filter(e=>e.controller===r.id&&!r.disabledActions?.includes(e.action));}
+export function listEndpoint(r:Resource){return endpoints.find(e=>e.controller===r.id&&e.action===(r.listAction||'GetByFilter'))||endpoints.find(e=>e.controller===r.id&&e.action.toLowerCase()==='getbyfilter');}
+export function detailEndpoint(r:Resource){return endpoints.find(e=>e.controller===r.id&&e.action===(r.detailAction||'GetByCode'));}
+export function actionTitle(e:Endpoint){const a=e.action; if(e.method==='DELETE')return 'حذف';if(a.includes('/Roles'))return 'مدیریت نقش‌ها';if(a.includes('Refund'))return 'تکمیل بازپرداخت';if(a.includes('/Action'))return 'عملیات سفارش';if(/AddExpert/.test(a))return 'تعیین کارشناس';if(/AddProvider/.test(a))return 'تعیین ارائه‌دهنده';if(/Finalize/.test(a))return 'نهایی‌کردن حراج';if(/Primary/.test(a))return 'تصویر اصلی';if(/Image|Upload/.test(a))return 'مدیریت تصویر / فایل';if(/Create|Province|County|City|Village/.test(a))return 'ثبت جدید';if(/Update/.test(a))return 'ویرایش';if(a==='Read')return 'علامت‌گذاری خوانده‌شده';return a;}

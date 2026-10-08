@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { RewardsFilters } from "@/design-system/organisms/dashbord";
 import { getFeaturedCategories } from "@/lib/actions/categories";
 import { ICategoryFeatured } from "@/shared/types/categories";

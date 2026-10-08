@@ -7,7 +7,6 @@ export interface IUser {
   email: string | null;
   userName: string;
   isEmailConfirmed: boolean;
-  age: number | string;
   roleCode: string;
   roleName: string | null;
   phoneNumber: number | string;
@@ -21,6 +20,8 @@ export type GetUserResponse = IApiResponse<IUser>;
 export type GetUserRoulResponse = IApiResponse<{
   roleName: string;
   roleCode: string;
+  roleNames?: string[];
+  roleCodes?: string[];
 }>;
 
 export type EditUserResponse = IApiResponse<IUser>;

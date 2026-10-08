@@ -1,40 +1,8 @@
 "use client";
-
-import { ReactNode } from "react";
-import { motion } from "framer-motion";
+import type { ReactNode } from "react";
 import Link from "next/link";
-
-
-interface SidebarItemProps {
-  icon: ReactNode;
-  label: string;
-  collapsed: boolean;
-  href: string;
+import { usePathname } from "next/navigation";
+export default function SidebarItem({ icon, label, collapsed, href }: { icon: ReactNode; label: string; collapsed: boolean; href: string }) {
+ const pathname = usePathname(); const active = href === "/" || href === "/dashboard" ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
+ return <Link href={href} title={collapsed ? label : undefined} aria-current={active ? "page" : undefined} className={`flex min-h-10 items-center gap-3 rounded-xl p-2.5 transition ${active ? "bg-emerald-50 font-bold text-emerald-800" : "text-slate-600 hover:bg-slate-50"}`}><span className="shrink-0">{icon}</span>{!collapsed && <span className="whitespace-nowrap text-xs">{label}</span>}</Link>;
 }
-
-const SidebarItem = ({ icon, label, collapsed, href }: SidebarItemProps) => {
-  return (
-    <Link href={href}>
-      <motion.div
-        animate={{ width: collapsed ? 36 : 136 }}
-        transition={{ duration: 0.3 }}
-        className="flex gap-3  p-2 rounded hover:bg-secondary-900 text-secondary-700 duration-200 cursor-pointer overflow-hidden"
-      >
-        <div>{icon}</div>
-
-        {!collapsed && (
-          <motion.span
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <p className="text-sm whitespace-nowrap">{label}</p>
-          </motion.span>
-        )}
-      </motion.div>
-    </Link>
-  );
-};
-
-export default SidebarItem;

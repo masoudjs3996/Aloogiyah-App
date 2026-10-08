@@ -4,12 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { ShoppingCartIcon } from "@heroicons/react/24/outline";
 import { getImageUrl } from "@/shared/utils/getImageUrl";
+import ProductPrice from "@/design-system/molecules/public/ProductPrice";
 
 type SimilarProduct = {
   code: string;
   name: string;
   productImageUrl?: string | null;
-  wholesalePrice: number | string;
+  wholesalePrice?: number | string | null;
   retailPrice: number | string;
 };
 
@@ -20,16 +21,6 @@ type SimilarProductsProps = {
 
 const INITIAL_PRODUCTS_COUNT = 4;
 const MAX_PRODUCTS_COUNT = 12;
-
-const formatPrice = (price: number | string) => {
-  const numericPrice = Number(price);
-
-  if (Number.isNaN(numericPrice)) {
-    return price;
-  }
-
-  return new Intl.NumberFormat("fa-IR").format(numericPrice);
-};
 
 export default function SimilarProducts({
   products = [],
@@ -97,26 +88,10 @@ export default function SimilarProducts({
                 </h3>
 
                 <div className="mt-3">
-                  <span className="text-xs font-bold text-green-700">
-                    {formatPrice(product.wholesalePrice)} تومان
-                  </span>
-
-                  <span className="mr-1 text-[10px] text-gray-400">
-                    عمده‌فروشی
-                  </span>
+                  <ProductPrice retailPrice={product.retailPrice} wholesalePrice={product.wholesalePrice} compact />
                 </div>
 
                 <div className="mt-3 flex items-center justify-between">
-                  <div>
-                    <span className="text-xs font-bold text-green-700">
-                      {formatPrice(product.retailPrice)} تومان
-                    </span>
-
-                    <span className="mr-1 block text-[10px] text-gray-400">
-                      خرده‌فروشی
-                    </span>
-                  </div>
-
                   {onAddToCart && (
                     <button
                       type="button"

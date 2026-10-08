@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Application.Commons;
+using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.Farm;
 using AlooGiyah_Application.Interfaces.Service.Store;
 using AlooGiyah_Shared.Constants;
@@ -119,7 +119,7 @@ public class FarmController : ControllerBase
     #region UploadImage
     [Authorize(Roles = "Admin,Manager,Farmer")]
     [HttpPatch("UploadImage")]
-    public async Task<IActionResult> ChangeFarmImagAsinc(UploadFarmImageDto upload)
+    public async Task<IActionResult> ChangeFarmImagAsinc([FromForm] UploadFarmImageDto upload)
     {
         var result = await _farmService.ChangeFarmImageAsync(upload);
 

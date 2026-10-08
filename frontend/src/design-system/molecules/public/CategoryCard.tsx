@@ -1,87 +1,54 @@
 "use client";
 
-import {
-  setCategories,
-  setSearch,
-} from "@/lib/store/slices/productFilterSlice";
-import { getImageUrl } from "@/shared/utils/getImageUrl";
+import type { FC } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { FC, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { setCategories } from "@/lib/store/slices/productFilterSlice";
+import { getImageUrl } from "@/shared/utils/getImageUrl";
 
 interface CategoryCardProps {
-  category: any;
+  category: {
+    code: string;
+    name: string;
+    imageUrl?: string;
+  };
 }
 
 const CategoryCard: FC<CategoryCardProps> = ({ category }) => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const handlerClick = (code: string) => {
-    dispatch(setCategories(code));
+
+  const handleClick = () => {
+    dispatch(setCategories(category.code));
     router.push("/product");
   };
 
   return (
-    <div
-      className="group relative mb-5 min-w-36 bg-white rounded-md shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer"
-      onClick={() => handlerClick(category?.code)}
+    <button
+      type="button"
+      onClick={handleClick}
+      className="group w-full overflow-hidden rounded-2xl border border-slate-100 bg-white text-right shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg"
     >
-      <div className="relative w-full h-20 overflow-hidden bg-gray-50">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-gradient-to-br from-emerald-50 to-lime-100">
         <Image
-          src={getImageUrl(category?.imageUrl)}
-          alt={"categoryImage"}
+          src={getImageUrl(category.imageUrl)}
+          alt={category.name}
           fill
-          className="absolute object-cover group-hover:scale-110 transition-transform duration-300"
+          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 16vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
-      <div className="p-1 flex items-center gap-2 bg-secondary-300">
-        <p className="text-sm font-medium text-gray-800 truncate mx-auto">
-          {category?.name}
+      <div className="flex min-h-14 items-center justify-between gap-2 px-3 py-3">
+        <p className="line-clamp-2 text-xs font-bold leading-5 text-slate-700 group-hover:text-emerald-800 sm:text-sm">
+          {category.name}
         </p>
+        <span aria-hidden="true" className="shrink-0 text-emerald-700">
+          ←
+        </span>
       </div>
-      <div className="absolute rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-    </div>
+    </button>
   );
 };
 
 export default CategoryCard;
-
-// "use client";
-// import { getImageUrl } from "@/shared/utils/getImageUrl";
-// import Image from "next/image";
-// import { FC } from "react";
-
-// interface CategoryCardProps {
-//   name: string;
-//   imageUrl: string;
-// }
-
-// const CategoryCard: FC<CategoryCardProps> = ({ name, imageUrl }) => {
-//   const handlerClick = ()=>{
-
-//   }
-//   return (
-//     <div
-//       className="group relative bg-white rounded-md shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer"
-//       onClick={() => handlerClick()}
-//     >
-//       <div className="relative w-full h-20 overflow-hidden bg-gray-50">
-//         <Image
-//           src={getImageUrl(imageUrl)}
-//           alt={"categoryImage"}
-//           fill
-//           className="absolute object-cover group-hover:scale-110 transition-transform duration-300"
-//         />
-//         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-//       </div>
-//       <div className="p-1 flex items-center gap-2 bg-secondary-300">
-//         <p className="text-sm font-medium text-gray-800 truncate">{name}</p>
-//       </div>
-//       <div className="absolute inset-0 ring-2 ring-indigo-500 ring-inset rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-//     </div>
-//   );
-// };
-
-// export default CategoryCard;

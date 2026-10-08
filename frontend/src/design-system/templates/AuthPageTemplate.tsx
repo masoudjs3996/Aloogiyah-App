@@ -18,9 +18,9 @@ const AuthPageTemplate: FC<AuthPageTemplateProps> = ({
   bottomLinkHref,
 }) => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md p-8 bg-white shadow-md rounded-md flex flex-col gap-6">
-        <h1 className="text-2xl font-bold mb-6 text-center">{title}</h1>
+    <div className="flex min-h-dvh items-center justify-center bg-gray-50 px-4 py-8">
+      <div className="flex w-full max-w-md flex-col gap-5 rounded-2xl bg-white p-5 shadow-md sm:gap-6 sm:p-8">
+        <h1 className="mb-2 text-2xl font-bold text-center sm:mb-4">{title}</h1>
         {children}
         {bottomText && bottomLinkText && bottomLinkHref && (
           <p className="text-sm text-center text-gray-600">

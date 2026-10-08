@@ -322,7 +322,22 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
         if (entity == null)
             throw new ArgumentNullException(nameof(entity));
 
-        await _dbSet.AddAsync(entity);
+        for (var attempt = 0; attempt <= 10; attempt++)
+        {
+            var codeExists = await _context.EntityCodeRegistry.AnyAsync(item => item.Code == entity.Code) ||
+                             await _dbSet.AnyAsync(item => item.Code == entity.Code);
+            var codeIsPending = _context.ChangeTracker.Entries<BaseEntity>()
+                .Any(entry => !ReferenceEquals(entry.Entity, entity) &&
+                              entry.State == EntityState.Added && entry.Entity.Code == entity.Code);
+            if (!codeExists && !codeIsPending)
+            {
+                await _dbSet.AddAsync(entity);
+                return;
+            }
+            entity.RegenerateCode();
+        }
+
+        throw new InvalidOperationException("Could not generate a unique entity code after repeated attempts.");
     }
     #endregion
 

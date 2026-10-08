@@ -52,6 +52,11 @@ public class ServiceRequestConfiguration : IEntityTypeConfiguration<ServiceReque
             .HasForeignKey(sr => sr.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne(sr => sr.Address)
+            .WithMany()
+            .HasForeignKey(sr => sr.AddressId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.HasOne(sr => sr.Provider)
             .WithMany(u => u.ProvidedServiceRequests)
             .HasForeignKey(sr => sr.ProviderId)

@@ -2,7 +2,6 @@ import axiosInstance from "@/shared/lib/config/axions";
 import {
   GetProductResponse,
   IAgriculturalProduct,
-  IPaginatedResult,
   ProductFilter,
 } from "@/shared/types/product";
 
@@ -55,33 +54,6 @@ export async function getProducts(
   }
 }
 
-// export async function getProducts(
-//   payload?: ProductFilter
-// ): Promise<IPaginatedResult<IAgriculturalProduct> | null> {
-//   try {
-//     const url = payload
-//       ? `/AgriculturalProduct/GetByFilter?FarmCode=${encodeURIComponent(
-//           payload
-//         )}`
-//       : `/AgriculturalProduct/GetByFilter`;
-
-//     const { data } = await axiosInstance.get<GetProductResponse>(url);
-//     if (!data?.isSuccess) {
-//       console.warn("API returned unsuccessful response:", data?.message);
-//       return null;
-//     }
-
-//     return data.data ?? null;
-//   } catch (error: any) {
-//     console.error("Error fetching products:", error.message || error);
-//     if (error.response) {
-//       console.error("Status:", error.response.status);
-//       console.error("Response data:", error.response.data);
-//     }
-
-//     return null;
-//   }
-// }
 export async function AddProduct(payload: FormData) {
   try {
     const res = await axiosInstance.post(

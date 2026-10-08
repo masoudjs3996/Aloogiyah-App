@@ -79,7 +79,7 @@ public class AuctionController : ControllerBase
     #endregion
 
     #region UpdateAuction
-    [Authorize(Roles = "Admin,Manager,Farmer")]
+    [Authorize(Roles = "Admin,Manager")]
     [HttpPut("UpdateAuction")]
     public async Task<IActionResult> UpdateAuction(AuctionUpdateDto updateDto)
     {

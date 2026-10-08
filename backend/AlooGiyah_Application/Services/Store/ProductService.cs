@@ -97,7 +97,7 @@ public class ProductService : IProductService
         await _unitOfWork.SaveChangesAsync();
 
         var productDto = _mapper.Map<ProductDto>(entity);
-        if (roles.Contains("UserFolder")) // قیمت همکاری برای کاربر با رول یوزر نال ارسال میشود
+        if (!roles.Any(role => role is "Buyer" or "Farmer" or "Admin" or "Manager"))
         {
             productDto.WholesalePrice = null;
         }

@@ -18,7 +18,7 @@ const HomeBottomNavigation: FC = () => {
       label: "دسته بندی ها ",
     },
     { href: "/checkout/card", icon: FaShoppingCart, label: "سبد خرید" },
-    { href: "/dashboard/latest", icon: FaInfoCircle, label: "آخرین محصولات" },
+    { href: "/product", icon: FaInfoCircle, label: "آخرین محصولات" },
     { href: "/", icon: FaHome, label: "خانه" },
   ];
   return <BottomNavBar navItems={navItems} />;
