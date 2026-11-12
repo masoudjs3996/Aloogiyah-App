@@ -1,6 +1,8 @@
 import { IApiResponse } from "./general";
+import type { ProductOffer } from "./productOffer";
 
-export interface IAgriculturalProduct {
+export interface IAgriculturalProduct extends ProductOffer {
+  saleUnit?: string | null;
   code: string;
   name: string;
   description: string;
@@ -12,6 +14,7 @@ export interface IAgriculturalProduct {
   primaryImageUrl: string;
   createdAt: string;
   statusCode: string;
+  isSellable?: boolean;
 }
 export interface IPaginatedResult<T> {
   items: T[];
@@ -21,6 +24,7 @@ export interface IPaginatedResult<T> {
 }
 
 export interface CreateProductPayload {
+  saleUnit?: string | null;
   FarmCode: string;
   Name: string;
   Slug: string;
@@ -37,6 +41,8 @@ export interface CreateProductPayload {
   Images?: File[];
 }
 export interface ProductFilter {
+  saleUnit?: string | null;
+  discountedOnly?: boolean;
   name?: string;
   statusCode?: string;
   farmCode?: string;

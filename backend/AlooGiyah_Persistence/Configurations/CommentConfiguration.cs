@@ -32,9 +32,13 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
         builder.Property(c => c.CreatedAt)
             .IsRequired();
 
-        builder.Property(c => c.Rating)
-            .HasColumnType("int")
-            .HasAnnotation("CheckConstraint", "Rating BETWEEN 1 AND 5");
+        builder.Property(c => c.Rating).HasColumnType("int");
+        builder.ToTable(t => t.HasCheckConstraint("CK_Comments_Rating", "\"Rating\" IS NULL OR \"Rating\" BETWEEN 1 AND 5"));
+        builder.HasOne(c => c.ParentComment).WithMany(c => c.SubComments)
+            .HasForeignKey(c => c.ParentCommentId).OnDelete(DeleteBehavior.Restrict);
+
+        builder.Property(c => c.IsUniqueProductReview)
+            .HasDefaultValue(false);
 
         builder.HasOne(c => c.User)
             .WithMany(u => u.Comments)
@@ -49,5 +53,9 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
 
         builder.HasIndex(c => new { c.EntityCode, c.EntityComment });
         builder.HasIndex(c => c.UserId);
+        builder.HasIndex(c => new { c.UserId, c.EntityCode })
+            .IsUnique()
+            .HasDatabaseName("IX_Comments_UserId_EntityCode_ProductReview")
+            .HasFilter("\"IsUniqueProductReview\" AND \"ParentCommentId\" IS NULL AND NOT \"IsDeleted\"");
     }
 }

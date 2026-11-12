@@ -26,6 +26,13 @@ public class ChatMessageConfiguration : IEntityTypeConfiguration<ChatMessage>
         builder.Property(cm => cm.ReceiverId)
             .IsRequired();
 
+        builder.Property(cm => cm.ConversationId).IsRequired();
+        builder.Property(cm => cm.IsEdited).IsRequired().HasDefaultValue(false);
+        builder.HasIndex(cm => new { cm.ConversationId, cm.CreatedAt });
+        builder.HasIndex(cm => cm.SenderId);
+        builder.HasIndex(cm => new { cm.SenderId, cm.UploadRequestId })
+            .IsUnique().HasFilter("\"UploadRequestId\" IS NOT NULL");
+
         builder.HasOne(cm => cm.Sender)
             .WithMany(u => u.SentMessages)
             .HasForeignKey(cm => cm.SenderId)

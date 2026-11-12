@@ -1,0 +1,23 @@
+# EAS builds only the standalone mobile app from this repository.
+/*
+!/frontend-mobile
+!frontend-mobile/**
+
+.git/
+frontend-mobile/node_modules/
+frontend-mobile/.expo/
+frontend-mobile/dist/
+frontend-mobile/web-build/
+frontend-mobile/android/
+frontend-mobile/ios/
+frontend-mobile/.env*
+frontend-mobile/credentials.json
+frontend-mobile/**/*.jks
+frontend-mobile/**/*.keystore
+frontend-mobile/**/*.p8
+frontend-mobile/**/*.p12
+frontend-mobile/**/*.pem
+frontend-mobile/**/*.key
+frontend-mobile/**/*.mobileprovision
+frontend-mobile/*.tsbuildinfo
+frontend-mobile/*debug.log*

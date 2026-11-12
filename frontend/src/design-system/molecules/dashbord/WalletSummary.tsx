@@ -22,11 +22,14 @@ export const WalletSummary = ({
           </TextLabel>
 
           <p className="text-lg font-bold text-gray-800 mt-1">
-            {balance?.toLocaleString()} ریال
+            {balance.toLocaleString("fa-IR")} تومان
           </p>
 
           <p className="text-xs text-teal-700 mt-2">
-            مبلغ در انتظار تایید: {pendingAmount?.toLocaleString()} ریال
+            وجه رزروشده: {pendingAmount.toLocaleString("fa-IR")} تومان
+          </p>
+          <p className="mt-2 text-sm font-bold text-teal-800">
+            موجودی قابل استفاده: {(balance - pendingAmount).toLocaleString("fa-IR")} تومان
           </p>
         </div>
 

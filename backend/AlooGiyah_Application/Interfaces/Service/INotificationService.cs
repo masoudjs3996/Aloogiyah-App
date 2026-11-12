@@ -10,5 +10,7 @@ public interface INotificationService
     //Task MarkAllAsReadAsync();
     Task DeleteNotificationAsync(string Code);
     Task<NotificationDto> CreateNotificationAsync(CreateNotificationDto dto);
+    Task<NotificationPreferencesDto> GetMyPreferencesAsync();
+    Task<NotificationPreferencesDto> UpdateMyPreferencesAsync(NotificationPreferencesDto preferences);
     //Task<int> GetUnreadCountAsync();
 }

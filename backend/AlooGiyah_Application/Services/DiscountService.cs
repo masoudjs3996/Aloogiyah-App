@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.Discount;
+using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.Discount;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.Store;
@@ -14,6 +15,8 @@ namespace AlooGiyah_Application.Services;
 
 public class DiscountService : IDiscountService
 {
+    private readonly IDiscountQuery _readQuery;
+
 
     #region Constractor
     private readonly IGenericRepository<Discount> _discountRepository;
@@ -24,7 +27,8 @@ public class DiscountService : IDiscountService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public DiscountService(
+    public DiscountService(IDiscountQuery readQuery,
+        
         IGenericRepository<Discount> discountRepository,
         IGenericRepository<User> userRepository,
         IGenericRepository<AgriculturalProduct> agriculturalProductRepository,
@@ -33,6 +37,7 @@ public class DiscountService : IDiscountService
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
+        _readQuery = readQuery;
         _discountRepository = discountRepository;
         _userRepository = userRepository;
         _agriculturalProductRepository = agriculturalProductRepository;
@@ -47,6 +52,9 @@ public class DiscountService : IDiscountService
     #region Create
     public async Task<DiscountDto> CreateAsync(DiscountCreateDto dto)
     {
+        if (dto.ForQualityAssessment && (dto.Value <= 0 || dto.DiscountType == AlooGiyah_Domain.Enums.DiscountType.Percentage && dto.Value > 100 ||
+            dto.MaxUsage <= 0 || dto.MaxDiscountAmount < 0 || dto.EndDate <= DateTimeOffset.UtcNow || dto.StartDate > dto.EndDate))
+            throw new AlooGiyah_Shared.Exceptions.BadRequestException("مقدار، تعداد استفاده یا اعتبار کد تخفیف معتبر نیست.");
         // کاربران
         var validUserCodes = dto.UserCodes?.Where(c => !string.IsNullOrWhiteSpace(c))
                                           ?? Enumerable.Empty<string>();
@@ -90,6 +98,15 @@ public class DiscountService : IDiscountService
             farmId = farm.FarmId;
         }
         var entity = _mapper.Map<Discount>(dto);
+        if (dto.FundingSource is not ("Platform" or "Seller") || dto.ForQualityAssessment && dto.FundingSource != "Platform")
+            throw new BadRequestException("منبع تأمین تخفیف معتبر نیست.");
+        entity.FundingSource = dto.FundingSource;
+        if (dto.FundingSource == "Seller")
+        {
+            var sellerFarm = await _farmRepository.GetByCodeAsync(dto.FarmCode.Trim()) ?? throw new BadRequestException("تخفیف کشاورز باید به مزرعه محدود باشد.");
+            entity.IssuerSellerId = sellerFarm.OwnerId;
+        }
+        entity.FarmId = farmId;
         entity.Users = users;
         entity.agriculturalProducts = agroProducts;
         entity.Categories = categories;
@@ -113,6 +130,20 @@ public class DiscountService : IDiscountService
         var entity = await _discountRepository.GetByCodeAsync(dto.Code);
         if (entity == null)
             return false;
+
+        if (dto.FundingSource != null)
+        {
+            if (dto.FundingSource is not ("Platform" or "Seller") || dto.ForQualityAssessment && dto.FundingSource != "Platform")
+                throw new BadRequestException("منبع تأمین تخفیف معتبر نیست.");
+            if (dto.FundingSource == "Seller")
+            {
+                var sellerFarm = entity.FarmId.HasValue ? await _farmRepository.GetByIdAsync(entity.FarmId.Value) : null;
+                if (sellerFarm == null) throw new BadRequestException("تخفیف کشاورز باید به مزرعه محدود باشد.");
+                entity.IssuerSellerId = sellerFarm.OwnerId;
+            }
+            else entity.IssuerSellerId = null;
+            entity.FundingSource = dto.FundingSource;
+        }
 
         // گرفتن کاربران مجاز
         var users = new List<User>();
@@ -140,6 +171,7 @@ public class DiscountService : IDiscountService
         entity.EndDate = dto.EndDate;
         entity.MaxUsage = dto.MaxUsage;
         entity.IsActive = dto.IsActive;
+        entity.ForQualityAssessment = dto.ForQualityAssessment;
         entity.UsageCount = dto.UsageCount;
         entity.Users = users;
         entity.agriculturalProducts = ageoProducts;
@@ -166,54 +198,14 @@ public class DiscountService : IDiscountService
     #region Get By Code
     public async Task<DiscountDto?> GetByCodeAsync(string code)
     {
-        var entity = await _discountRepository.GetByCodeWithIncludeAsync(
-         code,
-         "Users",
-         "Products",
-         "Categories.ParentCategory",
-         "Farm"
-     );
-
-        if (entity == null)
-            return null;
-
-       
-        return _mapper.Map<DiscountDto>(entity);
+        return await _readQuery.GetByCodeAsync(code);
     }
     #endregion
 
     #region Get By Filter
     public async Task<PagedResult<DiscountDto>> GetByFilterAsync(DiscountFilterDto filter)
     {
-        Expression<Func<Discount, bool>> predicate = d => !d.IsDeleted;
-
-        if (!string.IsNullOrEmpty(filter.SearchTerm))
-            predicate = predicate.And(d => d.Code.Contains(filter.SearchTerm));
-
-        if (filter.CategoryCodes?.Any() ?? false)
-            predicate = predicate.And(p => p.Categories.Any(c => filter.CategoryCodes.Contains(c.Code)));
-
-
-        if (filter.DiscountType.HasValue)
-            predicate = predicate.And(d => d.DiscountType == filter.DiscountType);
-
-        if (filter.IsActive.HasValue)
-            predicate = predicate.And(d => d.IsActive == filter.IsActive.Value);
-
-        return await _discountRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: d => _mapper.Map<DiscountDto>(d),
-            includes: new string[]
-        {
-            "Users",
-            "Products",
-            "Categories.ParentCategory",
-            "Farm"
-        },
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: d => d.CreatedAt
-        );
+        return await _readQuery.GetByFilterAsync(filter);
     }
     #endregion
 }

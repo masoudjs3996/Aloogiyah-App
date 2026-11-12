@@ -1,0 +1,54 @@
+{
+  "cli": {
+    "version": ">=16.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_ALLOW_HTTP": "true"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_ALLOW_HTTP": "true"
+      }
+    },
+    "release": {
+      "distribution": "store",
+      "environment": "production",
+      "env": {
+        "EXPO_PUBLIC_ALLOW_HTTP": "false",
+        "EXPO_PUBLIC_API_URL": "https://api.aloogiyah.ir/api",
+        "EXPO_PUBLIC_MEDIA_URL": "https://api.aloogiyah.ir",
+        "EXPO_PUBLIC_CHAT_URL": "wss://api.aloogiyah.ir/ws/chat",
+        "EXPO_PUBLIC_AUCTION_OPEN_STATUS_CODE": "59H5Z2H0M1",
+        "EXPO_PUBLIC_SERVICE_STATUS_LABELS": "{\"61AD6EEYSC\":\"در انتظار تخصیص\",\"HAQAG92G8N\":\"در حال انجام\",\"W2N6Q5ZHAD\":\"انجام شده\",\"MCHS3J49VZ\":\"لغو شده\"}"
+      }
+    },
+    "apk": {
+      "extends": "release",
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "ios-test": {
+      "extends": "release",
+      "distribution": "internal"
+    },
+    "production": {
+      "extends": "release",
+      "autoIncrement": true
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

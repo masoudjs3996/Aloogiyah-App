@@ -39,6 +39,7 @@ public class RepositoryFactory : IRepositoryFactory
         {
             { EntityComment.Product, typeof(Product) },
             { EntityComment.AgriculturalProduct, typeof(AgriculturalProduct) },
+            { EntityComment.AgriculturalListing, typeof(AgriculturalListing) },
             { EntityComment.Article, typeof(Article) },
             { EntityComment.Auction, typeof(Auction) },
             { EntityComment.ServiceRequest, typeof(ServiceRequest) }

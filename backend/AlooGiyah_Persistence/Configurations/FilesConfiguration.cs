@@ -39,7 +39,7 @@ public class FilesConfiguration : IEntityTypeConfiguration<Files>
             .HasForeignKey(f => f.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasIndex(f => new { f.EntityFile });
+        builder.HasIndex(f => new { f.EntityFile, f.EntityCode });
         builder.HasIndex(f => f.UserId);
     }
 }

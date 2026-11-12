@@ -4,6 +4,8 @@ namespace AlooGiyah_Application.DTOs.QualityAssessment;
 
 public class QualityAssessmentFilterDto : BaseFilterDto
 {
+    public string? AgriculturalOrderCode { get; set; }
+    public bool AssignedToMe { get; set; }
     public string? AgriculturalProductCode { get; set; }
     public string? ExpertCode { get; set; }
     public string? QualityGrade { get; set; }

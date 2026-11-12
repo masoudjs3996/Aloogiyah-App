@@ -8,8 +8,9 @@ public class UserDto
     public string? LName { get; set; }
     public string? Email { get; set; }
     public string UserName { get; set; } = string.Empty;
+    public bool IsPhoneOnly => AlooGiyah_Domain.Entities.UserFolder.User.IsGeneratedPhoneUsername(UserName);
+    public bool IsPhoneConfirmed { get; set; }
     public bool IsEmailConfirmed { get; set; }
-    public int Age { get; set; }
     public string RoleCode { get; set; } = string.Empty;
     public string RoleName {  get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;

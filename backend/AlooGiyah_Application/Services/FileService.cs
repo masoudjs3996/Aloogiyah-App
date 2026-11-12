@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.File;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.File;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Entities;
@@ -18,6 +19,8 @@ namespace AlooGiyah_Application.Services;
 
 public class FileService : IFileService
 {
+    private readonly IFileQuery _readQuery;
+
     #region Constructor
 
     private readonly IFileRepository _fileRepository;
@@ -28,8 +31,10 @@ public class FileService : IFileService
     private readonly ICurrentUserService _currentUserService;
     private readonly IGenericRepository<FileType> _genericFileRepository;
     private readonly IRepositoryFactory _repositoryFactory;
+    private readonly IGenericRepository<AgriculturalListing> _listings;
 
-    public FileService(
+    public FileService(IFileQuery readQuery,
+        
         IFileRepository fileRepository,
         IFileStorageService fileStorageService,
         IUnitOfWork unitOfWork,
@@ -37,8 +42,10 @@ public class FileService : IFileService
         IGenericRepository<Files> genericRepositoryfile,
         IGenericRepository<FileType> genericFileRepository,
         ICurrentUserService currentUserService,
-        IRepositoryFactory repositoryFactory)
+        IRepositoryFactory repositoryFactory,
+        IGenericRepository<AgriculturalListing> listings)
     {
+        _readQuery = readQuery;
         _fileRepository = fileRepository;
         _fileStorageService = fileStorageService;
         _unitOfWork = unitOfWork;
@@ -47,6 +54,7 @@ public class FileService : IFileService
         _genericFileRepository = genericFileRepository;
         _genericRepositoryfile = genericRepositoryfile;
         _repositoryFactory = repositoryFactory;
+        _listings = listings;
     }
     #endregion
 
@@ -56,6 +64,14 @@ public class FileService : IFileService
     {
         if (string.IsNullOrEmpty(_currentUserService.UserId))
             throw new UnauthorizedException("کاربر لاگین نیست");
+
+        if (dto.File == null || dto.File.Length == 0)
+            throw new BadRequestException("فایل خالی است.");
+        var extension = Path.GetExtension(dto.File.FileName).ToLowerInvariant();
+        if (dto.File.Length > 15 * 1024 * 1024 ||
+            !dto.File.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) ||
+            extension is not ".jpg" and not ".jpeg" and not ".png" and not ".webp" and not ".gif")
+            throw new BadRequestException("فقط تصویرهای JPG، PNG، WEBP یا GIF تا سقف ۱۵ مگابایت پذیرفته می‌شوند.");
 
         var fileType = await _genericFileRepository.GetByCodeAsync(dto.FileTypeCode)
                        ?? throw new AppException("نوع فایل یافت نشد");
@@ -122,8 +138,14 @@ public class FileService : IFileService
         if (file == null || file.IsDeleted)
             throw new AppException("File not found", "FILE_NOT_FOUND");
 
+        var userId = CurrentUserId();
+        if (!IsManager && file.UserId != userId)
+            throw new ForbiddenException("حذف این فایل برای شما مجاز نیست.");
+
         file.IsDeleted = true;
-        await _fileStorageService.DeleteFileAsync(file.Url);
+        if (file.EntityFile != EntityFile.AgriculturalProduct ||
+            !await _listings.ExistsAsync(listing => !listing.IsDeleted && listing.ImageUrls.Contains(file.Url)))
+            await _fileStorageService.DeleteFileAsync(file.Url);
         await _unitOfWork.SaveChangesAsync();
     }
     #endregion
@@ -131,71 +153,7 @@ public class FileService : IFileService
     #region Get By Filter
     public async Task<PagedResult<FileDto>> GetFilesAsync(FileFilterDto filter)
     {
-        if (string.IsNullOrEmpty(_currentUserService.UserId))
-            throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
-
-        // ساخت predicate (شرط‌ها)
-        Expression<Func<Files, bool>> predicate = f => !f.IsDeleted;
-
-        var userRole = _currentUserService.Roles.FirstOrDefault(); // نقش فعلی کاربر
-        if (userRole != "Manager") //  فقط مدیر می‌تونه آدرس‌های دیگران رو ببینه
-        {
-            predicate = predicate.And(a => a.User.UserId == int.Parse(_currentUserService.UserId));
-        }
-        else if (!string.IsNullOrEmpty(filter.UserCode))
-        {
-            predicate = predicate.And(a => a.User.Code == filter.UserCode);
-        }
-
-        int? fileTypeId = null;
-        if (!string.IsNullOrEmpty(filter.FileTypeCode))
-        {
-            var fileType = await _genericFileRepository.GetByCodeAsync(filter.FileTypeCode);
-            if (fileType == null)
-                throw new InvalidOperationException($"FileType with code {filter.FileTypeCode} does not exist.");
-            fileTypeId = fileType.FileTypeId;
-        }
-
-        if (!string.IsNullOrEmpty(filter.EntityCode) && filter.EntityFile.HasValue)
-        {
-            var isValidEntity = await ValidateEntityCodeAsync(filter.EntityFile.Value, filter.EntityCode);
-            if (!isValidEntity)
-                throw new InvalidOperationException($"Entity with code {filter.EntityCode} not found for EntityFile {filter.EntityFile.Value}.");
-        }
-
-
-
-
-        if (fileTypeId.HasValue)
-            predicate = predicate.And(f => f.FileTypeId == fileTypeId.Value);
-
-        if (filter.EntityFile.HasValue)
-            predicate = predicate.And(f => f.EntityFile == filter.EntityFile.Value);
-
-        if (!string.IsNullOrEmpty(filter.EntityCode))
-            predicate = predicate.And(f => f.EntityCode == filter.EntityCode);
-
-        if (!string.IsNullOrEmpty(filter.SearchText))
-            predicate = predicate.And(f => f.Description != null && f.Description.Contains(filter.SearchText));
-
-        // استفاده از متد GetPagedProjectedAsync جنریک ریپازیتوری با پروجکشن
-        var pagedResult = await _genericRepositoryfile.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: f => new FileDto
-            {
-                FileCode = f.Code,
-                Url = f.Url,
-                Description = f.Description,
-                CreatedAt = f.CreatedAt,
-                FileTypeCode = f.FileType.Code,
-                UserCode = f.User.Code
-            },
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: f => f.CreatedAt
-        );
-
-        return pagedResult;
+        return await _readQuery.GetFilesAsync(filter);
     }
 
     #endregion
@@ -205,6 +163,9 @@ public class FileService : IFileService
     {
         var file = await _genericRepositoryfile.GetByCodeAsync(fileCode);
         if (file == null || file.IsDeleted) throw new AppException("File not found or deleted");
+        var userId = CurrentUserId();
+        if (!IsManager && file.UserId != userId)
+            throw new ForbiddenException("تغییر فایل اصلی برای شما مجاز نیست.");
 
         // قدیمی primary رو غیرفعال کن
         var oldPrimary = await _genericRepositoryfile.FirstOrDefaultAsync(f =>
@@ -232,13 +193,7 @@ public class FileService : IFileService
     #region GetPrimaryFileUrlAsync
     public async Task<string?> GetPrimaryFileUrlAsync(EntityFile entityFile, string entityCode)
     {
-        var file = await _genericRepositoryfile.FirstOrDefaultAsync(f =>
-            f.EntityFile == entityFile &&
-            f.EntityCode == entityCode &&
-            f.IsPrimary &&
-            !f.IsDeleted);
-
-        return file?.Url;
+        return await _readQuery.GetPrimaryFileUrlAsync(entityFile, entityCode);
     }
     #endregion
 
@@ -299,5 +254,14 @@ public class FileService : IFileService
         EntityFile.Slider => false,
         _ => false
     };
+
+    private int CurrentUserId()
+    {
+        if (!_currentUserService.IsAuthenticated || _currentUserService.IsGuest || !int.TryParse(_currentUserService.UserId, out var id))
+            throw new UnauthorizedException("ابتدا وارد حساب کاربری شوید.");
+        return id;
+    }
+
+    private bool IsManager => _currentUserService.Roles.Contains("Manager") || _currentUserService.Roles.Contains("Admin");
 
 }

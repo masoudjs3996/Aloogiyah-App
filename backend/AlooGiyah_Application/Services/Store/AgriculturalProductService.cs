@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Application.DTOs.AgriculturalProduct;
+using AlooGiyah_Application.DTOs.AgriculturalProduct;
 using AlooGiyah_Application.DTOs.File;
 using AlooGiyah_Application.Interfaces.Query;
 using AlooGiyah_Application.Interfaces.Service;
@@ -9,9 +9,11 @@ using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Enums;
 using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Domain.Pagination;
+using AlooGiyah_Shared.Constants;
 using AlooGiyah_Shared.Exceptions;
 using AlooGiyah_Shared.Seo;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace AlooGiyah_Application.Services.Store;
 
@@ -36,7 +38,7 @@ public class AgriculturalProductService : IAgriculturalProductService
         IGenericRepository<Category> categoryRepository,
         IGenericRepository<Files> fileRepo,
         IAgriculturalProductQuery productQuery,
-    IFileService fileService,
+        IFileService fileService,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
         IMapper mapper)
@@ -53,6 +55,51 @@ public class AgriculturalProductService : IAgriculturalProductService
         _mapper = mapper;
     }
     #endregion
+    private bool IsManager => _currentUserService.Roles.Any(role => role is "Admin" or "Manager");
+
+    private async Task EnsureCanManageFarmAsync(int farmId)
+    {
+        if (!_currentUserService.IsAuthenticated || _currentUserService.IsGuest ||
+            !int.TryParse(_currentUserService.UserId, out var userId))
+            throw new UnauthorizedException("ابتدا وارد حساب کاربری شوید.");
+        var farm = await _greenhouseRepository.GetByIdAsync(farmId)
+            ?? throw new NotFoundException("مزرعه یافت نشد.");
+        if (!IsManager && farm.OwnerId != userId)
+            throw new ForbiddenException("فقط مالک مزرعه می‌تواند محصول آن را مدیریت کند.");
+    }
+
+    private async Task EnsureCanManageProductAsync(string code)
+    {
+        var product = await _agriculturalProductRepository.GetByCodeAsync(code)
+            ?? throw new NotFoundException("محصول یافت نشد.");
+        await EnsureCanManageFarmAsync(product.FarmId);
+    }
+
+    private string CreationStatus(string requested) =>
+        IsManager && !string.IsNullOrWhiteSpace(requested) ? requested : AgriculturalProductStatuses.Sellable;
+
+    public async Task SetProductOfferAsync(ProductOfferDto dto)
+    {
+        var product = await _agriculturalProductRepository.GetAll().Include(p => p.Farm).Include(p => p.Offers)
+            .SingleOrDefaultAsync(p => p.Code == dto.ProductCode && !p.IsDeleted && !p.Farm.IsDeleted)
+            ?? throw new NotFoundException("محصول یافت نشد.");
+        var manager = _currentUserService.Roles.Any(r => r is "Admin" or "Manager");
+        if (!manager && (!int.TryParse(_currentUserService.UserId, out var userId) || product.Farm.OwnerId != userId))
+            throw new ForbiddenException("فقط مالک مزرعه می‌تواند تخفیف محصول را تغییر دهد.");
+        var now = DateTimeOffset.UtcNow;
+        if (dto.Percentage < 0 || dto.Percentage > 100 || dto.Percentage != decimal.Round(dto.Percentage, 2) ||
+            dto.Percentage > 0 && (!dto.EndDate.HasValue || dto.EndDate <= now))
+            throw new BadRequestException("درصد تخفیف باید بین صفر و صد و زمان پایان در آینده باشد.");
+        foreach (var old in product.Offers.Where(o => o.IsActive && !o.IsDeleted)) {
+            old.IsActive = false;
+            old.UpdatedAt = now;
+        }
+        if (dto.Percentage > 0)
+            product.Offers.Add(new AgriculturalProductOffer {
+                Percentage = dto.Percentage, StartsAt = now, EndsAt = dto.EndDate!.Value.ToUniversalTime(), IsActive = true
+            });
+        await _unitOfWork.SaveChangesAsync();
+    }
 
     #region Create
     public async Task<AgriculturalProductDto> CreateAsync(AgriculturalProductCreateDto dto)
@@ -72,8 +119,10 @@ public class AgriculturalProductService : IAgriculturalProductService
         var greenhouseId = await _greenhouseRepository.GetIdByCodeAsync(dto.FarmCode, g => g.FarmId);
         if (greenhouseId == null)
             throw new NotFoundException($"گلخانه با کد {dto.FarmCode} پیدا نشد");
+        await EnsureCanManageFarmAsync(greenhouseId.Value);
 
         // گرفتن وضعیت
+        dto.StatusCode = CreationStatus(dto.StatusCode);
         var statusId = await _statusRepository.GetIdByCodeAsync(dto.StatusCode, s => s.StatusId);
         if (statusId == null)
             throw new NotFoundException($"وضعیت با کد {dto.StatusCode} پیدا نشد");
@@ -159,7 +208,9 @@ public class AgriculturalProductService : IAgriculturalProductService
 
             var farmId = await _greenhouseRepository.GetIdByCodeAsync(dto.FarmCode, g => g.FarmId)
                          ?? throw new NotFoundException($"گلخانه با کد {dto.FarmCode} پیدا نشد");
+            await EnsureCanManageFarmAsync(farmId);
 
+            dto.StatusCode = CreationStatus(dto.StatusCode);
             var statusId = await _statusRepository.GetIdByCodeAsync(dto.StatusCode, s => s.StatusId)
                            ?? throw new NotFoundException($"وضعیت با کد {dto.StatusCode} پیدا نشد");
 
@@ -223,7 +274,7 @@ public class AgriculturalProductService : IAgriculturalProductService
 
             await transaction.CommitAsync();
 
-            return await GetByCodeAsync(entity.Code);
+            return await GetByCodeAsync(entity.Code) ?? throw new NotFoundException("The saved product could not be retrieved.");
         }
         catch (Exception)
         {
@@ -250,6 +301,7 @@ public class AgriculturalProductService : IAgriculturalProductService
 
         if (entity == null)
             throw new NotFoundException($"محصول با کد {dto.Code} پیدا نشد");
+        await EnsureCanManageFarmAsync(entity.FarmId);
 
         // اعتبارسنجی‌ها مثل Create
         if (dto.RetailPrice < 0 || dto.WholesalePrice < 0)
@@ -268,6 +320,7 @@ public class AgriculturalProductService : IAgriculturalProductService
             var greenhouseId = await _greenhouseRepository.GetIdByCodeAsync(dto.GreenhouseCode, g => g.FarmId);
             if (greenhouseId == null)
                 throw new NotFoundException($"گلخانه با کد {dto.GreenhouseCode} پیدا نشد");
+            await EnsureCanManageFarmAsync(greenhouseId.Value);
             entity.FarmId = greenhouseId.Value;
         }
 
@@ -277,6 +330,8 @@ public class AgriculturalProductService : IAgriculturalProductService
             var statusId = await _statusRepository.GetIdByCodeAsync(dto.StatusCode, s => s.StatusId);
             if (statusId == null)
                 throw new NotFoundException($"وضعیت با کد {dto.StatusCode} پیدا نشد");
+            if (!IsManager && statusId.Value != entity.StatusId)
+                throw new ForbiddenException("تغییر وضعیت انتشار محصول فقط برای مدیریت مجاز است.");
             entity.StatusId = statusId.Value;
         }
 
@@ -294,6 +349,10 @@ public class AgriculturalProductService : IAgriculturalProductService
         }
 
         // مپ کردن بقیه فیلدها
+        if (!string.IsNullOrEmpty(dto.SaleUnit) && entity.SaleUnit != null && dto.SaleUnit != entity.SaleUnit &&
+            await _agriculturalProductRepository.GetAll().Where(p => p.AgriculturalProductId == entity.AgriculturalProductId)
+                .AnyAsync(p => p.AgriculturalOrderItems.Any()))
+            throw new BadRequestException("این محصول سابقه سفارش دارد؛ برای واحد فروش متفاوت، محصول جدید ثبت کنید.");
         _mapper.Map(dto, entity);
 
         // SEO
@@ -333,6 +392,7 @@ public class AgriculturalProductService : IAgriculturalProductService
         var entity = await _agriculturalProductRepository.GetByCodeAsync(code);
         if (entity == null)
             return false;
+        await EnsureCanManageFarmAsync(entity.FarmId);
 
         await _agriculturalProductRepository.DeleteAsync(entity);
         await _unitOfWork.SaveChangesAsync();
@@ -341,7 +401,7 @@ public class AgriculturalProductService : IAgriculturalProductService
     #endregion
 
     #region Get By Code
-    public async Task<AgriculturalProductDetailDto> GetByCodeAsync(string code)
+    public async Task<AgriculturalProductDetailDto?> GetByCodeAsync(string code)
     {
         var role = _currentUserService.Roles.FirstOrDefault() ?? "User";
 
@@ -362,9 +422,19 @@ public class AgriculturalProductService : IAgriculturalProductService
     }
     #endregion
 
+    public async Task<PagedResult<AgriculturalProductSimilarDto>> GetSimilarAsync(
+      AgriculturalProductSimilarFilterDto filter)
+    {
+        if (string.IsNullOrWhiteSpace(filter.ProductCode))
+            throw new ArgumentException("ProductCode is required");
+
+        return await _productQuery.GetSimilarAsync(filter);
+    }
+
     #region اضافه کردن چند عکس به محصول (برای کالای موجود)
     public async Task<List<string>> AddProductImagesAsync(AddProductImagesDto dto)
     {
+        await EnsureCanManageProductAsync(dto.ProductCode);
         var product = await _agriculturalProductRepository.FirstOrDefaultAsync(p => p.Code == dto.ProductCode && !p.IsDeleted)
                       ?? throw new NotFoundException("محصول یافت نشد");
 
@@ -430,6 +500,7 @@ public class AgriculturalProductService : IAgriculturalProductService
     #region تنظیم عکس اصلی محصول
     public async Task<string> SetPrimaryProductImageAsync(string productCode, string fileCode)
     {
+        await EnsureCanManageProductAsync(productCode);
         // چک کنیم فایل متعلق به این محصول باشد
         var fileExists = await _fileRepo.ExistsAsync(f =>
             f.Code == fileCode &&
@@ -461,6 +532,7 @@ public class AgriculturalProductService : IAgriculturalProductService
     #region حذف یک عکس از محصول
     public async Task RemoveProductImageAsync(string productCode, string fileCode)
     {
+        await EnsureCanManageProductAsync(productCode);
         var file = await _fileRepo.FirstOrDefaultAsync(f =>
             f.Code == fileCode &&
             f.EntityCode == productCode &&

@@ -1,27 +1,54 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 @import "swiper/css";
 @import "swiper/css/navigation";
 @import "swiper/css/pagination";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Compact introduction using the site's existing green palette. */
+.brand-introduction {
+  background: rgb(var(--color-primary-50));
+  color: rgb(var(--color-primary-900));
+  border-bottom: 1px solid rgb(var(--color-primary-100));
+}
+.brand-main-action, .brand-secondary-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 40px;
+  border-radius: 0.65rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.brand-main-action { background: rgb(var(--color-primary-700)); color: #fff; }
+.brand-main-action:hover { background: rgb(var(--color-primary-800)); }
+.brand-secondary-action { border: 1px solid rgb(var(--color-primary-200)); }
+.brand-secondary-action:hover { background: rgb(var(--color-primary-100)); }
+.brand-introduction a:focus-visible, .brand-introduction button:focus-visible {
+  outline: 2px solid rgb(var(--color-primary-500));
+  outline-offset: 3px;
+}
 
 @layer base {
   :root {
     &,
     &.light-mode {
-      --background-app-rgb: 249, 250, 251;
-      --color-primary-900: 74, 109, 255;
-      --color-primary-800: 92, 124, 255;
-      --color-primary-700: 110, 138, 255;
-      --color-primary-600: 128, 153, 255;
-      --color-primary-500: 146, 167, 255;
-      --color-primary-400: 164, 182, 255;
-      --color-primary-300: 183, 197, 255;
-      --color-primary-200: 201, 211, 255;
-      --color-primary-100: 219, 226, 255;
-      --color-primary-50: 228, 233, 255;
+      --background-app-rgb: 250, 248, 242;
+      --color-primary-900: 25, 63, 50;
+      --color-primary-800: 30, 77, 60;
+      --color-primary-700: 36, 91, 70;
+      --color-primary-600: 45, 109, 83;
+      --color-primary-500: 57, 128, 99;
+      --color-primary-400: 101, 155, 129;
+      --color-primary-300: 149, 185, 165;
+      --color-primary-200: 192, 212, 198;
+      --color-primary-100: 225, 237, 228;
+      --color-primary-50: 240, 246, 241;
       --color-secondary-900: 29, 88, 35;
-      --color-secondary-700: 151, 181, 69;
+      --color-secondary-700: 25, 145, 92;
       --color-green: 34, 139, 34;
       --color-prymary-green: 44, 96, 65;
       --color-green-foreground: 255, 255, 255;
@@ -38,9 +65,9 @@
     }
     &.dark-mode {
       --background-app-rgb: 20, 20, 20;
-      --color-secondary-900: 249, 250, 251;
+      --color-secondary-900: 250, 248, 242;
       --color-secondary-800: 243, 244, 246;
-      --color-secondary-700: 229, 231, 235;
+      --color-secondary-700: 2, 120, 42;
       --color-secondary-600: 209, 213, 219;
       --color-secondary-500: 156, 163, 175;
       --color-secondary-400: 107, 114, 128;
@@ -60,6 +87,29 @@
       --backdrop-color: 0, 0, 0;
     }
   }
+}
+
+.register-farm-form .border-secondary-700 {
+  border-color: #cbd5e1;
+  border-width: 1px;
+  background: #fff;
+}
+
+.register-farm-form .border-secondary-700:focus-within {
+  border-color: #19915c;
+  box-shadow: 0 0 0 3px rgb(25 145 92 / 12%);
+}
+
+.register-farm-form .border-secondary-700 input,
+.register-farm-form .border-secondary-700 textarea {
+  border: 0;
+  background: transparent;
+  outline: 0;
+}
+
+.register-farm-form .border-secondary-700 input:focus,
+.register-farm-form .border-secondary-700 textarea:focus {
+  box-shadow: none;
 }
 
 .rti--container {
@@ -166,6 +216,7 @@
   }
 }
 
+@layer base {
 * {
   box-sizing: border-box;
   scroll-behavior: smooth;
@@ -195,6 +246,7 @@ button:disabled {
   color: rgb(var(--color-secondary-700), 0.5);
   pointer-events: none;
   box-shadow: none;
+}
 }
 
 /* inupt number */
@@ -233,8 +285,10 @@ table th {
   color: rgb(var(--color-secondary-600));
   font-size: 0.9rem;
 }
-a {
-  display: block;
+@layer base {
+  a {
+    display: block;
+  }
 }
 table td {
   font-size: 0.85rem;
@@ -291,5 +345,50 @@ table td {
     right: 11px;
     top: -13px;
     position: absolute;
+  }
+}
+
+/* Leave room for both the page action dock and mobile navigation. */
+@media (max-width: 767px) {
+  body:has([data-mobile-navigation]) {
+    --mobile-navigation-height: 4rem;
+  }
+  body:has([data-page-action-bar]) main {
+    padding-bottom: calc(6rem + var(--mobile-navigation-height, 0px) + env(safe-area-inset-bottom));
+  }
+}
+
+/* The available content width matters after the dashboard sidebar is deducted. */
+.sales-customers-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+}
+.dashboard-safe-shell {
+  padding-top: max(.5rem, env(safe-area-inset-top, 0px));
+  padding-right: max(.5rem, env(safe-area-inset-right, 0px));
+  padding-bottom: max(.5rem, env(safe-area-inset-bottom, 0px));
+  padding-left: max(.5rem, env(safe-area-inset-left, 0px));
+}
+.dashboard-safe-drawer {
+  padding: max(1rem, env(safe-area-inset-top, 0px)) max(1rem, env(safe-area-inset-right, 0px)) max(1rem, env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px));
+}
+.public-safe-header {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+.safe-notification-panel {
+  top: calc(4.5rem + env(safe-area-inset-top, 0px));
+  left: max(.5rem, env(safe-area-inset-left, 0px));
+  right: max(.5rem, env(safe-area-inset-right, 0px));
+  max-height: calc(100dvh - 5rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 768px) {
+  .safe-notification-panel {
+    top: 100%;
+    left: 0;
+    right: auto;
+    max-height: min(75vh, 620px);
   }
 }

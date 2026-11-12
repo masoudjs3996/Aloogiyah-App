@@ -12,6 +12,8 @@ namespace AlooGiyah_Application.DTOs.ServiceRequest
         public string? DiscountCode { get; set; }
         public decimal DiscountAmount { get; set; }
         public string StatusCode { get; set; } = string.Empty;
+        [Required]
+        public string AddressCode { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public DateTimeOffset? ServiceDate { get; set; }
 

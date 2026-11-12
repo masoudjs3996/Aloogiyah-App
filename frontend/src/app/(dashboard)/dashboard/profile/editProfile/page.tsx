@@ -1,11 +1,5 @@
-import { EditProfileForm } from "@/design-system/organisms/dashbord/EditProfileForm";
+import { redirect } from "next/navigation";
 
-const EditProfilePage = () => {
-  return (
-    <div className="max-w-md mx-auto pt-6">
-      <EditProfileForm />
-    </div>
-  );
-};
-
-export default EditProfilePage;
+export default function LegacyAccountPage() {
+  redirect("/dashboard/profile");
+}

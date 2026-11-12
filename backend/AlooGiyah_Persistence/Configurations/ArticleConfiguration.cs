@@ -19,7 +19,7 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
         builder.Property(a => a.Content)
             .IsRequired()
-            .HasMaxLength(4000);
+            .HasColumnType("text");
 
         builder.Property(a => a.CreatedAt)
             .IsRequired();

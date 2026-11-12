@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Domain.Entities.UserFolder;
+using AlooGiyah_Domain.Entities.UserFolder;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -18,7 +18,6 @@ public class Article : BaseEntity
     public string Title { get; set; } = string.Empty;
 
     [Required]
-    [MaxLength(4000)]
     public string Content { get; set; } = string.Empty;
 
 
@@ -43,4 +42,4 @@ public class Article : BaseEntity
     public User Author { get; set; } = null!;
     public List<Category> Categories { get; set; } = null!;
     #endregion
-}   
+}

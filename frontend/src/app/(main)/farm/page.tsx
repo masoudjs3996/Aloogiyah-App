@@ -1,8 +1,2 @@
-const Farm=()=>{
-    return(
-
-        <div>صفحه مزارع</div>
-    )
-}
-
-export default Farm
+import FarmsWorkspace from "@/design-system/organisms/platform/FarmsWorkspace";
+export default function Page() { return <FarmsWorkspace />; }

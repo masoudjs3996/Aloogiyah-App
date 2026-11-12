@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.Wallet;
+using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.Wallet;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Entities.UserFolder;
@@ -10,6 +11,8 @@ namespace AlooGiyah_Application.Services.UserFolder;
 
 public class WalletService : IWalletService
 {
+    private readonly IWalletQuery _readQuery;
+
     private readonly IGenericRepository<Wallet> _walletRepository;
     private readonly IGenericRepository<WalletTransaction> _walletTransactionRepository;
     private readonly ICurrentUserService _currentUserService;
@@ -17,7 +20,8 @@ public class WalletService : IWalletService
     private readonly IPaymentGatewayService _paymentGatewayService; // سرویس پرداخت
     private readonly IMapper _mapper;
 
-    public WalletService(
+    public WalletService(IWalletQuery readQuery,
+        
         IGenericRepository<Wallet> walletRepository,
         IGenericRepository<WalletTransaction> walletTransactionRepository,
         ICurrentUserService currentUserService,
@@ -25,6 +29,7 @@ public class WalletService : IWalletService
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
+        _readQuery = readQuery;
         _walletRepository = walletRepository;
         _walletTransactionRepository = walletTransactionRepository;
         _currentUserService = currentUserService;
@@ -35,24 +40,13 @@ public class WalletService : IWalletService
 
     public async Task<WalletDto> GetWalletByUserCodeAsync()
     {
-        if (string.IsNullOrEmpty(_currentUserService.UserId))
-            throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
-
-        var userId =int.Parse(_currentUserService.UserId);
-
-        var wallet = await _walletRepository.FirstOrDefaultAsync(w => w.UserId == userId);
-        if (wallet == null)
-            throw new NotFoundException("کیف پول پیدا نشد");
-
-        return _mapper.Map<WalletDto>(wallet);
+        return await _readQuery.GetWalletByUserCodeAsync() ?? throw new NotFoundException("کیف پول پیدا نشد.");
     }
 
     public async Task<bool> CheckBalanceAsync( decimal requiredAmount)
     {
-        if (string.IsNullOrEmpty(_currentUserService.UserId))
-            throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
-
-        var userId = int.Parse(_currentUserService.UserId);
+        if (requiredAmount <= 0) throw new BadRequestException("مبلغ باید مثبت باشد.");
+        var userId = CurrentUserId();
 
         var wallet = await _walletRepository.FirstOrDefaultAsync(w => w.UserId == userId);
         if (wallet == null)
@@ -63,11 +57,11 @@ public class WalletService : IWalletService
 
     public async Task<bool> HoldAmountAsync( decimal amount)
     {
+        if (amount <= 0) throw new BadRequestException("مبلغ باید مثبت باشد.");
+        ValidateWalletAmount(amount);
+        await using var transaction = await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
 
-            if (string.IsNullOrEmpty(_currentUserService.UserId))
-                throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
-
-            var userId = int.Parse(_currentUserService.UserId);
+            var userId = CurrentUserId();
 
             var wallet = await _walletRepository.FirstOrDefaultAsync(w => w.UserId == userId);
             if (wallet == null)
@@ -79,17 +73,18 @@ public class WalletService : IWalletService
             wallet.HeldAmount += amount;
             await _walletRepository.UpdateAsync(wallet);
             await _unitOfWork.SaveChangesAsync();
+            await transaction.CommitAsync();
             return true;
 
     }
 
     public async Task<bool> ReleaseHoldAsync(decimal amount)
     {
+        if (amount <= 0) throw new BadRequestException("مبلغ باید مثبت باشد.");
+        ValidateWalletAmount(amount);
+        await using var transaction = await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
 
-            if (string.IsNullOrEmpty(_currentUserService.UserId))
-                throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
-
-            var userId = int.Parse(_currentUserService.UserId);
+            var userId = CurrentUserId();
 
             var wallet = await _walletRepository.FirstOrDefaultAsync(w => w.UserId == userId);
             if (wallet == null)
@@ -101,28 +96,30 @@ public class WalletService : IWalletService
             wallet.HeldAmount -= amount;
             await _walletRepository.UpdateAsync(wallet);
             await _unitOfWork.SaveChangesAsync();
+            await transaction.CommitAsync();
             return true;
 
     }
 
     public async Task<bool> DeductAmountAsync( decimal amount)
     {
-            if (string.IsNullOrEmpty(_currentUserService.UserId))
-                throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
-
-            var userId = int.Parse(_currentUserService.UserId);
+        if (amount <= 0) throw new BadRequestException("مبلغ باید مثبت باشد.");
+        ValidateWalletAmount(amount);
+        await using var transaction = await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+            var userId = CurrentUserId();
 
             var wallet = await _walletRepository.FirstOrDefaultAsync(w => w.UserId == userId);
             if (wallet == null)
                 throw new NotFoundException("کیف پول پیدا نشد");
 
-            if (wallet.HeldAmount < amount)
+            if (wallet.HeldAmount < amount || wallet.Balance < amount)
                 throw new InvalidOperationException("مبلغ بلوکه‌شده کافی نیست");
 
             wallet.HeldAmount -= amount;
             wallet.Balance -= amount;
             await _walletRepository.UpdateAsync(wallet);
             await _unitOfWork.SaveChangesAsync();
+            await transaction.CommitAsync();
             return true;
         
     }
@@ -130,13 +127,11 @@ public class WalletService : IWalletService
     public async Task<DepositResultDto> DepositAsync( decimal amount, string? redirectUrl)
     {
 
-        if (string.IsNullOrEmpty(_currentUserService.UserId))
-            throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
+        var userId = CurrentUserId();
 
-        var userId = int.Parse(_currentUserService.UserId);
-
-        if (amount <= 0)
-            throw new InvalidOperationException("مبلغ شارژ باید مثبت باشد");
+        ValidateWalletAmount(amount);
+        if (amount < 1000 || amount > 1000000000)
+            throw new BadRequestException("مبلغ شارژ باید بین ۱٬۰۰۰ تا ۱٬۰۰۰٬۰۰۰٬۰۰۰ تومان باشد.");
 
         await using var transaction = await _unitOfWork.BeginTransactionAsync();
         try
@@ -181,21 +176,32 @@ public class WalletService : IWalletService
     // متد برای تأیید پرداخت موفق (بعد از بازگشت از درگاه)
     public async Task<bool> ConfirmDepositAsync(string transactionId)
     {
-        await using var transaction = await _unitOfWork.BeginTransactionAsync();
+        if (string.IsNullOrWhiteSpace(transactionId) || transactionId.Length > 150)
+            throw new BadRequestException("شناسه تراکنش معتبر نیست.");
+        await using var transaction = await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
         try
         {
             var walletTransaction = await _walletTransactionRepository.FirstOrDefaultAsync(t => t.ReferenceId == transactionId);
             if (walletTransaction == null)
                 throw new NotFoundException("تراکنش پیدا نشد");
+            if (walletTransaction.TransactionType != WalletTransactionType.Deposit || walletTransaction.Amount <= 0)
+                throw new BadRequestException("تراکنش شارژ معتبر نیست.");
+            if (walletTransaction.CompletedAt.HasValue) return true;
 
             var wallet = await _walletRepository.FirstOrDefaultAsync(w => w.WalletId == walletTransaction.WalletId);
             if (wallet == null)
                 throw new NotFoundException("کیف پول پیدا نشد");
 
             // فرض: درگاه پرداخت تأیید کرده
-            var paymentStatus = await _paymentGatewayService.VerifyPaymentAsync(transactionId);
+            var paymentStatus = await _paymentGatewayService.VerifyPaymentAsync(transactionId, walletTransaction.Amount);
             if (!paymentStatus.IsSuccess)
-                throw new InvalidOperationException("پرداخت ناموفق بود");
+                throw new BadRequestException("پرداخت توسط ارائه‌دهنده تأیید نشد.");
+            if (paymentStatus.VerifiedAmountToman != walletTransaction.Amount || paymentStatus.Currency != "IRT" ||
+                string.IsNullOrWhiteSpace(paymentStatus.ProviderReference) || paymentStatus.ProviderReference.Length > 150 ||
+                string.IsNullOrWhiteSpace(paymentStatus.ProviderName) || paymentStatus.ProviderName.Length > 30)
+                throw new ConflictException("مبلغ، واحد پول یا شناسه تأیید پرداخت معتبر نیست.");
+            walletTransaction.PaymentProvider = paymentStatus.ProviderName;
+            walletTransaction.ProviderReference = paymentStatus.ProviderReference;
 
             // آپدیت موجودی
             wallet.Balance += walletTransaction.Amount;
@@ -203,6 +209,7 @@ public class WalletService : IWalletService
 
             // آپدیت توضیحات تراکنش
             walletTransaction.Description += " - تأیید شد";
+            walletTransaction.CompletedAt = DateTimeOffset.UtcNow;
             await _walletTransactionRepository.UpdateAsync(walletTransaction);
 
             await _unitOfWork.SaveChangesAsync();
@@ -214,5 +221,19 @@ public class WalletService : IWalletService
             await transaction.RollbackAsync();
             throw;
         }
+    }
+
+    private int CurrentUserId()
+    {
+        if (!_currentUserService.IsAuthenticated || _currentUserService.IsGuest ||
+            !int.TryParse(_currentUserService.UserId, out var id) || id <= 0)
+            throw new UnauthorizedException("ابتدا وارد حساب کاربری شوید.");
+        return id;
+    }
+
+    private static void ValidateWalletAmount(decimal amount)
+    {
+        if (amount <= 0 || amount >= 1000000000000000000m || decimal.Round(amount, 2) != amount)
+            throw new BadRequestException("مبلغ باید مثبت و حداکثر با دو رقم اعشار باشد.");
     }
 }

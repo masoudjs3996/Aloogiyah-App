@@ -2,7 +2,6 @@ import axiosInstance from "@/shared/lib/config/axions";
 import {
   GetProductResponse,
   IAgriculturalProduct,
-  IPaginatedResult,
   ProductFilter,
 } from "@/shared/types/product";
 
@@ -15,6 +14,7 @@ export async function getProducts(
     } else {
       if (filters.name) params.append("Name", filters.name);
       if (filters.statusCode) params.append("StatusCode", filters.statusCode);
+      if (filters.discountedOnly) params.append("DiscountedOnly", "true");
       if (filters.farmCode) params.append("FarmCode", filters.farmCode);
       if (filters.minPrice !== undefined)
         params.append("MinPrice", filters.minPrice.toString());
@@ -39,7 +39,7 @@ export async function getProducts(
       params.append("PageSize", (filters.pageSize ?? 3).toString());
     }
 
-    const url = `/AgriculturalProduct/GetByFilter?${params.toString()}`;
+    const url = `/AgriculturalListing/GetByFilter?${params.toString()}`;
 
     const { data } = await axiosInstance.get<GetProductResponse>(url);
 
@@ -55,56 +55,43 @@ export async function getProducts(
   }
 }
 
-// export async function getProducts(
-//   payload?: ProductFilter
-// ): Promise<IPaginatedResult<IAgriculturalProduct> | null> {
-//   try {
-//     const url = payload
-//       ? `/AgriculturalProduct/GetByFilter?FarmCode=${encodeURIComponent(
-//           payload
-//         )}`
-//       : `/AgriculturalProduct/GetByFilter`;
-
-//     const { data } = await axiosInstance.get<GetProductResponse>(url);
-//     if (!data?.isSuccess) {
-//       console.warn("API returned unsuccessful response:", data?.message);
-//       return null;
-//     }
-
-//     return data.data ?? null;
-//   } catch (error: any) {
-//     console.error("Error fetching products:", error.message || error);
-//     if (error.response) {
-//       console.error("Status:", error.response.status);
-//       console.error("Response data:", error.response.data);
-//     }
-
-//     return null;
-//   }
-// }
 export async function AddProduct(payload: FormData) {
+  const { data } = await axiosInstance.post("/AgriculturalListing/CreateWithImages", payload);
+  return data;
+}
+
+export async function GetDetailProduct(payload?: string) {
   try {
-    const res = await axiosInstance.post(
-      "/AgriculturalProduct/CreateWithImages",
-      payload,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      },
+    const { data } = await axiosInstance.get(
+      `/AgriculturalListing/GetByCode?code=${payload}`,
     );
 
-    return res?.data;
+    return data;
   } catch (error) {
     console.error("Error creating product:", error);
     throw error;
   }
 }
 
-export async function GetDetailProduct(payload?: string) {
+export async function GetSimilar(payload?: {
+  ProductCode: string;
+  PageNumber: number;
+  PageSize: number;
+  SortColumn: string;
+  SortDescending: boolean;
+}) {
   try {
     const { data } = await axiosInstance.get(
-      `/AgriculturalProduct/GetByCode?code=${payload}`,
+      `/AgriculturalListing/GetSimilar`,
+      {
+        params: {
+          ProductCode: payload?.ProductCode,
+          PageNumber: payload?.PageNumber,
+          PageSize: payload?.PageSize,
+          SortColumn: payload?.SortColumn,
+          SortDescending: payload?.SortDescending,
+        },
+      },
     );
 
     return data;

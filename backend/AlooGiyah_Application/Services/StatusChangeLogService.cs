@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using System.Linq.Expressions;
 using AlooGiyah_Application.DTOs.StatusChangeLog;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Interfaces;
@@ -14,6 +15,8 @@ namespace AlooGiyah_Application.Services;
 
 public class StatusChangeLogService
 {
+    private readonly IStatusChangeLogQuery _readQuery;
+
     #region Constractor
     private readonly IGenericRepository<StatusChangeLog> _statusChangeLogRepository;
     private readonly IGenericRepository<User> _userRepository;
@@ -22,7 +25,8 @@ public class StatusChangeLogService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public StatusChangeLogService(
+    public StatusChangeLogService(IStatusChangeLogQuery readQuery,
+        
         IGenericRepository<StatusChangeLog> statusChangeLogRepository,
         IGenericRepository<User> userRepository,
         ICurrentUserService currentUserService,
@@ -30,6 +34,7 @@ public class StatusChangeLogService
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
+        _readQuery = readQuery;
         _statusChangeLogRepository = statusChangeLogRepository;
         _userRepository = userRepository;
         _currentUserService = currentUserService;
@@ -125,67 +130,14 @@ public class StatusChangeLogService
     #region Get By Code
     public async Task<StatusChangeLogDto?> GetByCodeAsync(string code)
     {
-        var entity = await _statusChangeLogRepository.GetByCodeAsync(code);
-        if (entity == null)
-            return null;
-
-        var statusChangeLogDto = _mapper.Map<StatusChangeLogDto>(entity);
-        statusChangeLogDto.UserCode = await _userRepository.GetCodeByIdAsync(entity.UserId) ?? string.Empty;
-        statusChangeLogDto.OldStatusCode = await _statusRepository.GetCodeByIdAsync(entity.OldStatusId) ?? string.Empty;
-        statusChangeLogDto.NewStatusCode = await _statusRepository.GetCodeByIdAsync(entity.NewStatusId) ?? string.Empty;
-        statusChangeLogDto.EntityStatus = entity.EntityStatus;
-
-        return statusChangeLogDto;
+        return await _readQuery.GetByCodeAsync(code);
     }
     #endregion
 
     #region Get By Filter
     public async Task<PagedResult<StatusChangeLogDto>> GetByFilterAsync(StatusChangeLogFilterDto filter)
     {
-        Expression<Func<StatusChangeLog, bool>> predicate = scl => !scl.IsDeleted;
-
-        var userRole = _currentUserService.Roles.FirstOrDefault(); // نقش فعلی کاربر
-        if (userRole != "Manager") //  فقط مدیر می‌تونه آدرس‌های دیگران رو ببینه
-        {
-            predicate = predicate.And(a => a.User.UserId == int.Parse(_currentUserService.UserId));
-        }
-        else if (!string.IsNullOrEmpty(filter.UserCode))
-        {
-            predicate = predicate.And(a => a.User.Code == filter.UserCode);
-        }
-
-        if (filter.EntityId.HasValue)
-            predicate = predicate.And(scl => scl.EntityId == filter.EntityId.Value);
-
-        if (filter.EntityStatus.HasValue)
-            predicate = predicate.And(f => f.EntityStatus == filter.EntityStatus.Value);
-
-        if (!string.IsNullOrEmpty(filter.StatusCode))
-            predicate = predicate.And(scl => scl.OldStatus.Code == filter.StatusCode || scl.NewStatus.Code == filter.StatusCode);
-
-        if (filter.StartDate.HasValue)
-            predicate = predicate.And(scl => scl.ChangeDate >= filter.StartDate.Value);
-
-        if (filter.EndDate.HasValue)
-            predicate = predicate.And(scl => scl.ChangeDate <= filter.EndDate.Value);
-
-        return await _statusChangeLogRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: scl => new StatusChangeLogDto
-            {
-                Code = scl.Code,
-                EntityId = scl.EntityId,
-                EntityStatus = scl.EntityStatus,
-                Comments = scl.Comments,
-                OldStatusCode = scl.OldStatus.Code,
-                NewStatusCode = scl.NewStatus.Code,
-                UserCode = scl.User.Code,
-                ChangeDate = scl.ChangeDate
-            },
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: scl => scl.ChangeDate
-        );
+        return await _readQuery.GetByFilterAsync(filter);
     }
     #endregion
 }

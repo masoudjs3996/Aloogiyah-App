@@ -13,13 +13,14 @@ const Button: FC<ButtonProps> = ({
   onClick,
   ...rest
 }) => {
-  const base = "px-2 flex justify-center items-center gap-x-1 py-1 rounded-md font-bold  shadow-lg w-full";
+  const base =
+    "px-2 h-12 flex justify-center items-center gap-x-1 py-1 rounded-md font-bold shadow-lg w-full disabled:cursor-not-allowed disabled:opacity-60";
 
   const styles = {
     primary: "bg-primary-900 text-white hover:bg-primary-800",
-    secondary: "bg-secondary-700 text-white",
+    secondary: "bg-secondary-700 text-white hover:bg-emerald-800",
     yellow: "bg-warning text-black hover:bg-warning/80",
-    success: "bg-success text-white hover:bg-success/80",
+    success: "bg-secondary-700 text-white hover:bg-emerald-800",
     warning: "bg-warning text-black hover:bg-warning/80",
   };
 

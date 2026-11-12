@@ -1,7 +1,5 @@
-import { GetDetailProduct } from "@/lib/actions/product";
 import { PageParams } from "@/shared/types/general";
-import Test from "./test";
-import ProductDetailUI from "./test";
+import ProductDetailUI from "./ProductDetailUI";
 
 type ProductDetailParams = PageParams<"productId">;
 const ProductDetail = async ({ params }: ProductDetailParams) => {

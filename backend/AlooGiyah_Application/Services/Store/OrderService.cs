@@ -1,4 +1,6 @@
-﻿using AlooGiyah_Application.DTOs.Order;
+using AlooGiyah_Shared.Constants;
+using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.Order;
 using AlooGiyah_Application.DTOs.OrderItem;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Application.Interfaces.Service.Store;
@@ -11,6 +13,8 @@ using AlooGiyah_Domain.Pagination;
 using AlooGiyah_Shared.Commons;
 using AlooGiyah_Shared.Exceptions;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 using System.Linq.Expressions;
 
@@ -18,6 +22,8 @@ namespace AlooGiyah_Application.Services.Store;
 
 public class OrderService : IOrderService
 {
+    private readonly IOrderQuery _readQuery;
+
     #region Constructor
     private readonly IGenericRepository<Order> _orderRepository;
     private readonly IGenericRepository<OrderItem> _orderItemRepository;
@@ -25,24 +31,28 @@ public class OrderService : IOrderService
     private readonly IGenericRepository<Status> _statusRepository;
     private readonly IGenericRepository<Address> _addressRepository;
     private readonly IGenericRepository<Discount> _discountRepository;
+    private readonly INotificationWriter _notificationWriter;
     private readonly IPriceCalculatorService _priceCalculator;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     
 
-    public OrderService(
+    public OrderService(IOrderQuery readQuery,
+        
         IGenericRepository<Order> orderRepository,
         IGenericRepository<OrderItem> orderItemRepository,
         IGenericRepository<Product> productRepository,
         IGenericRepository<Status> statusRepository,
         IGenericRepository<Address> addressRepository,
         IGenericRepository<Discount> discountRepository,
+        INotificationWriter notificationWriter,
         IPriceCalculatorService priceCalculator,    
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
+        _readQuery = readQuery;
         _orderRepository = orderRepository;
         _orderItemRepository = orderItemRepository;
         _currentUserService = currentUserService;
@@ -50,6 +60,7 @@ public class OrderService : IOrderService
         _statusRepository = statusRepository;
         _addressRepository = addressRepository;
         _discountRepository = discountRepository;
+        _notificationWriter = notificationWriter;
         _priceCalculator = priceCalculator;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
@@ -60,6 +71,11 @@ public class OrderService : IOrderService
     #region Create
     public async Task<OrderDto> CreateAsync(OrderCreateDto dto)
     {
+        if (dto.Items is not { Count: > 0 })
+            throw new BadRequestException("برای ثبت سفارش دست‌کم یک کالا لازم است.");
+        if (dto.Items.Any(item => item is null || item.Quantity <= 0))
+            throw new BadRequestException("تعداد هر کالا باید بیشتر از صفر باشد.");
+
         await using var transaction = await _unitOfWork.BeginTransactionAsync();
         try
         {
@@ -89,7 +105,7 @@ public class OrderService : IOrderService
             {
                 UserId = userId,
                 AddressId = addressId,
-                DiscountId = discount?.DiscountId,
+                Discount = discount!,
                 DiscountAmount = 0,
                 TotalPrice = 0,
                 StatusId = (await _statusRepository.GetByCodeAsync("PendingApproval"))?.StatusId
@@ -114,12 +130,10 @@ public class OrderService : IOrderService
                 var orderItem = new OrderItem
                 {
                     OrderId = order.OrderId,
-                    ProductId = product.ProductId,
+                    Product = product,
                     Quantity = item.Quantity,
                     // قیمت‌گذاری بعداً توسط PriceCalculatorService انجام میشه
                 };
-
-                await _orderItemRepository.AddAsync(orderItem);
 
                 // کاهش موجودی محصول
                 product.Stock -= item.Quantity;
@@ -139,7 +153,8 @@ public class OrderService : IOrderService
                 await _discountRepository.UpdateAsync(discount);
             }
 
-            await _orderRepository.UpdateAsync(order);
+            await _notificationWriter.AddForUserAsync(userId, NotificationTypes.OrderCreated,
+                $"سفارش {order.Code} با موفقیت ثبت شد.");
             await _unitOfWork.SaveChangesAsync();
             await transaction.CommitAsync();
 
@@ -167,101 +182,48 @@ public class OrderService : IOrderService
     #region Get By Filter
     public async Task<PagedResult<OrderDto>> GetByFilterAsync(OrderFilterDto dto)
     {
-        if (string.IsNullOrEmpty(_currentUserService.UserId))
-            throw new ArgumentNullException(nameof(_currentUserService.UserId), "UserFolder ID is required from token.");
-
-        Expression<Func<Order, bool>> predicate = o => !o.IsDeleted;
-
-      
-
-        var userRole = _currentUserService.Roles.FirstOrDefault(); // نقش فعلی کاربر
-        if (userRole != "Manager") //  فقط مدیر می‌تونه آدرس‌های دیگران رو ببینه
-        {
-            predicate = predicate.And(a => a.User.UserId == int.Parse(_currentUserService.UserId));
-        }
-        else if (!string.IsNullOrEmpty(dto.UserCode)) 
-        {
-            predicate = predicate.And(a => a.User.Code == dto.UserCode);
-        }
-
-        if (!string.IsNullOrEmpty(dto.StatusCode))
-            predicate = predicate.And(o => o.Status.Code == dto.StatusCode);
-
-        if (!string.IsNullOrEmpty(dto.SearchTerm))
-            predicate = predicate.And(o => o.Code.Contains(dto.SearchTerm));
-
-        return await _orderRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: o => new OrderDto
-            {
-                Code = o.Code,
-                StatusCode = o.Status.Code,
-                TotalPrice = o.TotalPrice,
-                DiscountAmount = o.DiscountAmount,
-                AddressCode = o.Address != null ? o.Address.Code : null,
-                DiscountCode = o.Discount != null ? o.Discount.Code : null,
-                IsPaid = o.IsPaid,
-                PaymentDate = o.PaymentDate,
-                PaymentReference = o.PaymentReference,
-                Items = o.OrderItems.Select(oi => new OrderItemDto
-                {
-                    OrderItemCode = oi.Code,
-                    ProductCode = oi.Product.Code,
-                    ProductName = oi.Product.Name,
-                    Quantity = oi.Quantity,
-                    Price = oi.Price,
-                    PriceType = oi.PriceType
-                }).ToList()
-            },
-            pageNumber: dto.PageNumber,
-            pageSize: dto.PageSize,
-            orderBy: o => o.CreatedAt
-        );
+        return await _readQuery.GetByFilterAsync(dto);
     }
     #endregion
 
     #region Get By Code
     public async Task<OrderDto?> GetByCodeAsync(string orderCode)
     {
-        if (string.IsNullOrEmpty(orderCode))
-            throw new ArgumentNullException(nameof(orderCode));
-
-        var entity = await _orderRepository.GetByCodeWithIncludeAsync(
-            code: orderCode,
-            includes: new Expression<Func<Order, object>>[] { o => o.OrderItems, o => o.User, o => o.Status, o => o.Address, o => o.Discount });
-
-        if (entity == null) return null;
-
-        var orderDto = _mapper.Map<OrderDto>(entity);
-        orderDto.UserCode = entity.User?.Code ?? string.Empty;
-        orderDto.StatusCode = entity.Status?.Code ?? string.Empty;
-        orderDto.AddressCode = entity.AddressId.HasValue ? entity.Address?.Code : null;
-        orderDto.DiscountCode = entity.DiscountId.HasValue ? entity.Discount?.Code : null;
-        orderDto.Items = entity.OrderItems.Select(oi => new OrderItemDto
-        {
-            OrderItemCode = oi.Code,
-            ProductCode = oi.Product.Code,
-            ProductName = oi.Product.Name,
-            Quantity = oi.Quantity,
-            Price = oi.Price,
-            PriceType = oi.PriceType
-        }).ToList();
-
-        return orderDto;
+        return await _readQuery.GetByCodeAsync(orderCode);
     }
     #endregion
 
     #region Update
     public async Task<bool> UpdateAsync(OrderUpdateDto dto)
     {
-        await using var transaction = await _unitOfWork.BeginTransactionAsync();
+        if (dto.Items == null || dto.Items.Any(item => item is null || item.Quantity <= 0))
+            throw new BadRequestException("فهرست اقلام را با تعداد بیشتر از صفر ارسال کنید.");
+        await using var transaction = await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable);
         try
         {
-            var order = await _orderRepository.GetByCodeWithIncludeAsync(
-                code: dto.OrderCode,
-                includes: new Expression<Func<Order, object>>[] { o => o.OrderItems });
+            var order = await _orderRepository.GetAll()
+                .Include(o => o.OrderItems.Where(i => !i.IsDeleted)).ThenInclude(i => i.Product)
+                .SingleOrDefaultAsync(o => o.Code == dto.OrderCode);
 
             if (order == null) return false;
+            if (!_currentUserService.Roles.Any(role => role is "Admin" or "Manager") &&
+                (!int.TryParse(_currentUserService.UserId, out var userId) || userId != order.UserId))
+                throw new ForbiddenException("ویرایش این سفارش مجاز نیست.");
+            if (order.IsPaid || order.PaymentDate.HasValue || !string.IsNullOrWhiteSpace(order.PaymentReference))
+                throw new ConflictException("اقلام سفارش دارای سابقه پرداخت قابل تغییر نیست.");
+
+            if (dto.Items.Count == 0)
+            {
+                foreach (var item in order.OrderItems.ToList())
+                {
+                    item.Product.Stock += item.Quantity;
+                    await _orderItemRepository.DeleteAsync(item);
+                }
+                await _orderRepository.LogicalDeleteAsync(order);
+                await _unitOfWork.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return true;
+            }
 
             int? addressId = null;
             if (!string.IsNullOrEmpty(dto.AddressCode))
@@ -302,6 +264,7 @@ public class OrderService : IOrderService
                         await _productRepository.UpdateAsync(product);
                     }
                     await _orderItemRepository.DeleteAsync(item);
+                    order.OrderItems.Remove(item);
                 }
             }
 
@@ -328,11 +291,10 @@ public class OrderService : IOrderService
                 {
                     var orderItem = new OrderItem
                     {
-                        OrderId = order.OrderId,
-                        ProductId = product.ProductId,
+                        Order = order,
+                        Product = product,
                         Quantity = item.Quantity,
                     };
-                    await _orderItemRepository.AddAsync(orderItem);
                     product.Stock -= item.Quantity;
 
                     order.OrderItems.Add(orderItem);
@@ -342,7 +304,7 @@ public class OrderService : IOrderService
             }
 
             // محاسبه قیمت نهایی با سرویس
-            order.DiscountId = discount?.DiscountId;
+            order.Discount = discount!;
             order.TotalPrice = _priceCalculator.CalculateOrder(order /*, userRole*/);
             order.DiscountAmount = order.DiscountAmount; // داخل PriceCalculator مقداردهی میشه
 
@@ -383,6 +345,8 @@ public class OrderService : IOrderService
 
             if (order == null)
                 throw new NotFoundException("سفارش پیدا نشد");
+            if (!order.OrderItems.Any(item => !item.IsDeleted && item.Quantity > 0))
+                throw new ConflictException("سفارش قلم فعالی ندارد.");
             if (order.Status.Code != "PendingApproval")
                 throw new InvalidOperationException("سفارش در وضعیت در انتظار تأیید نیست");
 
@@ -395,6 +359,9 @@ public class OrderService : IOrderService
 
             order.StatusId = (await _statusRepository.GetByCodeAsync("Approved"))?.StatusId
                 ?? throw new NotFoundException("وضعیت تأیید شده یافت نشد");
+
+            await _notificationWriter.AddForUserAsync(order.UserId, NotificationTypes.OrderApproved,
+                $"سفارش {order.Code} تأیید شد و آماده پرداخت است.");
 
             await _orderRepository.UpdateAsync(order);
             await _unitOfWork.SaveChangesAsync();
@@ -424,6 +391,9 @@ public class OrderService : IOrderService
 
             order.StatusId = (await _statusRepository.GetByCodeAsync("ReadyForShipment"))?.StatusId
                 ?? throw new NotFoundException("وضعیت آماده ارسال یافت نشد");
+
+            await _notificationWriter.AddForUserAsync(order.UserId, NotificationTypes.OrderReady,
+                $"سفارش {order.Code} آماده ارسال است.");
 
             await _orderRepository.UpdateAsync(order);
             await _unitOfWork.SaveChangesAsync();

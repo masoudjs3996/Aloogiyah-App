@@ -8,7 +8,7 @@ export async function getCommentsTree() {
     return data.data ?? null;
   } catch (error) {
     console.error("Error fetching provinces:", error);
-    return null;
+    throw error;
   }
 }
 
@@ -21,17 +21,19 @@ export type CreateCommentPayload = {
 };
 export async function postComment(payload: CreateCommentPayload) {
   try {
-    const { data } = await axiosInstance.post("/Comment/Create", {
+    const body = {
       content: payload.content,
-      rating: payload.rating,
+      rating: payload.parentCode ? undefined : payload.rating,
       entityCode: payload.entityCode,
-      parentCode: payload.parentCode || "",
       entityComment: payload.entityComment,
-    });
+    };
+    const { data } = payload.parentCode
+      ? await axiosInstance.post("/Comment/Reply", body, { params: { parentCode: payload.parentCode } })
+      : await axiosInstance.post("/Comment/Create", body);
 
     return data.data ?? null;
   } catch (error) {
     console.error("Error fetching provinces:", error);
-    return null;
+    throw error;
   }
 }

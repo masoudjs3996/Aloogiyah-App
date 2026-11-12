@@ -1,14 +1,2 @@
-import { FarmInfo } from "@/design-system/organisms/dashbord";
-import { PageParams } from "@/shared/types/general";
-
-
-type DetailFarmParams = PageParams<"fermCode">;
-
-export default async function DetailFarm({ params }: DetailFarmParams) {
-  const { fermCode } = await params;
-  return (
-    <div className="p-5">
-      <FarmInfo fermCode={fermCode} />
-    </div>
-  );
-}
+import { FarmProfile } from "@/design-system/organisms/platform/FarmsWorkspace";
+export default async function Page({ params }: { params: Promise<{ fermCode: string }> }) { const { fermCode } = await params; return <FarmProfile code={fermCode} dashboard />; }

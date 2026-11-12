@@ -1,0 +1,16 @@
+import { useState, useId } from 'react';
+import { CalendarDays, ChevronRight, ChevronLeft } from 'lucide-react';
+import { isValidJalaaliDate, toGregorian, toJalaali } from 'jalaali-js';
+const months = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+const pad = (n: number) => String(n).padStart(2, '0');
+export default function PersianDeliveryTime({ value, onChange, label = 'تاریخ و ساعت هماهنگ‌شده تحویل', hint = 'زمان را پس از هماهنگی با خریدار انتخاب کنید.', maxDaysAhead = 90 }: { value: string; onChange: (value: string) => void; label?: string; hint?: string; maxDaysAhead?: number | null }) {
+  const today = toJalaali(new Date()), id = useId();
+  const parts = value.match(/^(\d{4})\/(\d{2})\/(\d{2}) (\d{2}:\d{2})$/);
+  const [month, setMonth] = useState(parts ? Number(parts[2]) : today.jm), [year, setYear] = useState(parts ? Number(parts[1]) : today.jy), [open, setOpen] = useState(false);
+  const g = toGregorian(year, month, 1), offset = (new Date(g.gy, g.gm - 1, g.gd).getDay() + 1) % 7;
+  function move(delta: number) { const index = year * 12 + month - 1 + delta; setYear(Math.floor(index / 12)); setMonth(index % 12 + 1); }
+  return <div className="calendar-field"><label htmlFor={id}>{label}</label><button type="button" id={id} className="calendar-trigger" aria-expanded={open} onClick={() => setOpen(!open)}><CalendarDays size={17} /><span>{parts ? `${Number(parts[3]).toLocaleString('fa-IR')} ${months[Number(parts[2]) - 1]} ${Number(parts[1]).toLocaleString('fa-IR', { useGrouping: false })}` : 'انتخاب روز از تقویم شمسی'}</span><ChevronLeft size={15} /></button>
+    {open && <div className="calendar-panel"><div className="calendar-head"><button type="button" aria-label="ماه قبل" onClick={() => move(-1)}><ChevronRight size={18} /></button><strong>{months[month - 1]} {year.toLocaleString('fa-IR', { useGrouping: false })}</strong><button type="button" aria-label="ماه بعد" onClick={() => move(1)}><ChevronLeft size={18} /></button></div><div className="calendar-grid">{['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'].map(d => <small key={d}>{d}</small>)}{Array.from({ length: offset }, (_, i) => <span key={'blank' + i} />)}{Array.from({ length: 31 }, (_, i) => i + 1).filter(d => isValidJalaaliDate(year, month, d)).map(day => { const dayG = toGregorian(year, month, day), date = new Date(dayG.gy, dayG.gm - 1, dayG.gd, 23, 59); const selected = parts && Number(parts[1]) === year && Number(parts[2]) === month && Number(parts[3]) === day; return <button key={day} type="button" disabled={date.getTime() < Date.now() || maxDaysAhead != null && date.getTime() > Date.now() + maxDaysAhead * 86400000} aria-pressed={!!selected} aria-label={`${day} ${months[month - 1]} ${year}`} onClick={() => { onChange(`${year}/${pad(month)}/${pad(day)} ${parts?.[4] ?? '12:00'}`); setOpen(false); }}>{day.toLocaleString('fa-IR')}</button>; })}</div><button type="button" className="text-button" onClick={() => setOpen(false)}>بستن تقویم</button></div>}
+    <label className="calendar-time">ساعت<input aria-label={label + '؛ ساعت'} type="time" value={parts?.[4] ?? '12:00'} onChange={e => { if (e.target.value) onChange(`${parts?.[1] ?? today.jy}/${parts?.[2] ?? pad(today.jm)}/${parts?.[3] ?? pad(today.jd)} ${e.target.value}`); }} /></label><small className="field-help">{hint}</small>
+  </div>;
+}

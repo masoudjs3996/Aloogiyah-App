@@ -21,7 +21,11 @@ public class Farm : BaseEntity
     [Required]
     public int OwnerId { get; set; }
 
+    [MaxLength(10)]
+    public string? DeliveryPointCode { get; set; }
+
     public int? AddressId { get; set; }
+    public int StatusId { get; set; }
 
     public int? Capacity { get; set; }
 
@@ -29,12 +33,17 @@ public class Farm : BaseEntity
     #endregion
 
     #region Relations
+    public DeliveryPoint? DeliveryPoint { get; set; }
+
     [ForeignKey(nameof(OwnerId))]
-    public User Owner { get; set; } = null!;
+    public required User Owner { get; set; } 
 
     [ForeignKey(nameof(AddressId))]
     public Address? Address { get; set; }
 
-    public List<AgriculturalProduct> AgriculturalProduct { get; set; } = null!;
+    [ForeignKey(nameof(StatusId))]
+    public required Status Status { get; set; } 
+
+    public ICollection<AgriculturalProduct> AgriculturalProduct { get; set; } = [];
     #endregion
 }

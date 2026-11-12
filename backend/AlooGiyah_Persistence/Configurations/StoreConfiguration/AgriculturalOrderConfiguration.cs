@@ -8,7 +8,19 @@ public class AgriculturalOrderConfiguration : IEntityTypeConfiguration<Agricultu
 {
     public void Configure(EntityTypeBuilder<AgriculturalOrder> builder)
     {
+        builder.HasOne<AlooGiyah_Domain.Entities.UserFolder.User>().WithMany().HasForeignKey(x => x.DeliveredById).OnDelete(DeleteBehavior.Restrict);
         builder.HasKey(ao => ao.AgriculturalOrderId);
+        builder.HasIndex(x => new { x.BuyerId, x.CreatedAt });
+        builder.HasIndex(x => new { x.FarmId, x.CreatedAt });
+        builder.HasIndex(ao => new { ao.IsHeld, ao.ApprovalExpiresAt });
+        builder.Property(x => x.Version).IsConcurrencyToken();
+        builder.Property(x => x.Subtotal).HasPrecision(20, 2);
+        builder.Property(x => x.DiscountFundingSource).HasMaxLength(20);
+        builder.Property(x => x.PlatformDiscountAmount).HasPrecision(20, 2);
+        builder.Property(x => x.SellerDiscountAmount).HasPrecision(20, 2);
+        builder.Property(x => x.ShippingAmount).HasPrecision(20, 2);
+        builder.HasOne(x => x.Farm).WithMany().HasForeignKey(x => x.FarmId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(x => new { x.CheckoutId, x.FarmId }).IsUnique();
 
         builder.Property(ao => ao.CreatedAt)
             .IsRequired();
@@ -47,11 +59,6 @@ public class AgriculturalOrderConfiguration : IEntityTypeConfiguration<Agricultu
         builder.HasOne(ao => ao.Discount)
             .WithMany(s => s.AgriculturalOrders)
             .HasForeignKey(ao => ao.DiscountId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(ao => ao.Address)
-            .WithMany(s => s.AgriculturalOrders)
-            .HasForeignKey(ao => ao.AddressId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(ao => ao.Buyer)

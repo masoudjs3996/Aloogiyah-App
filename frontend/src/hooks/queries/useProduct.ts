@@ -1,7 +1,11 @@
-import { GetDetailProduct, getProducts } from "@/lib/actions/product";
+import {
+  GetDetailProduct,
+  getProducts,
+  GetSimilar,
+} from "@/lib/actions/product";
 import { ProductFilter } from "@/shared/types/product";
 import { useQuery } from "@tanstack/react-query";
-// this is alocather api
+
 export const useProducts = (filters?: ProductFilter) => {
   const queryKey = ["products", filters];
 
@@ -14,47 +18,45 @@ export const useProducts = (filters?: ProductFilter) => {
 
   return {
     products: data,
-    // pagination: data ?? null,
-    // totalCount: data?.totalCount ?? 0,
     error,
     isLoading,
     isSuccess,
   };
 };
 
-// export const useProducts = (farmCode?: string) => {
-//   const normalizedFarmCode = farmCode?.trim() ? farmCode.trim() : undefined;
-//   const queryKey = ["products", normalizedFarmCode ?? "all"];
-
-//   const { data, error, isLoading, isSuccess } = useQuery({
-//     queryKey,
-//     queryFn: () => getProducts(normalizedFarmCode),
-//     // enabled: !!normalizedFarmCode,
-//     staleTime: 1000 * 60 * 2,
-//     gcTime: 1000 * 60 * 10,
-//   });
-
-//   return {
-//     products: data?.items ?? [],
-//     pagination: data ?? null,
-//     totalCount: data?.totalCount ?? 0,
-//     error,
-//     isLoading,
-//     isSuccess,
-//   };
-// };
-////////////////////////////////this is pruducts code
 export const useProduct = (productId?: string) => {
   const { data, error, isLoading, isSuccess } = useQuery({
     queryKey: ["productId", productId],
     queryFn: () => GetDetailProduct(productId),
-    // enabled: !!normalizedFarmCode,
+    enabled: Boolean(productId),
     staleTime: 1000 * 60 * 2,
     gcTime: 1000 * 60 * 10,
   });
 
   return {
     product: data ?? {},
+    isLoading,
+    isSuccess,
+  };
+};
+
+export const useSimilarProduct = (payload?: {
+  ProductCode: string;
+  PageNumber: number;
+  PageSize: number;
+  SortColumn: string;
+  SortDescending: boolean;
+}) => {
+  const { data, isLoading, isSuccess } = useQuery({
+    queryKey: ["similarProduct", payload],
+    queryFn: () => GetSimilar(payload),
+    enabled: !!payload?.ProductCode,
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 10,
+  });
+
+  return {
+    similarProduct: data ?? {},
     isLoading,
     isSuccess,
   };

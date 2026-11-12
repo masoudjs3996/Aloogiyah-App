@@ -6,6 +6,7 @@ namespace AlooGiyah_Application.DTOs.ServiceRequest;
     public required string Code { get; set; } 
     public string? StatusCode { get; set; }
     public string? ProviderCode { get; set; }
+    public string? AddressCode { get; set; }
     public decimal? Price { get; set; }
     public string? DiscountCode { get; set; }
     public decimal? DiscountAmount { get; set; }

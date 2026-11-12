@@ -7,6 +7,10 @@ namespace AlooGiyah_Domain.Entities.UserFolder;
 
 public class User : BaseEntity
 {
+    public static bool IsGeneratedPhoneUsername(string username) =>
+        username.Length == 17 && username.StartsWith("phone_09", StringComparison.OrdinalIgnoreCase) &&
+        username.AsSpan(8).IndexOfAnyExceptInRange('0', '9') < 0;
+
     #region Properties
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int UserId { get; set; }
@@ -31,18 +35,23 @@ public class User : BaseEntity
     [MaxLength(256)]
     public string Password { get; set; } = string.Empty;
 
-    public int Age { get; set; }
-
     [MaxLength(20)]
     public string PhoneNumber { get; set; } = string.Empty;
 
     [Required]
     public int RoleId { get; set; }
 
+    public int TokenVersion { get; set; }
+
     [MaxLength(50)]
     public string? EmailVerificationCode { get; set; }
 
+    public bool IsPhoneConfirmed { get; set; }
     public bool IsEmailConfirmed { get; set; }
+
+    public bool ReceiveOrderNotifications { get; set; } = true;
+    public bool ReceiveServiceRequestNotifications { get; set; } = true;
+    public bool ReceiveGeneralNotifications { get; set; } = true;
 
     public DateTimeOffset? VerificationCodeExpiration { get; set; }
 
@@ -64,7 +73,6 @@ public class User : BaseEntity
     public List<ServiceRequest> ServiceRequests { get; set; } = null!;
     public List<ServiceRequest> ProvidedServiceRequests { get; set; } = null!;
     public List<RefreshToken> RefreshTokens { get; set; } = null!;
-    public List<AgriculturalProduct> AgriculturalProducts { get; set; } = null!;
     public List<Warehouse> Warehouses { get; set; } = null!;
     public List<QualityAssessment> ExpertQualityAssessments { get; set; } = null!;
     public List<QualityAssessment> ApplicantQualityAssessments { get; set; } = null!;
@@ -78,6 +86,7 @@ public class User : BaseEntity
     public List<Discount> Discounts { get; set; } = null!;
     public List<Address> Addresses { get; set; } = null!;
     public List<Cart> Carts { get; set; } = null!;
+    public List<UserRole> AdditionalRoles { get; set; } = [];
 
     #endregion
 }

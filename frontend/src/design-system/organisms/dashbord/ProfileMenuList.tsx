@@ -1,16 +1,11 @@
 import { MenuItem } from "@molecules/dashbord/MenuItem";
 import { SlEnvolopeLetter } from "react-icons/sl";
-import { IoPricetagOutline, IoWalletOutline } from "react-icons/io5";
+import { IoNotificationsOutline } from "react-icons/io5";
 import Link from "next/link";
 import Button from "@/design-system/atoms/Button";
 
 const userItem = [
-  {
-    icon: IoPricetagOutline,
-    title: "تخفیف و جایزه شما",
-    href: "/dashboard/profile/rewards",
-  },
-  { icon: IoWalletOutline, href: "/dashboard/profile/wallet", title: "کیف پول " },
+  { icon: IoNotificationsOutline, href: "/dashboard/profile/notifications", title: "مدیریت اعلان‌ها" },
   { icon: SlEnvolopeLetter, title: "پیام ها" },
 ];
 export const ProfileMenuList = ({ items }: any) => (

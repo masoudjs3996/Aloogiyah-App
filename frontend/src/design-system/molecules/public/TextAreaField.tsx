@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import Textarea from "@/design-system/atoms/Textarea";
 
 type TextAreaFieldProps = {
@@ -12,10 +13,12 @@ export const TextAreaField = ({
   error,
   ...rest
 }: TextAreaFieldProps) => {
+  const generatedId = useId();
+  const id = rest.id ?? generatedId;
   return (
-    <div className="flex flex-col gap-1">
-      {label && <label className="text-sm font-medium">{label}</label>}
-      <Textarea {...rest} />
+    <div className="flex w-full min-w-0 flex-col gap-2">
+      {label && <label htmlFor={id} className="text-sm font-medium text-slate-700">{label}</label>}
+      <Textarea {...rest} id={id} aria-invalid={!!error} />
       {error && <span className="text-red-500 text-xs">{error}</span>}
     </div>
   );

@@ -21,7 +21,7 @@ public class UserQuery : BaseQuery, IUserQuery
             ? """
               SELECT 
                   u."Code", u."FName", u."LName", u."Email", u."UserName",
-                  u."PhoneNumber", u."Age", u."IsEmailConfirmed",
+                  u."PhoneNumber", u."IsPhoneConfirmed", u."IsEmailConfirmed",
                   u."CreatedAt", u."UpdatedAt",
                   r."Code" AS "RoleCode",
                   r."Name" AS "RoleName"
@@ -32,7 +32,7 @@ public class UserQuery : BaseQuery, IUserQuery
             : """
               SELECT 
                   u."Code", u."FName", u."LName", u."Email", u."UserName",
-                  u."PhoneNumber", u."Age", u."IsEmailConfirmed",
+                  u."PhoneNumber", u."IsPhoneConfirmed", u."IsEmailConfirmed",
                   u."CreatedAt", u."UpdatedAt"
               FROM "Users" u
               WHERE u."UserId" = @UserId AND u."IsDeleted" = false
@@ -49,8 +49,8 @@ public class UserQuery : BaseQuery, IUserQuery
             ? """
           SELECT 
               u."Code", u."FName", u."LName", u."Email", u."UserName", u."PhoneNumber", 
-              u."Age", u."IsEmailConfirmed", u."CreatedAt", u."UpdatedAt",
-              r."Code" AS "RoleCode", r."Name" AS "Name"
+              u."IsPhoneConfirmed", u."IsEmailConfirmed", u."CreatedAt", u."UpdatedAt",
+              r."Code" AS "RoleCode", r."Name" AS "RoleName"
           FROM "Users" u
           INNER JOIN "Roles" r ON u."RoleId" = r."RoleId"
           WHERE u."Code" = @Code AND u."IsDeleted" = false
@@ -58,7 +58,7 @@ public class UserQuery : BaseQuery, IUserQuery
             : """
           SELECT 
               u."Code", u."FName", u."LName", u."Email", u."UserName", u."PhoneNumber", 
-              u."Age", u."IsEmailConfirmed", u."CreatedAt", u."UpdatedAt"
+              u."IsPhoneConfirmed", u."IsEmailConfirmed", u."CreatedAt", u."UpdatedAt"
           FROM "Users" u
           WHERE u."Code" = @Code AND u."IsDeleted" = false
           """;
@@ -85,14 +85,14 @@ public class UserQuery : BaseQuery, IUserQuery
             u."Email",
             u."UserName",
             u."Password",
+            u."TokenVersion",
             u."PhoneNumber",
-            u."Age",
             u."IsEmailConfirmed",
 
             r."RoleId",
-            r."Code"        AS "RoleCode",
+            r."Code"        AS "Code",
             r."Name"        AS "Name",
-            r."Description" AS "RoleDescription"
+            r."Description" AS "Description"
 
         FROM "Users" u
         INNER JOIN "Roles" r ON u."RoleId" = r."RoleId"
@@ -114,7 +114,24 @@ public class UserQuery : BaseQuery, IUserQuery
             splitOn: "RoleId"
         );
 
-        return result.FirstOrDefault();
+        var user = result.FirstOrDefault();
+        if (user != null)
+        {
+            const string rolesSql = """
+                SELECT ur."UserId", r."RoleId", r."Code", r."Name", r."Description",
+                       r."CreatedAt", r."UpdatedAt", r."IsDeleted"
+                FROM "UserRoles" ur
+                INNER JOIN "Roles" r ON r."RoleId" = ur."RoleId"
+                WHERE ur."UserId" = @UserId AND r."IsDeleted" = false
+                """;
+            var additionalRoles = await conn.QueryAsync<UserRole, Role, UserRole>(
+                rolesSql,
+                (assignment, role) => { assignment.RoleId = role.RoleId; assignment.Role = role; return assignment; },
+                new { user.UserId },
+                splitOn: "RoleId");
+            user.AdditionalRoles = additionalRoles.ToList();
+        }
+        return user;
     }
 
     public async Task<bool> ExistsByUsernameAsync(string username)
@@ -155,7 +172,7 @@ public class UserQuery : BaseQuery, IUserQuery
                 u."FName",
                 u."LName",
                 u."Email",
-                u."Name",
+                u."UserName",
                 u."PhoneNumber",
                 r."Code" AS "RoleCode",
                 r."Name" AS "RoleName",

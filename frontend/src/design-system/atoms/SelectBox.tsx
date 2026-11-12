@@ -1,14 +1,19 @@
 "use client";
 
-import { FC } from "react";
+import { FC, ReactNode, useState, useRef, useEffect } from "react";
+import { formControlClass } from "./formControlStyles";
+
 
 interface SelectBoxProps {
   label?: string;
   options: string[];
-  value?: string;
+  value?: string | string[];
   placeholder?: string;
-  onChange?: (value: string) => void;
+  onChange?: (value: string | string[]) => void;
   error?: string;
+  icon?: ReactNode;
+  multiple?: boolean;
+  required?: boolean;
 }
 
 export const SelectBox: FC<SelectBoxProps> = ({
@@ -18,31 +23,227 @@ export const SelectBox: FC<SelectBoxProps> = ({
   placeholder = "انتخاب کنید",
   onChange,
   error,
+  icon,
+  multiple = false,
+  required = false,
 }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const normalize = (text: string) => text.replace(/ي/g, "ی").replace(/ك/g, "ک").trim();
+  const filteredOptions = options.filter(option => normalize(option).includes(normalize(search)));
+  useEffect(() => { if (!isOpen) setSearch(""); }, [isOpen]);
+  const [selectedValues, setSelectedValues] = useState<string[]>(
+    multiple ? (Array.isArray(value) ? value : []) : [],
+  );
+  const [selectedValue, setSelectedValue] = useState<string>(
+    !multiple && typeof value === "string" ? value : "",
+  );
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (multiple) {
+      setSelectedValues(Array.isArray(value) ? value : []);
+    } else {
+      setSelectedValue(typeof value === "string" ? value : "");
+    }
+  }, [value, multiple]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelect = (option: string) => {
+    if (multiple) {
+      let newValues: string[];
+      if (selectedValues.includes(option)) {
+        newValues = selectedValues.filter((item) => item !== option);
+      } else {
+        newValues = [...selectedValues, option];
+      }
+      setSelectedValues(newValues);
+      onChange?.(newValues);
+    } else {
+      setSelectedValue(option);
+      onChange?.(option);
+      setIsOpen(false);
+    }
+  };
+
+  const removeValue = (option: string) => {
+    if (multiple) {
+      const newValues = selectedValues.filter((item) => item !== option);
+      setSelectedValues(newValues);
+      onChange?.(newValues);
+    }
+  };
+
+  const getDisplayText = () => {
+    if (multiple) {
+      if (selectedValues.length === 0) return placeholder;
+      return `${selectedValues.length} مورد انتخاب شده`;
+    }
+    return selectedValue || placeholder;
+  };
+
   return (
-    <div className="flex flex-col w-full space-y-1">
-      {label && <label className="text-sm text-gray-700">{label}</label>}
+    <div className="flex flex-col gap-y-2 w-full" ref={containerRef}>
+      {label && (
+        <label className="block text-sm font-medium text-slate-700">
+          {label}{required && <span className="text-red-500"> *</span>}
+        </label>
+      )}
 
-      <select
-        value={value}
-        onChange={(e) => onChange?.(e.target.value)}
-        className={`
-          w-full rounded-md border px-3 py-2 bg-secondary-0 text-secondary-600 
-          focus:outline-none focus:ring-2 focus:ring-primary-500
-          ${error ? "border-error" : "border-secondary-50"}
-        `}
+      <div
+        className={`${formControlClass} relative flex items-center gap-x-2 ${
+          error
+            ? "border-error"
+            : "focus-within:border-emerald-600 focus-within:ring-2 focus-within:ring-emerald-100"
+        }`}
       >
-        <option value="" disabled>
-          {placeholder}
-        </option>
+        {icon && (
+          <div className="flex items-center justify-center text-secondary-700 pl-2">
+            {icon}
+          </div>
+        )}
 
-        {options.map((item, i) => (
-          <option key={i} value={item}>
-            {item}
-          </option>
-        ))}
-      </select>
+        {/* نمایش انتخاب‌ها */}
+        <div
+          className="flex-1 flex items-center gap-1 flex-wrap cursor-pointer min-h-6"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {multiple ? (
+            selectedValues.length > 0 ? (
+              selectedValues.map((item) => (
+                <span
+                  key={item}
+                  className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full flex items-center gap-1"
+                >
+                  {item}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeValue(item);
+                    }}
+                    className="hover:text-blue-600 font-bold"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))
+            ) : (
+              <span className="text-slate-400">{placeholder}</span>
+            )
+          ) : (
+            <span
+              className={selectedValue ? "text-slate-700" : "text-slate-400"}
+            >
+              {getDisplayText()}
+            </span>
+          )}
+        </div>
 
+        {/* آیکون فلش */}
+        <button
+          type="button"
+          aria-label={label || "انتخاب گزینه"}
+          aria-expanded={isOpen}
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex-shrink-0 text-slate-400 hover:text-slate-600"
+        >
+          <svg
+            className={`w-5 h-5 transition-transform ${isOpen ? "rotate-180" : ""}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </button>
+        {/* Dropdown */}
+        {isOpen && (
+          <div className="absolute top-10 bg-white left-0 z-50 w-full mt-1 border border-secondary-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+            <div className="sticky top-0 z-10 bg-white p-2 border-b border-slate-200">
+              <input type="search" aria-label={`جست‌وجوی ${label || "گزینه"}`} placeholder="جست‌وجو…" value={search} onChange={event => setSearch(event.target.value)} onKeyDown={event => { if (event.key === "Enter") event.preventDefault(); if (event.key === "Escape") setIsOpen(false); }} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-600" />
+            </div>
+            {multiple && (
+              <div className="p-2 border-b border-secondary-200">
+                <button
+                  onClick={() => {
+                    setSelectedValues([]);
+                    onChange?.([]);
+                    setIsOpen(false);
+                  }}
+                  className="text-sm text-red-500 hover:text-red-700"
+                >
+                  پاک کردن همه
+                </button>
+              </div>
+            )}
+            {!filteredOptions.length && <p className="p-3 text-sm text-slate-500">نتیجه‌ای پیدا نشد</p>}
+            {filteredOptions.map((option, index) => {
+              const isSelected = multiple
+                ? selectedValues.includes(option)
+                : selectedValue === option;
+              return (
+                <div
+                  key={index}
+                  onClick={() => handleSelect(option)}
+                  className={`px-4 py-2 cursor-pointer hover:bg-gray-100 flex items-center gap-2 ${
+                    isSelected ? "bg-blue-50" : ""
+                  }`}
+                >
+                  {multiple && (
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => {}}
+                      className="w-4 h-4 text-blue-600 rounded"
+                    />
+                  )}
+                  <span
+                    className={isSelected ? "text-blue-600 font-medium" : ""}
+                  >
+                    {option}
+                  </span>
+                  {isSelected && !multiple && (
+                    <svg
+                      className="w-4 h-4 text-blue-600 mr-auto"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Error */}
       {error && <span className="text-xs text-error">{error}</span>}
     </div>
   );

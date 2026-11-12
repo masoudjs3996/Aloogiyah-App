@@ -33,6 +33,10 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.PhoneNumber)
             .HasMaxLength(20);
 
+        builder.Property(u => u.ReceiveOrderNotifications).HasDefaultValue(true);
+        builder.Property(u => u.ReceiveServiceRequestNotifications).HasDefaultValue(true);
+        builder.Property(u => u.ReceiveGeneralNotifications).HasDefaultValue(true);
+
         builder.Property(u => u.RoleId)
             .IsRequired();
 
@@ -52,6 +56,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
            .HasForeignKey(a => a.UserId)
            .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasIndex(u => u.PhoneNumber)
+            .IsUnique().HasFilter("\"IsPhoneConfirmed\" AND NOT \"IsDeleted\" AND \"PhoneNumber\" IS NOT NULL");
         builder.HasIndex(u => u.Email)
             .IsUnique();
 

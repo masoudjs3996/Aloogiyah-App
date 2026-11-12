@@ -1,8 +1,12 @@
 "use client";
-import { ReactNode, useEffect } from "react";
+
+import { ReactNode, useEffect, useState } from "react";
 import { Sidebar } from "../organisms/dashbord/Sidebar";
-import Notification from "../molecules/dashbord/NotificationItem";
 import { useUser } from "@/hooks/queries/useUser";
+import Header from "../organisms/dashbord/Header";
+import ChatRealtimeProvider from "@/shared/providers/ChatRealtimeProvider";
+import HomeBottomNavigation from "../organisms/Home/HomeBottomNavigation";
+import { usePathname } from "next/navigation";
 
 interface DashboardTemplateProps {
   children: ReactNode;
@@ -10,44 +14,68 @@ interface DashboardTemplateProps {
 
 const DashboardTemplate = ({ children }: DashboardTemplateProps) => {
   const { roulData } = useUser();
+  const isChat = usePathname() === "/dashboard/chat";
+
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    console.log(roulData);
-  }, [roulData]);
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768; // md breakpoint
+      setIsMobile(mobile);
+
+      if (!mobile) {
+        setMobileOpen(false);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
   return (
-    <div className="flex h-screen  justify-end">
-      {roulData?.data?.roleName && <Sidebar role={roulData?.data?.roleName} />}
-      <main className="flex-1 p-8 overflow-y-auto">{children}</main>
-      {/* <aside className="w-36 bg-white border-l p-6 hidden lg:block">
-        <h3 className="text-lg font-semibold mb-4">Notifications</h3>
-        <Notification text="New message" />
-        <Notification text="Server updated" />
-      </aside> */}
+    <div className="dashboard-safe-shell flex h-dvh min-h-0 justify-end gap-x-3 overflow-hidden bg-slate-50 md:gap-x-5">
+      {roulData?.data?.roleName && (
+        <Sidebar
+          role={roulData?.data?.roleName}
+          roles={roulData?.data?.roleNames}
+          collapsed={collapsed}
+          isMobile={isMobile}
+          mobileOpen={mobileOpen}
+          setMobileOpen={setMobileOpen}
+        />
+      )}
+
+      <div className="flex min-h-0 w-full min-w-0 flex-col">
+        <Header
+          setCollapsed={setCollapsed}
+          collapsed={collapsed}
+          isMobile={isMobile}
+          mobileOpen={mobileOpen}
+          setMobileOpen={setMobileOpen}
+        />
+        <main className={isChat
+          ? "min-h-0 flex-1 overflow-hidden p-3 pb-[calc(3.75rem+env(safe-area-inset-bottom))] sm:p-4 sm:pb-[calc(3.75rem+env(safe-area-inset-bottom))] md:p-4 xl:p-8"
+          : "min-h-0 min-w-0 flex-1 overflow-y-auto p-3 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] sm:p-4 sm:pb-[calc(6rem+env(safe-area-inset-bottom,0px))] md:p-4 xl:p-8"}>
+          <ChatRealtimeProvider className={isChat ? "h-full min-h-0" : undefined}>{children}</ChatRealtimeProvider>
+        </main>
+      </div>
+      <HomeBottomNavigation />
     </div>
   );
 };
+
 export default DashboardTemplate;
-
-// ---------- Components ----------
-
-// import { TextField } from "../molecules/public";
-// import { DashboardBottomNavigation } from "../organisms/dashbord";
-// import { ProfileHeader } from "../organisms/dashbord/ProfileHeader";
-
-// interface DashboardTemolateProps {
-//   children: React.ReactNode;
-// }
-
-// const DashboardTemolate = ({ children }: DashboardTemolateProps) => {
-//   return (
-//     <>
-//       <div className="fixed top-0 w-full z-10">
-//         <ProfileHeader />
-//       </div>
-//       <main className="p-4 mt-10 pb-20">{children}</main>
-//       <DashboardBottomNavigation />
-//     </>
-//   );
-// };
-
-// export default DashboardTemolate;

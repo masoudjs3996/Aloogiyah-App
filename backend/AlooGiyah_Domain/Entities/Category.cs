@@ -37,6 +37,8 @@ public class Category : BaseEntity
     #endregion
 
     #region Relations
+    public List<Discount> Discounts { get; set; } = [];
+
     [ForeignKey(nameof(ParentCategoryId))]
     public Category? ParentCategory { get; set; }
 

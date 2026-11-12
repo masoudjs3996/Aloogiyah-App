@@ -6,6 +6,8 @@ namespace AlooGiyah_Application.DTOs.Discount;
 public class DiscountUpdateDto
 {
     public string Code { get; set; } = string.Empty;
+    public string? FundingSource { get; set; }
+    public bool ForQualityAssessment { get; set; }
     public DiscountType DiscountType { get; set; } 
     public decimal Value { get; set; }
     public DateTimeOffset? StartDate { get; set; }

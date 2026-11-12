@@ -13,6 +13,18 @@ public class QualityAssessment : BaseEntity
     [Required]
     public int AgriculturalProductId { get; set; }
 
+    public int? AgriculturalOrderId { get; set; }
+    public AgriculturalOrder? AgriculturalOrder { get; set; }
+    [MaxLength(700)] public string RequestDescription { get; set; } = string.Empty;
+    public decimal? RequestedQuantity { get; set; }
+    public decimal Fee { get; set; }
+    public decimal DiscountAmount { get; set; }
+    public decimal PaidAmount { get; set; }
+    public DateTimeOffset? PaidAt { get; set; }
+    [MaxLength(100)] public string? IdempotencyKey { get; set; }
+    [MaxLength(64)] public string? RequestHash { get; set; }
+    [MaxLength(1000)] public string? ReportFileUrl { get; set; }
+    [MaxLength(4000)] public string? ReportJson { get; set; }
     public int? ExpertId { get; set; }
 
     [Required]

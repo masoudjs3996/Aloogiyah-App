@@ -20,8 +20,5 @@ public class StatusConfiguration : IEntityTypeConfiguration<Status>
         builder.Property(s => s.EntityStatus)
             .IsRequired();
 
-        builder.HasKey(s => s.StatusId);
-        builder.Property(s => s.Name).IsRequired().HasMaxLength(50);
-        builder.Property(s => s.EntityStatus).IsRequired();
     }
 }

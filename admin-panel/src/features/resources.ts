@@ -1,0 +1,8 @@
+import raw from '../shared/api/catalog.json';
+import type {Endpoint,Resource} from '../shared/types';
+export const endpoints=raw as Endpoint[];
+export {resources} from './resource-list';
+export function resourceEndpoints(r:Resource){return endpoints.filter(e=>e.controller===r.id&&!r.disabledActions?.includes(e.action));}
+export function listEndpoint(r:Resource){return endpoints.find(e=>e.controller===r.id&&e.action===(r.listAction||'GetByFilter'))||endpoints.find(e=>e.controller===r.id&&e.action.toLowerCase()==='getbyfilter');}
+export function detailEndpoint(r:Resource){return endpoints.find(e=>e.controller===r.id&&e.action===(r.detailAction||'GetByCode'));}
+export function actionTitle(e:Endpoint){const a=e.action; if(a==='Tariff')return 'تنظیم تعرفه کارشناسی';if(a==='ReportFile')return 'بارگذاری فایل گزارش';if(e.method==='DELETE')return 'حذف';if(a.includes('/Roles'))return 'مدیریت نقش‌ها';if(a.includes('Refund'))return 'تکمیل بازپرداخت';if(a.includes('/Action'))return 'عملیات سفارش';if(/AddExpert/.test(a))return 'انتخاب کارشناس نزدیک';if(/AddProvider/.test(a))return 'انتخاب ارائه‌دهنده نزدیک';if(/Finalize/.test(a))return 'نهایی‌کردن حراج';if(/Primary/.test(a))return 'تصویر اصلی';if(/Image|Upload/.test(a))return 'مدیریت تصویر / فایل';if(/Create|Province|County|City|Village/.test(a))return 'ثبت جدید';if(/Update/.test(a))return 'ویرایش';if(a==='Read')return 'علامت‌گذاری خوانده‌شده';if(a==='Clear')return 'خالی‌کردن';if(a==='Add')return 'افزودن';if(a==='RemoveItem')return 'حذف مورد';if(a==='Deposit')return 'افزایش موجودی';if(a.includes('/Cancel'))return 'لغو';if(a.includes('/Pay/Wallet'))return 'پرداخت از کیف پول';if(e.method==='PUT')return 'ویرایش';return 'ثبت عملیات';}

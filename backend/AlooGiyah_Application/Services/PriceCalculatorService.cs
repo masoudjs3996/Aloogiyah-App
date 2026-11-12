@@ -1,10 +1,14 @@
-﻿using AlooGiyah_Application.Interfaces.Service;
+﻿using Microsoft.Extensions.Configuration;
+using AlooGiyah_Application.Services.Store;
+using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Entities.UserFolder;
 using AlooGiyah_Domain.Enums;
 using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Shared.Exceptions;
+using AlooGiyah_Application.Utils;
+using Microsoft.EntityFrameworkCore;
 
 namespace AlooGiyah_Application.Services;
 
@@ -12,9 +16,11 @@ public class PriceCalculatorService : IPriceCalculatorService
 {
     #region Constructor
     private readonly IGenericRepository<AgriculturalProduct> _agriculturalProductRepository;
-    public PriceCalculatorService(IGenericRepository<AgriculturalProduct> agriculturalProductRepository)
+    private readonly IConfiguration _configuration;
+    public PriceCalculatorService(IGenericRepository<AgriculturalProduct> agriculturalProductRepository, IConfiguration configuration)
     {
         _agriculturalProductRepository = agriculturalProductRepository;
+        _configuration = configuration;
     }
     #endregion
 
@@ -111,6 +117,8 @@ public class PriceCalculatorService : IPriceCalculatorService
     #region AgriculturalOrder Pricing
     public async Task<decimal> CalculateAgriculturalOrder(AgriculturalOrder order, string? userRole = null)
     {
+        if (order.CheckoutId.HasValue)
+            throw new BadRequestException("قیمت سفارش ثبت‌شده قابل محاسبه مجدد نیست.");
         if (order?.AgriculturalOrderItems == null || !order.AgriculturalOrderItems.Any())
             return 0;
 
@@ -119,6 +127,7 @@ public class PriceCalculatorService : IPriceCalculatorService
 
         var discount = order.Discount;
         var buyerCode = order.Buyer?.Code;
+        var pricingTime = DateTimeOffset.UtcNow;
 
         // اعتبارسنجی تخفیف
         if (discount != null && !IsDiscountValid(discount, buyerCode))
@@ -126,10 +135,12 @@ public class PriceCalculatorService : IPriceCalculatorService
 
         foreach (var item in order.AgriculturalOrderItems)
         {
-            var product = await _agriculturalProductRepository.GetByIdAsync(item.AgriculturalProductId);
+            var product = await _agriculturalProductRepository.GetAll().Include(p => p.Offers)
+                .SingleOrDefaultAsync(p => p.AgriculturalProductId == item.AgriculturalProductId);
             if (product == null) continue;
 
             decimal productPrice = userRole == "User" || userRole == "Gust" ? product.RetailPrice : product.WholesalePrice;
+            productPrice = ProductOfferPricing.UnitPrice(product, productPrice, pricingTime);
             decimal subtotal = productPrice * item.Quantity;
             item.Price = productPrice;
 
@@ -168,59 +179,39 @@ public class PriceCalculatorService : IPriceCalculatorService
      string userRole,
      Dictionary<int, bool>? discountEligibility = null)
     {
-        if (cart?.CartItems == null || !cart.CartItems.Any())
-            return 0;
-
-        decimal totalBeforeDiscount = 0;
-        decimal totalDiscount = 0;
-
+        if (cart?.CartItems == null || cart.CartItems.Count == 0) return 0;
+        var wholesale = _configuration.GetSection("Commerce:WholesaleRoles").GetChildren().Any(x => x.Value == userRole);
         var discount = cart.Discount;
-        var buyerCode = cart.User?.Code;
-
-        if (discount != null && !IsDiscountValid(discount, buyerCode))
-            discount = null;
-
-        foreach (var item in cart.CartItems)
+        if (discount != null && (!IsDiscountValid(discount, cart.User?.Code) || discount.Value < 0 ||
+            discount.DiscountType == DiscountType.Percentage && discount.Value > 100 || discount.MaxDiscountAmount < 0)) discount = null;
+        var eligible = new Dictionary<int, decimal>();
+        var now = DateTimeOffset.UtcNow;
+        decimal gross = 0;
+        foreach (var group in cart.CartItems.GroupBy(x => x.AgriculturalProduct.FarmId))
         {
-            var product = item.AgriculturalProduct;
-            if (product == null) continue;
-
-            decimal unitPrice =
-                userRole is "User" or "Guest"
-                ? product.RetailPrice
-                : product.WholesalePrice;
-
-            decimal subtotal = unitPrice * item.Quantity;
-
-            item.Price = subtotal; // ✅ قیمت کل آیتم
-
-            decimal itemDiscount = 0;
-
-            if (discount != null &&
-                discountEligibility?.TryGetValue(item.AgriculturalProductId, out var eligible) == true &&
-                eligible)
+            decimal eligibleTotal = 0;
+            foreach (var item in group)
             {
-                itemDiscount = discount.DiscountType switch
-                {
-                    DiscountType.Percentage =>
-                        Math.Min(subtotal * discount.Value / 100m,
-                                 discount.MaxDiscountAmount ?? decimal.MaxValue),
-
-                    DiscountType.Fixed =>
-                        Math.Min(discount.Value * item.Quantity,
-                                 discount.MaxDiscountAmount ?? decimal.MaxValue),
-
-                    _ => 0
-                };
+                var product = item.AgriculturalProduct;
+                var unit = ProductOfferPricing.UnitPrice(product, wholesale ? product.WholesalePrice : product.RetailPrice, now);
+                item.Price = Math.Max(0, unit * item.Quantity); gross += item.Price;
+                if (discount != null &&
+                    (!discount.IssuerSellerId.HasValue || product.Farm.OwnerId == discount.IssuerSellerId) &&
+                    (!discount.FarmId.HasValue || discount.FarmId == product.FarmId) &&
+                    (discount.agriculturalProducts == null || discount.agriculturalProducts.Count == 0 || discount.agriculturalProducts.Any(p => p.AgriculturalProductId == product.AgriculturalProductId)) &&
+                    (discount.Categories == null || discount.Categories.Count == 0 || product.Categories?.Any(c => discount.Categories.Any(d => d.CategoryId == c.CategoryId)) == true)) eligibleTotal += item.Price;
             }
-
-            totalBeforeDiscount += subtotal;
-            totalDiscount += itemDiscount;
+            eligible[group.Key] = eligibleTotal;
         }
-
-        cart.DiscountAmount = totalDiscount;
-        cart.TotalPrice = Math.Max(0, totalBeforeDiscount - totalDiscount);
-
+        var totalEligible = eligible.Values.Sum();
+        var amount = discount == null ? 0m : discount.DiscountType switch
+        {
+            DiscountType.Percentage => totalEligible * discount.Value / 100m,
+            DiscountType.Fixed => discount.Value,
+            _ => 0m
+        };
+        amount = decimal.Round(Math.Min(totalEligible, Math.Min(amount, discount?.MaxDiscountAmount ?? decimal.MaxValue)), 2);
+        cart.DiscountAmount = amount; cart.TotalPrice = Math.Max(0, gross - amount);
         return cart.TotalPrice;
     }
 
@@ -250,7 +241,7 @@ public class PriceCalculatorService : IPriceCalculatorService
 
     public bool IsDiscountValid(Discount discount, string? buyerCode)
     {
-        if (discount == null || !discount.IsActive) return false;
+        if (discount == null || discount.ForQualityAssessment || !discount.IsActive || discount.FundingSource is not ("Platform" or "Seller")) return false;
         var now = DateTimeOffset.UtcNow;
         if (discount.StartDate.HasValue && discount.StartDate > now) return false;
         if (discount.EndDate.HasValue && discount.EndDate < now) return false;
@@ -258,7 +249,8 @@ public class PriceCalculatorService : IPriceCalculatorService
 
         // اگر Users خالی یا null بود → عمومی (همه مجاز)
         var allowedUsers = discount.Users ?? Enumerable.Empty<User>();
-        if (allowedUsers.Any() && buyerCode != null && !allowedUsers.Any(u => u.Code == buyerCode))
+        if ((discount.FundingSource == "Seller") != discount.IssuerSellerId.HasValue || discount.IssuerSellerId.HasValue && !discount.FarmId.HasValue) return false;
+        if (allowedUsers.Any() && (buyerCode == null || !allowedUsers.Any(u => u.Code == buyerCode)))
             return false;
 
         return true;
@@ -283,7 +275,8 @@ public class PriceCalculatorService : IPriceCalculatorService
         bool inAllowedFarm =
             discount.FarmId.HasValue && discount.FarmId == product.FarmId;
 
-        return (noProductLimit || inAllowedProducts)
+        return (!discount.IssuerSellerId.HasValue || product.Farm?.OwnerId == discount.IssuerSellerId)
+            && (noProductLimit || inAllowedProducts)
             && (noCategoryLimit || inAllowedCategories)
             && (noFarmLimit || inAllowedFarm);
     }

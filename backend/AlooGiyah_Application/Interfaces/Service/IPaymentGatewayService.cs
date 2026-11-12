@@ -9,7 +9,9 @@ namespace AlooGiyah_Application.Interfaces.Service
 {
     public interface IPaymentGatewayService
     {
+        bool IsAvailable => false;
+        string ProviderName => "None";
         Task<string> InitiatePaymentAsync(string transactionId, decimal amount, string? redirectUrl);
-        Task<PaymentStatus> VerifyPaymentAsync(string transactionId);
+        Task<PaymentStatus> VerifyPaymentAsync(string transactionId, decimal expectedAmountToman);
     }
 }

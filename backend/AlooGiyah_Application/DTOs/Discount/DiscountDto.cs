@@ -8,6 +8,7 @@ namespace AlooGiyah_Application.DTOs.Discount;
 public class DiscountDto
 {
     public string Code { get; set; } = string.Empty;
+    public bool ForQualityAssessment { get; set; }
     public DiscountType DiscountType { get; set; } 
     public decimal Value { get; set; }
     public DateTimeOffset? StartDate { get; set; }
@@ -15,6 +16,7 @@ public class DiscountDto
     public int? MaxUsage { get; set; }
     public int UsageCount { get; set; }
     public bool IsActive { get; set; }
+    public string? FundingSource => Entity?.FundingSource;
     public decimal? MaxDiscountAmount { get; set; }
     public List<string>? UserCodes { get; set; } 
     public List<string>? ProductCodes { get; set; } 

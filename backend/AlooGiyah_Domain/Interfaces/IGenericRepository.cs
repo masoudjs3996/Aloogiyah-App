@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Domain.Entities;
+using AlooGiyah_Domain.Entities;
 using System.Linq.Expressions;
 using AlooGiyah_Domain.Pagination;
 
@@ -7,6 +7,7 @@ namespace AlooGiyah_Domain.Interfaces;
 public interface IGenericRepository<T> where T : BaseEntity
 {
     IQueryable<T> GetAll();
+    IQueryable<T> GetAllIncludingDeleted();
     Task<IEnumerable<T>> GetAllAsync();
     Task<PagedResult<T>> GetPagedAsync(Expression<Func<T, bool>>? filter = null, int pageNumber = 1, int pageSize = 10, Expression<Func<T, object>>? orderBy = null);
     Task<PagedResult<T>> GetPagedWithIncludeAsync(Expression<Func<T, bool>>? filter = null, int pageNumber = 1, int pageSize = 10, Expression<Func<T, object>>? orderBy = null, params Expression<Func<T, object>>[] includes);
@@ -25,7 +26,7 @@ public interface IGenericRepository<T> where T : BaseEntity
     Task<string?> GetCodeByIdAsync(int id);
     Task<T?> GetByCodeWithIncludeAsync(string code, params string[] includes);
     Task<T?> GetByCodeWithIncludeAsync(string code, params Expression<Func<T, object>>[] includes);
-    Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
+    Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
     Task AddAsync(T entity);
     Task<T> UpdateAsync(T entity);
     Task DeleteAsync(T entity);

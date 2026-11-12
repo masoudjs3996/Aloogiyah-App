@@ -9,6 +9,9 @@ public class FarmConfiguration : IEntityTypeConfiguration<Farm>
     public void Configure(EntityTypeBuilder<Farm> builder)
     {
         builder.HasKey(g => g.FarmId);
+        builder.HasOne(g => g.DeliveryPoint).WithMany()
+            .HasForeignKey(g => g.DeliveryPointCode).HasPrincipalKey(p => p.Code)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(g => g.Name)
             .IsRequired()
@@ -33,6 +36,12 @@ public class FarmConfiguration : IEntityTypeConfiguration<Farm>
             .HasForeignKey(g => g.AddressId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired(false);
+
+        builder.HasOne(g => g.Status)
+            .WithMany()
+            .HasForeignKey(g => g.StatusId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(true);
 
         builder.HasMany(g => g.AgriculturalProduct)
             .WithOne(p => p.Farm) 

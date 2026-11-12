@@ -13,5 +13,6 @@ public interface IUserService
     Task<UserDto> UpdateProfileAsync(UpdateProfileDto userDto);
     Task<string?> ChangeProfilePhotoAsync(ChangeProfilePhotoDto file);
     Task<RegisterUserDto> GetUserByUsername(string username);
+    Task SetAdditionalRolesAsync(string userCode, IReadOnlyCollection<string> roleCodes);
 
 }

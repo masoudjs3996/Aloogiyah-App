@@ -51,7 +51,7 @@ namespace AlooGiyah_WebApi.Controllers
 
         // شهرستان‌ها
         [HttpGet("Counties")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> GetCounties([FromQuery] string? provinceCode, [FromQuery] LocationFilterDto filter)
         {
             var result = await _locationService.GetCountiesAsync(provinceCode, filter);
@@ -117,7 +117,7 @@ namespace AlooGiyah_WebApi.Controllers
         }
 
         [HttpGet("CityAndVillage")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> GetCountyLocations([FromQuery] CountyLocationsFilterDto filterDto)
         {
 

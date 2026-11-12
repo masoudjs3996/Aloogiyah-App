@@ -20,6 +20,8 @@ public class ServiceRequest : BaseEntity
     [Required]
     public int UserId { get; set; }
 
+    public int? AddressId { get; set; }
+
     public int? ProviderId { get; set; }
 
     public decimal Price { get; set; } 
@@ -52,6 +54,9 @@ public class ServiceRequest : BaseEntity
 
     [ForeignKey(nameof(ProviderId))]
     public User? Provider { get; set; } 
+
+    [ForeignKey(nameof(AddressId))]
+    public AlooGiyah_Domain.Entities.UserFolder.AddressFolder.Address? Address { get; set; }
 
     [ForeignKey(nameof(DiscountId))]
     public Discount? Discount { get; set; } 

@@ -1,0 +1,21 @@
+{
+  "source": "https://github.com/Hameds/IranCountryDivisions",
+  "revision": "68687cf96cc1852d5d38c7283353c80829331758",
+  "source_year": 1404,
+  "source_sha256": "7fc95cc5fd20be3b960e33a9f72ec2d12ef7d87f417e12eaa26a0f6097ac0d18",
+  "counts": {
+    "0": 1,
+    "1": 31,
+    "2": 484,
+    "3": 1193,
+    "4": 2777,
+    "5": 1481,
+    "7": 191,
+    "6": 99317
+  },
+  "application_records": 101313,
+  "disambiguated_names": {
+    "6": 5188
+  },
+  "sql_sha256": "0e322a96774390d0b1565b9712b4fb5e7712cca6ed12ffcd101a8b11a2a372e1"
+}

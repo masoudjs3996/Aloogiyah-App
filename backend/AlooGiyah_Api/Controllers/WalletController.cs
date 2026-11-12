@@ -10,6 +10,14 @@ namespace AlooGiyah_Api.Controllers
     [ApiController]
     public class WalletController : ControllerBase
     {
+        [Authorize(Policy = "NotGuest")]
+        [HttpGet("Capabilities")]
+        public IActionResult Capabilities([FromServices] AlooGiyah_Application.Interfaces.Service.IPaymentGatewayService payment,
+            [FromServices] AlooGiyah_Application.Interfaces.Service.IPayoutProvider payout) =>
+            Ok(new ApiResponse<object> { IsSuccess = true, Data = new {
+                OnlinePaymentAvailable = payment.IsAvailable, AutomaticPayoutAvailable = payout.IsAvailable,
+                PaymentProvider = payment.ProviderName, PayoutProvider = payout.Name, SettlementMode = "Manual",
+                Currency = "IRT" } });
         private readonly IWalletService _walletService;
         public WalletController(IWalletService walletService)
         {
@@ -62,9 +70,9 @@ namespace AlooGiyah_Api.Controllers
                     Data = new { TransactionId = transactionId }
                 });
             }
-            catch (Exception ex)
+            catch (AlooGiyah_Shared.Exceptions.BadRequestException)
             {
-                return BadRequest(new ApiResponse<object> { IsSuccess = false, Message = ex.Message });
+                return BadRequest(new ApiResponse<object> { IsSuccess = false, Message = "تأیید پرداخت ناموفق بود" });
             }
         }
     }

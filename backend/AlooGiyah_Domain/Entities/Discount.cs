@@ -9,6 +9,7 @@ public class Discount : BaseEntity
 {
     #region Properties
     public int DiscountId { get; set; }
+    public bool ForQualityAssessment { get; set; }
     public DiscountType DiscountType { get; set; }
     public decimal Value { get; set; }
     public DateTimeOffset? StartDate { get; set; }
@@ -17,6 +18,9 @@ public class Discount : BaseEntity
     public decimal? MaxDiscountAmount { get; set; }
     public int UsageCount { get; set; }
     public bool IsActive { get; set; }
+    public int? IssuerSellerId { get; set; }
+    public string? FundingSource { get; set; }
+    public User? IssuerSeller { get; set; }
     #endregion
 
     #region Relations

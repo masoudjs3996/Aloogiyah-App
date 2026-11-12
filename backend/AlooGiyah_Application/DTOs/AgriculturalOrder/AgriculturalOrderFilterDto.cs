@@ -4,6 +4,9 @@ namespace AlooGiyah_Application.DTOs.AgriculturalOrder;
 
 public class AgriculturalOrderFilterDto : BaseFilterDto
 {
+    public string View { get; set; } = "Buyer"; // Buyer | Seller | Manager
+    public string? FarmCode { get; set; }
+    public bool IncludeUnpaid { get; set; }
     public string? StatusCode { get; set; }
     public decimal? MinTotalPrice { get; set; }
     public decimal? MaxTotalPrice { get; set; }

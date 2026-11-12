@@ -1,6 +1,8 @@
-﻿using AlooGiyah_Application.DTOs.Auction;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.Auction;
 using AlooGiyah_Application.DTOs.AuctionBid;
 using AlooGiyah_Application.Interfaces.Service.Store;
+using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Entities;
 using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Entities.UserFolder;
@@ -10,11 +12,15 @@ using AlooGiyah_Shared.Commons;
 using AlooGiyah_Shared.Exceptions;
 using AutoMapper;
 using System.Linq.Expressions;
+using System.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace AlooGiyah_Application.Services.Store;
 
 public class AuctionService : IAuctionService
 {
+    private readonly IAuctionQuery _readQuery;
+
     #region Constructor
     private readonly IGenericRepository<Auction> _auctionRepository;
     private readonly IGenericRepository<AgriculturalProduct> _agriculturalProductRepository;
@@ -23,16 +29,20 @@ public class AuctionService : IAuctionService
     private readonly IGenericRepository<AuctionBid> _auctionBidRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
+    private readonly ICurrentUserService _currentUser;
 
-    public AuctionService(
+    public AuctionService(IAuctionQuery readQuery,
+        
         IGenericRepository<Auction> auctionRepository,
         IGenericRepository<AgriculturalProduct> agriculturalProductRepository,
         IGenericRepository<User> userRepository,
         IGenericRepository<Status> statusRepository,
         IGenericRepository<AuctionBid> auctionBidRepository,
         IUnitOfWork unitOfWork,
-        IMapper mapper)
+        IMapper mapper,
+        ICurrentUserService currentUser)
     {
+        _readQuery = readQuery;
         _auctionRepository = auctionRepository;
         _agriculturalProductRepository = agriculturalProductRepository;
         _userRepository = userRepository;
@@ -40,6 +50,7 @@ public class AuctionService : IAuctionService
         _auctionBidRepository = auctionBidRepository;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+        _currentUser = currentUser;
     }
     #endregion
 
@@ -47,6 +58,9 @@ public class AuctionService : IAuctionService
     #region Create
     public async Task<AuctionDto> CreateAsync(AuctionCreateDto dto)
     {
+        var actorId = CurrentUserId();
+        ScheduleValidation.Validate(dto.StartDate);
+        ScheduleValidation.Validate(dto.EndDate);
         // اعتبارسنجی محصول
         var productId = await _agriculturalProductRepository.GetIdByCodeAsync(dto.AgriculturalProductCode, p => p.AgriculturalProductId);
         if (productId == null)
@@ -65,9 +79,12 @@ public class AuctionService : IAuctionService
             throw new InvalidOperationException("قیمت اولیه باید بیشتر از صفر باشد");
 
         // چک کردن موجودی محصول
-        var product = await _agriculturalProductRepository.GetByIdAsync(productId.Value);
+        var product = await _agriculturalProductRepository.GetAll().Include(x => x.Farm)
+            .SingleOrDefaultAsync(x => x.AgriculturalProductId == productId.Value);
         if (product == null || product.Stock <= 0)
             throw new InvalidOperationException("محصول موجود نیست یا موجودی کافی ندارد");
+        if (!IsManager && product.Farm.OwnerId != actorId)
+            throw new ForbiddenException("فقط مالک مزرعه می‌تواند برای محصول خود حراج بسازد.");
 
         var entity = _mapper.Map<Auction>(dto);
         entity.AgriculturalProductId = productId.Value;
@@ -87,39 +104,27 @@ public class AuctionService : IAuctionService
     #region Update
     public async Task<bool> UpdateAsync(AuctionUpdateDto dto)
     {
-        var entity = await _auctionRepository.GetByCodeAsync(dto.Code);
-        if (entity == null)
-            return false;
-
-        // اعتبارسنجی وضعیت
-        var statusId = await _statusRepository.GetIdByCodeAsync(dto.StatusCode, s => s.StatusId);
-        if (statusId == null)
-            throw new NotFoundException($"وضعیت با کد {dto.StatusCode} پیدا نشد");
-
-        // اعتبارسنجی برنده (اگر مشخص شده)
-        int? winnerId = null;
-        if (!string.IsNullOrEmpty(dto.WinnerCode))
-        {
-            winnerId = await _userRepository.GetIdByCodeAsync(dto.WinnerCode, u => u.UserId);
-            if (winnerId == null)
-                throw new NotFoundException($"کاربر با کد {dto.WinnerCode} پیدا نشد");
-        }
-
-        entity.StatusId = statusId.Value;
-        entity.WinnerId = winnerId;
-
-        await _auctionRepository.UpdateAsync(entity);
-        await _unitOfWork.SaveChangesAsync();
-        return true;
+        CurrentUserId();
+        if (!IsManager) throw new ForbiddenException("ویرایش حراج فقط برای مدیریت مجاز است.");
+        throw new BadRequestException("وضعیت و برنده حراج فقط از مسیر نهایی‌سازی تغییر می‌کند.");
     }
     #endregion
 
     #region Delete
     public async Task<bool> DeleteAsync(string code)
     {
-        var entity = await _auctionRepository.GetByCodeAsync(code);
+        var actorId = CurrentUserId();
+        var entity = await _auctionRepository.GetAll().Include(x => x.AgriculturalProduct).ThenInclude(x => x.Farm)
+            .SingleOrDefaultAsync(x => x.Code == code);
         if (entity == null)
             return false;
+
+        if (!IsManager && entity.AgriculturalProduct.Farm.OwnerId != actorId)
+            throw new ForbiddenException("حذف این حراج برای شما مجاز نیست.");
+        if (!IsManager && entity.StartDate <= DateTimeOffset.UtcNow)
+            throw new BadRequestException("پس از شروع حراج، مالک نمی‌تواند آن را حذف کند.");
+        if (await _auctionBidRepository.GetAll().AnyAsync(b => b.AuctionId == entity.AuctionId))
+            throw new BadRequestException("حراج دارای پیشنهاد است و قابل حذف نیست.");
 
         // حذف پیشنهادهای مرتبط
         var bidsResult = await _auctionBidRepository.GetPagedAsync(
@@ -140,123 +145,69 @@ public class AuctionService : IAuctionService
     #region Get By Code
     public async Task<AuctionDto?> GetByCodeAsync(string code)
     {
-        var entity = await _auctionRepository.GetByCodeAsync(code);
-        if (entity == null)
-            return null;
-
-        var auctionDto = _mapper.Map<AuctionDto>(entity);
-        auctionDto.AgriculturalProductCode = await _agriculturalProductRepository.GetCodeByIdAsync(entity.AgriculturalProductId) ?? string.Empty;
-        auctionDto.StatusCode = await _statusRepository.GetCodeByIdAsync(entity.StatusId) ?? string.Empty;
-        auctionDto.WinnerCode = entity.WinnerId.HasValue ? await _userRepository.GetCodeByIdAsync(entity.WinnerId.Value) ?? string.Empty : string.Empty;
-        auctionDto.Bids = entity.Bids.Select(b => new AuctionBidDto
-        {
-            Code = b.Code,
-            BidAmount = b.BidAmount,
-            CreatedAt = b.CreatedAt
-        }).ToList();
-
-        return auctionDto;
+        return await _readQuery.GetByCodeAsync(code);
     }
     #endregion
 
     #region Get By Filter
     public async Task<PagedResult<AuctionDto>> GetByFilterAsync(AuctionFilterDto filter)
     {
-        Expression<Func<Auction, bool>> predicate = a => !a.IsDeleted;
-
-        if (!string.IsNullOrEmpty(filter.ProductCode))
-            predicate = predicate.And(a => a.AgriculturalProduct.Code == filter.ProductCode);
-
-        if (!string.IsNullOrEmpty(filter.StatusCode))
-            predicate = predicate.And(a => a.Status.Code == filter.StatusCode);
-
-        if (!string.IsNullOrEmpty(filter.WinnerCode))
-            predicate = predicate.And(a => a.Winner != null && a.Winner.Code == filter.WinnerCode);
-
-        if (filter.StartDateFrom.HasValue)
-            predicate = predicate.And(a => a.StartDate >= filter.StartDateFrom.Value);
-
-        if (filter.StartDateTo.HasValue)
-            predicate = predicate.And(a => a.StartDate <= filter.StartDateTo.Value);
-
-        if (filter.EndDateFrom.HasValue)
-            predicate = predicate.And(a => a.EndDate >= filter.EndDateFrom.Value);
-
-        if (filter.EndDateTo.HasValue)
-            predicate = predicate.And(a => a.EndDate <= filter.EndDateTo.Value);
-
-        if (filter.MinStartingPrice.HasValue)
-            predicate = predicate.And(a => a.StartingPrice >= filter.MinStartingPrice.Value);
-
-        if (filter.MaxStartingPrice.HasValue)
-            predicate = predicate.And(a => a.StartingPrice <= filter.MaxStartingPrice.Value);
-
-        return await _auctionRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: a => new AuctionDto
-            {
-                Code = a.Code,
-                AgriculturalProductCode = a.AgriculturalProduct.Code,
-                StartDate = a.StartDate,
-                EndDate = a.EndDate,
-                StartingPrice = a.StartingPrice,
-                CurrentPrice = a.CurrentPrice,
-                WinnerCode = a.Winner != null ? a.Winner.Code : string.Empty,
-                StatusCode = a.Status.Code,
-                CreatedAt = a.CreatedAt,
-                Bids = a.Bids.Select(b => new AuctionBidDto
-                {
-                    Code = b.Code,
-                    BidAmount = b.BidAmount,
-                    CreatedAt = b.CreatedAt
-                }).ToList()
-            },
-            pageNumber: filter.PageNumber,
-            pageSize: filter.PageSize,
-            orderBy: a => a.CreatedAt
-        );
+        return await _readQuery.GetByFilterAsync(filter);
     }
     #endregion
 
     #region Finalize
     public async Task<bool> FinalizeAuctionAsync(string code)
     {
-        var entity = await _auctionRepository.GetByCodeAsync(code);
+        CurrentUserId();
+        if (!IsManager) throw new ForbiddenException("نهایی‌کردن حراج فقط برای مدیریت مجاز است.");
+        await using var tx = await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable);
+        var entity = await _auctionRepository.GetAll().Include(x => x.Status)
+            .SingleOrDefaultAsync(x => x.Code == code);
         if (entity == null)
             return false;
+
+        if (entity.Status?.Code == "COMPLETED")
+        {
+            await tx.CommitAsync();
+            return true;
+        }
 
         // چک کردن اینکه حراج تمام شده یا خیر
         if (entity.EndDate > DateTime.UtcNow)
             throw new InvalidOperationException("حراج هنوز به پایان نرسیده است");
 
         // گرفتن بالاترین پیشنهاد
-        var bidsResult = await _auctionBidRepository.GetPagedAsync(
-            filter: b => b.AuctionId == entity.AuctionId,
-            pageNumber: 1,
-            pageSize: 1,
-            orderBy: b => b.BidAmount);
-        var highestBid = bidsResult.Items.OrderByDescending(b => b.BidAmount).FirstOrDefault();
+        var highestBid = await _auctionBidRepository.GetAll().Where(b => b.AuctionId == entity.AuctionId)
+            .OrderByDescending(b => b.BidAmount).ThenBy(b => b.CreatedAt).ThenBy(b => b.AuctionBidId)
+            .FirstOrDefaultAsync();
 
-        if (highestBid == null)
-            throw new InvalidOperationException("هیچ پیشنهادی برای این حراج ثبت نشده است");
-
-        // به‌روزرسانی موجودی محصول
-        var product = await _agriculturalProductRepository.GetByIdAsync(entity.AgriculturalProductId);
-        if (product == null || product.Stock <= 0)
-            throw new InvalidOperationException("محصول موجود نیست یا موجودی کافی ندارد");
-
-        product.Stock -= 1; // فرض می‌کنیم هر حراج برای یک واحد محصول است
-        await _agriculturalProductRepository.UpdateAsync(product);
-
-        // تنظیم برنده و قیمت جاری
-        entity.WinnerId = highestBid.UserId;
-        entity.CurrentPrice = highestBid.BidAmount;
+        if (highestBid != null)
+        {
+            var product = await _agriculturalProductRepository.GetByIdAsync(entity.AgriculturalProductId);
+            if (product == null || product.Stock <= 0)
+                throw new ConflictException("محصول موجود نیست یا موجودی کافی ندارد.");
+            product.Stock -= 1;
+            entity.WinnerId = highestBid.UserId;
+            entity.CurrentPrice = highestBid.BidAmount;
+            await _agriculturalProductRepository.UpdateAsync(product);
+        }
         entity.StatusId = (await _statusRepository.FirstOrDefaultAsync(s => s.Code == "COMPLETED"))?.StatusId
             ?? throw new NotFoundException("وضعیت 'تکمیل‌شده' پیدا نشد");
 
         await _auctionRepository.UpdateAsync(entity);
         await _unitOfWork.SaveChangesAsync();
+        await tx.CommitAsync();
         return true;
     }
+
+    private int CurrentUserId()
+    {
+        if (!_currentUser.IsAuthenticated || _currentUser.IsGuest || !int.TryParse(_currentUser.UserId, out var id))
+            throw new UnauthorizedException("ابتدا وارد حساب کاربری شوید.");
+        return id;
+    }
+
+    private bool IsManager => _currentUser.Roles.Contains("Manager") || _currentUser.Roles.Contains("Admin");
     #endregion
 }

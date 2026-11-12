@@ -1,9 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace AlooGiyah_Application.DTOs.AgriculturalProduct;
 
 public class AgriculturalProductUpdateDto
 {
+    [System.ComponentModel.DataAnnotations.RegularExpression("^(Kilogram|Package|Piece)$")]
+    public string? SaleUnit { get; set; }
+
     [Required]
     public string Code { get; set; } = string.Empty;
 

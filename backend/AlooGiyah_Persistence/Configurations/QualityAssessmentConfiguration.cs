@@ -8,6 +8,12 @@ public class QualityAssessmentConfiguration : IEntityTypeConfiguration<QualityAs
 {
     public void Configure(EntityTypeBuilder<QualityAssessment> builder)
     {
+        builder.Property(x => x.Fee).HasPrecision(20, 2);
+        builder.Property(x => x.DiscountAmount).HasPrecision(20, 2);
+        builder.Property(x => x.PaidAmount).HasPrecision(20, 2);
+        builder.Property(x => x.RequestedQuantity).HasPrecision(20, 2);
+        builder.HasIndex(x => new { x.ApplicantId, x.IdempotencyKey }).IsUnique().HasFilter("\"IdempotencyKey\" IS NOT NULL");
+        builder.HasOne(x => x.AgriculturalOrder).WithMany().HasForeignKey(x => x.AgriculturalOrderId).OnDelete(DeleteBehavior.Restrict);
         builder.HasKey(qa => qa.QualityAssessmentId);
 
         builder.Property(qa => qa.AgriculturalProductId)

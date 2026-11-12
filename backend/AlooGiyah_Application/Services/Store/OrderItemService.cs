@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.OrderItem;
+using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.OrderItem;
 using AlooGiyah_Application.Interfaces.Service.Store;
 using AlooGiyah_Domain.Entities.Store;
 using AlooGiyah_Domain.Interfaces;
@@ -7,6 +8,8 @@ using AlooGiyah_Shared.Commons;
 using AlooGiyah_Shared.Exceptions;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 using System.Linq.Expressions;
 using System.Security.Claims;
 
@@ -14,6 +17,8 @@ namespace AlooGiyah_Application.Services.Store;
 
 public class OrderItemService : IOrderItemService
 {
+    private readonly IOrderItemQuery _readQuery;
+
     #region Constructor
     private readonly IGenericRepository<OrderItem> _orderItemRepository;
     private readonly IGenericRepository<Order> _orderRepository;
@@ -22,7 +27,8 @@ public class OrderItemService : IOrderItemService
     private readonly IMapper _mapper;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public OrderItemService(
+    public OrderItemService(IOrderItemQuery readQuery,
+        
         IGenericRepository<OrderItem> orderItemRepository,
         IGenericRepository<Order> orderRepository,
         IGenericRepository<Product> productRepository,
@@ -30,6 +36,7 @@ public class OrderItemService : IOrderItemService
         IMapper mapper,
         IHttpContextAccessor httpContextAccessor)
     {
+        _readQuery = readQuery;
         _orderItemRepository = orderItemRepository;
         _orderRepository = orderRepository;
         _productRepository = productRepository;
@@ -47,59 +54,23 @@ public class OrderItemService : IOrderItemService
     #endregion
 
     #region Get by Filter
-    public async Task<PagedResult<OrderItemDto?>> GetByFilterAsync(OrderItemFilterDto dto)
+    public async Task<PagedResult<OrderItemDto>> GetByFilterAsync(OrderItemFilterDto dto)
     {
-        Expression<Func<OrderItem, bool>> predicate = oi => !oi.IsDeleted;
-
-        if (!string.IsNullOrEmpty(dto.OrderCode))
-            predicate = predicate.And(oi => oi.Order.Code == dto.OrderCode);
-
-        if (!string.IsNullOrEmpty(dto.ProductCode))
-            predicate = predicate.And(oi => oi.Product.Code == dto.ProductCode);
-
-        if (!string.IsNullOrEmpty(dto.SearchTerm))
-            predicate = predicate.And(oi => oi.Product.Name.Contains(dto.SearchTerm));
-
-        return await _orderItemRepository.GetPagedProjectedAsync(
-            filter: predicate,
-            selector: oi => new OrderItemDto
-            {
-                OrderItemCode = oi.Code,
-                ProductCode = oi.Product.Code,
-                ProductName = oi.Product.Name,
-                Quantity = oi.Quantity,
-                Price = oi.Price,
-                PriceType = oi.PriceType,
-                OrderCode = oi.Order.Code
-            },
-            pageNumber: dto.PageNumber,
-            pageSize: dto.PageSize,
-            orderBy: oi => oi.CreatedAt
-        );
+        return await _readQuery.GetByFilterAsync(dto);
     }
     #endregion
 
     #region Get by Code
     public async Task<OrderItemDto?> GetByCodeAsync(string orderItemCode)
     {
-        var entity = await _orderItemRepository.GetByCodeAsync(orderItemCode);
-        if (entity == null) return null;
-
-        var orderCode = await _orderRepository.GetCodeByIdAsync(entity.OrderId);
-        var productCode = await _productRepository.GetCodeByIdAsync(entity.ProductId);
-        var orderItemDto = _mapper.Map<OrderItemDto>(entity);
-        orderItemDto.OrderCode = orderCode ?? string.Empty;
-        orderItemDto.ProductCode = productCode ?? string.Empty;
-        orderItemDto.ProductName = entity.Product.Name;
-        orderItemDto.PriceType = entity.PriceType;
-
-        return orderItemDto;
+        return await _readQuery.GetByCodeAsync(orderItemCode);
     }
     #endregion
 
     #region Create
     public async Task<OrderItemDto> CreateAsync(OrderItemCreateDto dto)
     {
+        if (dto.Quantity <= 0) throw new BadRequestException("تعداد کالا باید بیشتر از صفر باشد.");
         await using var transaction = await _unitOfWork.BeginTransactionAsync();
         try
         {
@@ -168,6 +139,7 @@ public class OrderItemService : IOrderItemService
     #region Update
     public async Task<bool> UpdateAsync(OrderItemUpdateDto dto)
     {
+        if (dto.Quantity <= 0) throw new BadRequestException("تعداد کالا باید بیشتر از صفر باشد.");
        await using var transaction = await _unitOfWork.BeginTransactionAsync();
         try
         {
@@ -217,27 +189,31 @@ public class OrderItemService : IOrderItemService
     #region Delete
     public async Task<bool> DeleteAsync(int orderItemId)
     {
-       await using var transaction = await _unitOfWork.BeginTransactionAsync();
+        await using var transaction = await _unitOfWork.BeginTransactionAsync(IsolationLevel.Serializable);
         try
         {
             var existing = await _orderItemRepository.GetByIdAsync(orderItemId);
             if (existing == null) return false;
-
-            var product = await _productRepository.GetByIdAsync(existing.ProductId);
-            if (product != null)
-            {
-                product.Stock += existing.Quantity;
-                await _productRepository.UpdateAsync(product);
-            }
-
-            await _orderItemRepository.DeleteAsync(existing); // خط 207: اطمینان از عدم اختصاص به var
-
             var order = await _orderRepository.GetByIdAsync(existing.OrderId);
-            if (order != null)
-            {
-                order.TotalPrice = order.OrderItems.Sum(oi => oi.Price) - order.DiscountAmount;
-                await _orderRepository.UpdateAsync(order);
-            }
+            if (order == null) return false;
+            var actor = _httpContextAccessor.HttpContext?.User;
+            if (actor?.IsInRole("Admin") != true && actor?.IsInRole("Manager") != true &&
+                (!int.TryParse(actor?.FindFirstValue(ClaimTypes.NameIdentifier), out var userId) || userId != order.UserId))
+                throw new ForbiddenException("حذف اقلام این سفارش مجاز نیست.");
+            if (order.IsPaid || order.PaymentDate.HasValue || !string.IsNullOrWhiteSpace(order.PaymentReference))
+                throw new ConflictException("اقلام سفارش دارای سابقه پرداخت قابل حذف نیست.");
+
+            var product = await _productRepository.GetAllIncludingDeleted().SingleAsync(p => p.ProductId == existing.ProductId);
+            product.Stock += existing.Quantity;
+
+            var remaining = await _orderItemRepository.GetAll()
+                .Where(item => item.OrderId == order.OrderId && item.OrderItemId != orderItemId)
+                .Select(item => item.Price).ToListAsync();
+            await _orderItemRepository.DeleteAsync(existing);
+            if (remaining.Count == 0)
+                await _orderRepository.LogicalDeleteAsync(order);
+            else
+                order.TotalPrice = Math.Max(0, remaining.Sum() - order.DiscountAmount);
 
             await _unitOfWork.SaveChangesAsync();
             await transaction.CommitAsync();

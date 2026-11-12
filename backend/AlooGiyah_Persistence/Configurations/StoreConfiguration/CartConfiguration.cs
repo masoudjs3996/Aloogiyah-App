@@ -48,9 +48,8 @@ public class CartConfiguration : IEntityTypeConfiguration<Cart>
             .OnDelete(DeleteBehavior.Cascade); // اگر سبد حذف شد، آیتم‌ها هم حذف بشن
 
         // ایندکس برای جستجوی سریع بر اساس CartId و UserId
-        builder.HasIndex(c => c.CartId)
-            .IsUnique();
-
+        builder.HasOne(c => c.Farm).WithMany().HasForeignKey(c => c.FarmId)
+            .OnDelete(DeleteBehavior.Restrict);
         builder.HasIndex(c => c.UserId);
     }
 }

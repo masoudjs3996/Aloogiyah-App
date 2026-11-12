@@ -1,9 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace AlooGiyah_Application.DTOs.AgriculturalProduct;
 
 public class AgriculturalProductDto
 {
+        public string? SaleUnit { get; set; }
+
     public string Code { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;

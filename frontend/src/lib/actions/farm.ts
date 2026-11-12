@@ -7,7 +7,7 @@ import {
 } from "@/shared/types/farm";
 
 export async function CreateFarm(
-  payload: FormData
+  payload: FormData,
 ): Promise<CreateFarmResponse | null> {
   try {
     const { data } = await axiosInstance.post<CreateFarmResponse>(
@@ -17,7 +17,7 @@ export async function CreateFarm(
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      }
+      },
     );
 
     return data ?? null;
@@ -28,9 +28,8 @@ export async function CreateFarm(
 }
 export async function GetMyFarm(): Promise<GetMyFarmResponse | null> {
   try {
-    const { data } = await axiosInstance.get<GetMyFarmResponse>(
-      "/Farm/GetMyFarm"
-    );
+    const { data } =
+      await axiosInstance.get<GetMyFarmResponse>("/Farm/GetMyFarm");
     return data ?? null;
   } catch (error) {
     console.error("Error fetching MyFarm:", error);
@@ -38,11 +37,11 @@ export async function GetMyFarm(): Promise<GetMyFarmResponse | null> {
   }
 }
 export async function GetMyFarmDetail(
-  code: string
+  code: string,
 ): Promise<DetailFarmResponse | null> {
   try {
     const { data } = await axiosInstance.get<DetailFarmResponse | null>(
-      `/Farm/GetByCode?code=${code}`
+      `/Farm/GetByCode?code=${code}`,
     );
     return data ?? null;
   } catch (error) {
@@ -53,7 +52,7 @@ export async function GetMyFarmDetail(
 export async function GetFarmsByFilter(): Promise<GetFarmByFilterResponse | null> {
   try {
     const { data } = await axiosInstance.get<GetFarmByFilterResponse>(
-      "/Farm/GetByFilter"
+      "/Farm/GetByFilter?StatusCode=%20",
     );
     return data ?? null;
   } catch (error) {

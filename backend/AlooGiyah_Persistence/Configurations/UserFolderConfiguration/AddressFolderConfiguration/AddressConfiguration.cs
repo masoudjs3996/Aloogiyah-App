@@ -58,9 +58,9 @@ public class AddressConfiguration : IEntityTypeConfiguration<Address>
             .OnDelete(DeleteBehavior.SetNull)
             .IsRequired(false);
 
-        // یک کاربر فقط یک آدرس پیش‌فرض داشته باشه (اختیاری ولی توصیه میشه)
+        // Only active addresses participate in the default-address constraint.
         builder.HasIndex(a => new { a.UserId, a.IsDefault })
-            .HasFilter("\"IsDefault\" = true")
+            .HasFilter("\"IsDefault\" = true AND NOT \"IsDeleted\"")
             .IsUnique();
     }
 }

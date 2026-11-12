@@ -8,4 +8,5 @@ public enum EntityComment
     Article = 3,
     Auction = 4,
     ServiceRequest = 5,
+    AgriculturalListing = 6,
 }

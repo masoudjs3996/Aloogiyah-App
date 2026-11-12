@@ -10,6 +10,11 @@ public class ServiceRequestDto
     public string StatusCode { get; set; } = string.Empty;
     public string UserCode { get; set; } = string.Empty;
     public string? ProviderCode { get; set; }
+    public string? AddressCode { get; set; }
+    public string? AddressStreet { get; set; }
+    public string? AddressProvince { get; set; }
+    public string? AddressCounty { get; set; }
+    public string? AddressCity { get; set; }
     public decimal Price { get; set; }
     public string? DiscountCode { get; set; }
     public decimal DiscountAmount { get; set; }

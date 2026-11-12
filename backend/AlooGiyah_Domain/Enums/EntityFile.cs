@@ -11,5 +11,7 @@ public enum  EntityFile
     Auction = 5,
     Farm = 6,
     Category = 7,
-    Slider = 8
+    Slider = 8,
+    QualityAssessment = 9,
+    AgriculturalListing = 10
 }

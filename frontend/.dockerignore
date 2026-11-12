@@ -1,0 +1,7 @@
+node_modules
+.next
+out
+.env*
+tests
+header-notifications-preview.png
+*.tsbuildinfo

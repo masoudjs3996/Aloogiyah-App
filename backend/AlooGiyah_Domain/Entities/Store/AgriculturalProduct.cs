@@ -1,10 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AlooGiyah_Domain.Entities.Store;
 
 public class AgriculturalProduct : BaseEntity
 {
+    [System.ComponentModel.DataAnnotations.MaxLength(16)]
+    public string? SaleUnit { get; set; }
+
     #region Properties
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int AgriculturalProductId { get; set; }
@@ -54,6 +57,7 @@ public class AgriculturalProduct : BaseEntity
     public List<AgriculturalOrderItem> AgriculturalOrderItems { get; set; } = null!;
     public List<CartItem> CartItems { get; set; } = null!;
     public List<Discount> Discounts { get; set; } = null!;
+    public List<AgriculturalProductOffer> Offers { get; set; } = new();
     public List<WarehouseInventory> WarehouseInventories { get; set; } = null!;
     public List<QualityAssessment> QualityAssessments { get; set; } = null!;
     public List<Auction> Auctions { get; set; } = null!;

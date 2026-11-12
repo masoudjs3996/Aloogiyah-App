@@ -1591,7 +1591,7 @@ namespace AlooGiyah_Persistence.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Users_UserName",
                 table: "Users",
-                column: "Name",
+                column: "UserName",
                 unique: true);
 
             migrationBuilder.CreateIndex(

@@ -23,7 +23,7 @@ namespace AlooGiyah_API.Controllers
 
 
         #region UploadFile
-        [Authorize]
+        [Authorize(Roles = "Admin,Manager")]
         [HttpPost("UploadFile")]
         public async Task<IActionResult> Upload([FromForm] FileUploadDto dto)
         {
@@ -42,7 +42,7 @@ namespace AlooGiyah_API.Controllers
         #endregion
 
         #region GetFiles
-        [Authorize]
+        [Authorize(Policy = "NotGuest")]
         [HttpGet("GetFiles")]
         public async Task<IActionResult> GetFiles([FromQuery] FileFilterDto filter)
         {
@@ -63,7 +63,7 @@ namespace AlooGiyah_API.Controllers
         #endregion
 
         #region DeleteFile
-        [Authorize]
+        [Authorize(Policy = "NotGuest")]
         [HttpDelete("DeleteFile")]
         public async Task<IActionResult> DeleteFileByCode([FromQuery]string fileCode)
         {

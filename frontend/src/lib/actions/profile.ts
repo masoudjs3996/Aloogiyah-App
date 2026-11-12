@@ -1,19 +1,20 @@
+import type { ApiResult, Profile } from "@/shared/types/platform";
 import axiosInstance from "@/shared/lib/config/axions";
 import {
   EditUserResponse,
-  GetUserResponse,
+
   UpdateProfileImageResponse,
 } from "@/shared/types/user";
 
-export async function getUserInfo(): Promise<GetUserResponse | null> {
+export async function getUserInfo(): Promise<ApiResult<Profile> | null> {
   try {
-    const { data } = await axiosInstance.get<GetUserResponse | null>(
+    const { data } = await axiosInstance.get<ApiResult<Profile> | null>(
       "/User/GetMyProfile"
     );
     return data;
   } catch (error) {
     console.error("Error fetching categories:", error);
-    return null;
+    throw error;
   }
 }
 export async function editUserInfo(
@@ -27,7 +28,7 @@ export async function editUserInfo(
     return data;
   } catch (error) {
     console.error("Error updating user:", error);
-    return null;
+    throw error;
   }
 }
 
@@ -52,6 +53,6 @@ export async function uploadProfileImage(
     return data;
   } catch (error) {
     console.error("Error uploading profile image:", error);
-    return null;
+    throw error;
   }
 }

@@ -1,0 +1,78 @@
+{
+  "expo": {
+    "name": "الو گیاه",
+    "slug": "aloogiyah-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/brand/app-icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/brand/logo-full.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#073B25"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ir.aloogiyah.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/brand/adaptive-icon.png",
+        "backgroundColor": "#073B25"
+      },
+      "softwareKeyboardLayoutMode": "resize",
+      "predictiveBackGestureEnabled": false,
+      "blockedPermissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
+      ],
+      "package": "ir.aloogiyah.mobile"
+    },
+    "web": {
+      "favicon": "./assets/brand/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
+        }
+      ],
+      ["expo-notifications", { "color": "#19915C", "defaultChannel": "chat" }],
+      "expo-secure-store",
+      "expo-font",
+      "expo-web-browser",
+      [
+        "expo-media-library",
+        {
+          "savePhotosPermission": "برای ذخیرهٔ عکس یا فیلمی که انتخاب می‌کنید، اجازهٔ افزودن به گالری لازم است.",
+          "granularPermissions": []
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "برای انتخاب آدرس و موقعیت مزرعه، موقعیت شما لازم است."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "برای انتخاب عکس و فیلم در چت و تصاویر مزرعه، محصول و پروفایل اجازهٔ دسترسی لازم است.",
+          "cameraPermission": "برای گرفتن عکس گیاهان و محصولات اجازهٔ دوربین لازم است.",
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "scheme": "aloogiyah",
+    "extra": {
+      "eas": {
+        "projectId": "3e60b1cf-9ffb-4d2d-9e6a-5632126e08b8"
+      }
+    },
+    "owner": "am200092"
+  }
+}

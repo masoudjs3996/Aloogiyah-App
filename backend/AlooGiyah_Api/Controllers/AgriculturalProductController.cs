@@ -1,7 +1,6 @@
 ﻿using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.AgriculturalProduct;
 using AlooGiyah_Application.Interfaces.Service.Store;
-using AlooGiyah_Application.Services.Store;
 using AlooGiyah_Shared.Constants;
 using AlooGiyah_Shared.Exceptions;
 using Microsoft.AspNetCore.Authorization;
@@ -21,6 +20,14 @@ public class AgriculturalProductController : ControllerBase
         _agriculturalProductService = agriculturalProductService;
     }
     #endregion
+
+    [Authorize(Roles = "Admin,Manager,Farmer")]
+    [HttpPut("Offer")]
+    public async Task<IActionResult> SetOffer([FromBody] ProductOfferDto dto)
+    {
+        await _agriculturalProductService.SetProductOfferAsync(dto);
+        return Ok(new ApiResponse<bool> { IsSuccess = true, Message = "تخفیف محصول ذخیره شد", Data = true });
+    }
 
 
     #region CreateAgriculturalProduct
@@ -102,6 +109,22 @@ public class AgriculturalProductController : ControllerBase
             IsSuccess = true,
             Message = "محصول کشاورزی با موفقیت دریافت شد",
             Data = result
+        });
+    }
+    #endregion
+
+    #region GetSimilar
+    [AllowAnonymous]
+    [HttpGet("GetSimilar")]
+    public async Task<IActionResult> GetSimilarAsync([FromQuery] AgriculturalProductSimilarFilterDto filterDto)
+    {
+        var result = await _agriculturalProductService.GetSimilarAsync(filterDto);
+
+        return Ok(new ApiResponse<object>
+        {
+            IsSuccess = true,
+            Message = "لیست محصولات مشابه با موفقیت دریافت شد",
+            Data = result.Items
         });
     }
     #endregion

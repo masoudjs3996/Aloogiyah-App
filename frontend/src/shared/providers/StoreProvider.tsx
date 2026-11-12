@@ -10,7 +10,7 @@ export default function StoreProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const storeRef = useRef<any>();
+  const storeRef = useRef<ReturnType<typeof makeStore> | null>(null);
   if (!storeRef.current) {
     storeRef.current = makeStore();
   }

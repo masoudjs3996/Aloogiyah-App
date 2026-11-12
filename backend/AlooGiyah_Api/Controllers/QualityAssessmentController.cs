@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.Commons;
+using AlooGiyah_Api.Realtime;
+using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.QualityAssessment;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Shared.Constants;
@@ -22,8 +23,33 @@ public class QualityAssessmentController : ControllerBase
     #endregion
 
 
+    [Authorize(Policy = "NotGuest"), HttpPost("{code}/Conversation")]
+    public async Task<IActionResult> OpenExpertConversation(string code, [FromServices] IChatMessageService chat, [FromServices] ChatConnectionManager connections)
+    {
+        var expertCode = await _qualityAssessmentService.GetExpertForApplicantAsync(code);
+        var room = await chat.PrepareConversationAsync(expertCode);
+        room.PeerOnline = connections.IsUserOnline(room.PeerCode);
+        return Ok(new ApiResponse<object> { IsSuccess = true, Data = room });
+    }
+
+    [Authorize(Policy = "NotGuest")]
+    [HttpPost("Request")]
+    public async Task<IActionResult> RequestAssessment([FromBody] QualityAssessmentRequestDto dto)
+    {
+        var result = await _qualityAssessmentService.RequestAsync(dto);
+        return Ok(new ApiResponse<object> { IsSuccess = true, Message = "درخواست تعیین کیفیت ثبت شد", Data = result });
+    }
+
+    [Authorize(Policy = "NotGuest"), HttpPost("Quote")]
+    public async Task<IActionResult> Quote(QualityAssessmentQuoteInput dto) => Ok(new ApiResponse<object> { IsSuccess = true, Data = await _qualityAssessmentService.QuoteAsync(dto) });
+    [Authorize(Policy = "NotGuest"), HttpGet("Tariff")]
+    public async Task<IActionResult> Tariff() => Ok(new ApiResponse<decimal> { IsSuccess = true, Data = await _qualityAssessmentService.GetFeeAsync() });
+    [Authorize(Roles = "Manager,Admin"), HttpPut("Tariff")]
+    public async Task<IActionResult> Tariff(QualityAssessmentTariffInput dto) { await _qualityAssessmentService.SetFeeAsync(dto.Fee); return Ok(new ApiResponse<bool> { IsSuccess = true, Data = true }); }
+    [Authorize(Roles = "Expert,Manager,Admin"), HttpPost("{code}/ReportFile"), RequestSizeLimit(16 * 1024 * 1024)]
+    public async Task<IActionResult> UploadReport(string code, IFormFile file) => Ok(new ApiResponse<string> { IsSuccess = true, Data = await _qualityAssessmentService.UploadReportAsync(code, file) });
     #region Create
-    [Authorize]
+    [Authorize(Roles = "Expert,Manager,Admin")]
     [HttpPost("Create")]
     public async Task<IActionResult> CreateQualityAssessment(QualityAssessmentCreateDto createDto)
     {
@@ -48,8 +74,6 @@ public class QualityAssessmentController : ControllerBase
     {
         var result = await _qualityAssessmentService.GetByFilterAsync(filterDto);
 
-        if (result == null || !result.Items.Any())
-            throw new NotFoundException(ErrorMessages.ErrorNullQualityAssessment);
 
         return Ok(new ApiResponse<object>
         {
@@ -79,7 +103,7 @@ public class QualityAssessmentController : ControllerBase
     #endregion
 
     #region Update
-    [Authorize]
+    [Authorize(Roles = "Expert,Manager,Admin")]
     [HttpPut("Update")]
     public async Task<IActionResult> UpdateQualityAssessment(QualityAssessmentUpdateDto updateDto)
     {
@@ -98,7 +122,7 @@ public class QualityAssessmentController : ControllerBase
     #endregion
 
     #region Update
-    [Authorize]
+    [Authorize(Roles = "Manager,Admin")]
     [HttpPatch("AddExpert")]
     public async Task<IActionResult> AddExpert(AddExpertDto updateDto)
     {
@@ -117,7 +141,7 @@ public class QualityAssessmentController : ControllerBase
     #endregion
 
     #region Delete
-    [Authorize]
+    [Authorize(Roles = "Admin,Manager")]
     [HttpDelete("Delete")]
     public async Task<IActionResult> DeleteQualityAssessment([FromQuery] string code)
     {

@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Domain.Enums;
+using AlooGiyah_Domain.Enums;
 using AlooGiyah_Domain.Interfaces;
 using AlooGiyah_Domain.ValueObjects;
 using Microsoft.AspNetCore.Hosting;
@@ -10,11 +10,9 @@ namespace AlooGiyah_Infrastructure.Files;
 
 public class FileStorageService : IFileStorageService
 {
-    private readonly IWebHostEnvironment _env;
-    private readonly IConfiguration _config;
     private readonly string _baseUploadPath;
 
-    public FileStorageService(IWebHostEnvironment env, IConfiguration config)
+    public FileStorageService(IConfiguration config)
     {
         _baseUploadPath = config.GetValue<string>("FileStorage:UploadPath")
             ?? Path.Combine(
@@ -33,6 +31,7 @@ public class FileStorageService : IFileStorageService
         string? entityCode = null,
         bool useDateFolder = false)
     {
+        ValidateUpload(file, entityFile);
         string baseFolder = GetBaseFolder(entityFile);
         string finalFolder = baseFolder;
 
@@ -69,6 +68,7 @@ public class FileStorageService : IFileStorageService
     EntityFile entityFile,
     bool useDateFolder)
     {
+        ValidateUpload(file, entityFile);
         string baseFolder = GetBaseFolder(entityFile);
         string finalFolder = baseFolder;
 
@@ -107,10 +107,26 @@ public class FileStorageService : IFileStorageService
         else if (cleanPath.StartsWith("uploads\\"))
             physicalPath = Path.Combine(_baseUploadPath, cleanPath.Substring(8));
 
-        if (File.Exists(physicalPath))
-            File.Delete(physicalPath);
+        if (!string.IsNullOrEmpty(physicalPath))
+        {
+            var root = Path.GetFullPath(_baseUploadPath).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            var target = Path.GetFullPath(physicalPath);
+            var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+            if (!target.StartsWith(root, comparison))
+                throw new AlooGiyah_Shared.Exceptions.BadRequestException("مسیر فایل معتبر نیست.");
+            if (File.Exists(target)) File.Delete(target);
+        }
 
         return Task.CompletedTask;
+    }
+
+    private static void ValidateUpload(IFormFile file, EntityFile entityFile)
+    {
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        var image = extension is ".jpg" or ".jpeg" or ".png" or ".webp" or ".gif";
+        var report = entityFile == EntityFile.QualityAssessment && extension == ".pdf";
+        if (file.Length <= 0 || file.Length > 15 * 1024 * 1024 || (!image && !report))
+            throw new AlooGiyah_Shared.Exceptions.BadRequestException("فقط تصویر یا گزارش PDF تا سقف ۱۵ مگابایت پذیرفته می‌شود.");
     }
 
     private string GetBaseFolder(EntityFile entityFile) => entityFile switch
@@ -122,7 +138,9 @@ public class FileStorageService : IFileStorageService
         EntityFile.Profile => "profiles",
         EntityFile.ServiceRequest => "service-requests",
         EntityFile.AgriculturalProduct => "agricultural-products",
+        EntityFile.AgriculturalListing => "agricultural-listings",
         EntityFile.Farm => "Farm",
+        EntityFile.QualityAssessment => "quality-reports",
         EntityFile.Slider => "Slider",
         _ => "others"
     };

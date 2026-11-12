@@ -1,4 +1,4 @@
-﻿using AlooGiyah_Application.DTOs.File;
+using AlooGiyah_Application.DTOs.File;
 using AlooGiyah_Application.DTOs.Users;
 using AlooGiyah_Application.Interfaces.Query;
 using AlooGiyah_Application.Interfaces.Service;
@@ -10,6 +10,7 @@ using AlooGiyah_Domain.Pagination;
 using AlooGiyah_Shared.Exceptions;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -30,6 +31,9 @@ public class UserService : IUserService
     private readonly IConfiguration _config;                        // اضافه شد
     private readonly IMapper _mapper;
     private readonly IUserQuery _userQuery;
+    private readonly IGenericRepository<UserRole> _userRoleRepository;
+    private readonly IGenericRepository<Role> _roleRepository;
+    private readonly IAuthRepository _authRepository;
 
 
     public UserService(
@@ -41,7 +45,10 @@ public class UserService : IUserService
         IMapper mapper,
         IHttpContextAccessor httpContextAccessor,      // تزریق شد
             IConfiguration config,                          // تزریق شد
-            IUserQuery userQuery
+            IUserQuery userQuery,
+            IGenericRepository<UserRole> userRoleRepository,
+            IGenericRepository<Role> roleRepository,
+            IAuthRepository authRepository
         )
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -53,8 +60,54 @@ public class UserService : IUserService
         _httpContextAccessor = httpContextAccessor;
         _config = config;
         _userQuery = userQuery;
+        _userRoleRepository = userRoleRepository;
+        _roleRepository = roleRepository;
+        _authRepository = authRepository;
     }
     #endregion
+
+    public async Task SetAdditionalRolesAsync(string userCode, IReadOnlyCollection<string> roleCodes)
+    {
+        if (!_currentUserService.IsAuthenticated || !_currentUserService.Roles.Any(x => x is "Admin" or "Manager"))
+            throw new ForbiddenException("تغییر نقش کاربران فقط برای مدیریت مجاز است.");
+        if (string.IsNullOrWhiteSpace(userCode)) throw new BadRequestException("کد کاربر الزامی است.");
+        ArgumentNullException.ThrowIfNull(roleCodes);
+        await using var transaction = await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+        var user = await _userRepository.GetByCodeAsync(userCode)
+            ?? throw new NotFoundException("کاربر پیدا نشد.");
+        var distinctCodes = roleCodes.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Trim()).Distinct().ToList();
+        var roles = new List<Role>();
+        var isManager = _currentUserService.Roles.Contains("Manager");
+        var managerRoleIds = await _roleRepository.GetAll().Where(x => x.Name == "Manager").Select(x => x.RoleId).ToListAsync();
+        if (!isManager && (managerRoleIds.Contains(user.RoleId) ||
+            await _userRoleRepository.GetAll().AnyAsync(x => x.UserId == user.UserId && managerRoleIds.Contains(x.RoleId))))
+            throw new ForbiddenException("فقط مدیر ارشد می‌تواند نقش‌های حساب منیجر را تغییر دهد.");
+        foreach (var code in distinctCodes)
+        {
+            var role = await _roleRepository.GetByCodeAsync(code)
+                ?? throw new NotFoundException($"نقش با کد {code} پیدا نشد.");
+            if (!isManager && (role.Name is "Admin" or "Manager"))
+                throw new ForbiddenException("فقط مدیر ارشد (Manager) می‌تواند نقش‌های مدیریتی را واگذار کند.");
+            roles.Add(role);
+        }
+
+        var primary = roles.FirstOrDefault() ?? await _roleRepository.GetAll()
+            .SingleOrDefaultAsync(x => x.Name == "User")
+            ?? throw new BadRequestException("نقش پایه کاربر پیکربندی نشده است.");
+        user.RoleId = primary.RoleId;
+        user.Role = primary;
+        var existing = await _userRoleRepository.GetAll().Where(x => x.UserId == user.UserId).ToListAsync();
+        foreach (var assignment in existing) await _userRoleRepository.DeleteAsync(assignment);
+        foreach (var role in roles.Where(x => x.RoleId != primary.RoleId).DistinctBy(x => x.RoleId))
+            await _userRoleRepository.AddAsync(new UserRole { UserId = user.UserId, RoleId = role.RoleId });
+        user.TokenVersion++;
+        user.UpdatedAt = DateTimeOffset.UtcNow;
+        await _userRepository.UpdateAsync(user);
+        // Access tokens are invalidated by TokenVersion. Keep refresh tokens so clients
+        // can obtain the updated role claims without forcing a new login.
+        await _unitOfWork.SaveChangesAsync();
+        await transaction.CommitAsync();
+    }
 
 
     #region Get By Username
@@ -72,8 +125,11 @@ public class UserService : IUserService
     #endregion
 
     #region Get By Code
-    public async Task<UserDto> GetUserByCode(string code)
+    public async Task<UserDto> GetUserByCode(string? code)
     {
+        if (string.IsNullOrWhiteSpace(code))
+            throw new ArgumentException("User code is required.", nameof(code));
+
         var user = await _userQuery.GetByCodeAsync(code);
         if (user == null) throw new NotFoundException("کاربر پیدا پیدا نشد");
 
@@ -176,12 +232,14 @@ public class UserService : IUserService
         var principal = _httpContextAccessor.HttpContext?.User
             ?? throw new UnauthorizedAccessException("کاربر احراز هویت نشده است.");
 
-        var roleName = principal.FindFirst(ClaimTypes.Role)?.Value;
+        var roleNames = principal.FindAll(ClaimTypes.Role).Select(x => x.Value).Distinct().ToList();
+        var roleCodes = principal.FindAll("RoleCode").Select(x => x.Value).Distinct().ToList();
+        var roleName = roleNames.FirstOrDefault();
 
         if (string.IsNullOrEmpty(roleName))
             throw new BadRequestException("توکن مشکل دارد");
         
-        var roleCode = principal.FindFirst("RoleCode")?.Value;
+        var roleCode = roleCodes.FirstOrDefault();
 
         if (string.IsNullOrEmpty(roleCode))
             throw new BadRequestException("توکن مشکل دارد");
@@ -193,6 +251,8 @@ public class UserService : IUserService
         {
             RoleName = roleName,
             RoleCode = roleCode,
+            RoleNames = roleNames,
+            RoleCodes = roleCodes,
         };
     }
     #endregion
@@ -208,17 +268,36 @@ public class UserService : IUserService
         if (userDto == null)
             throw new ArgumentNullException(nameof(userDto));
 
+        await using var transaction = await _unitOfWork.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
         var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
             throw new NotFoundException("کاربر پیدا نشد");
 
-        _mapper.Map(userDto, user);
+        if (User.IsGeneratedPhoneUsername(user.UserName) && user.PhoneNumber != userDto.PhoneNumber)
+            throw new BadRequestException("تغییر شمارهٔ ورود نیازمند تأیید شمارهٔ جدید است.");
 
-        var result = await _userRepository.UpdateAsync(user);
+        var previousEmail = user.Email;
+        var previousPhone = user.PhoneNumber;
+        _mapper.Map(userDto, user);
+        user.Email = string.IsNullOrWhiteSpace(userDto.Email) ? null : userDto.Email.Trim();
+        user.PhoneNumber = userDto.PhoneNumber?.Trim() ?? string.Empty;
+        if (previousPhone != user.PhoneNumber)
+            user.IsPhoneConfirmed = false;
+        if (!string.Equals(previousEmail, user.Email, StringComparison.Ordinal))
+        {
+            user.IsEmailConfirmed = false;
+            user.EmailVerificationCode = null;
+            user.VerificationCodeExpiration = null;
+            user.PasswordResetCode = null;
+            user.PasswordResetExpiration = null;
+        }
+
+        user.UpdatedAt = DateTimeOffset.UtcNow;
 
         await _unitOfWork.SaveChangesAsync();
 
-        return _mapper.Map<UserDto>(result);
+        await transaction.CommitAsync();
+        return _mapper.Map<UserDto>(user);
     }
     #endregion
 

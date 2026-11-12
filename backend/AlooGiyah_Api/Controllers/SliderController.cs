@@ -19,6 +19,7 @@ namespace AlooGiyah_Api.Controllers
         }
 
         #region Create Slider
+        [Authorize(Roles = "Admin,Manager")]
         [HttpPost("Create")]
         public async Task<IActionResult> Create([FromForm] CreateSliderDto dto)
         {
@@ -53,6 +54,7 @@ namespace AlooGiyah_Api.Controllers
         #endregion
 
         #region Delete Slider
+        [Authorize(Roles = "Admin,Manager")]
         [HttpDelete("Delete")]
         public async Task<IActionResult> Delete(string code)
         {

@@ -1,4 +1,4 @@
-﻿
+
 using AlooGiyah_Application.DTOs.Address;
 using Microsoft.AspNetCore.Http;
 
@@ -8,7 +8,7 @@ public class FarmCreateDto
 {
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
-    public AddressCreateDto? Address { get; set; } // آدرس جدید
+    public FarmAddressCreateDto? Address { get; set; } // آدرس جدید
     public int? Capacity { get; set; }
     public decimal MinPurchase { get; set; }
     public IFormFile? Image { get; set; }

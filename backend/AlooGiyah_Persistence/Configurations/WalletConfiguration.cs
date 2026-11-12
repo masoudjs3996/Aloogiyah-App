@@ -14,13 +14,11 @@ public class WalletConfiguration : IEntityTypeConfiguration<Wallet>
 
         builder.Property(w => w.Balance)
             .HasPrecision(20, 2)
-            .IsRequired()
-            .HasMaxLength(100);
+            .IsRequired();
 
         builder.Property(w => w.HeldAmount)
             .HasPrecision(20, 2)
-            .IsRequired()
-            .HasMaxLength(500);
+            .IsRequired();
 
         builder.Property(w => w.UserId)
                 .IsRequired();

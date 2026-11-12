@@ -1,91 +1,108 @@
 "use client";
+import SaleUnitField from "@/design-system/molecules/platform/SaleUnitField";
+import { amountDigits, formatAmount } from "@/shared/utils/amount";
 import { useState } from "react";
-import { SelectBox } from "@/design-system/atoms/SelectBox";
-import { MultiSelect } from "@/design-system/organisms/public";
-import { ICategoryTree } from "@/shared/types/categories";
-import { FaTrash, FaUpload } from "react-icons/fa";
+import { useQuery } from "@tanstack/react-query";
+import { errorMessage, request } from "@/lib/actions/platform";
 import { TextField } from "@/design-system/molecules/public";
-
+import { IoPricetagsOutline } from "react-icons/io5";
 import toast from "react-hot-toast";
 import { useCreateProduct } from "@/hooks/mutations/useAddProduct";
+import MultiImageUpload from "@/design-system/molecules/dashbord/MultiImageUploader";
+import Textarea from "@/design-system/atoms/Textarea";
+import { TbFileDescription } from "react-icons/tb";
+import { MdOutlineDriveFileRenameOutline } from "react-icons/md";
+import { SiVirustotal } from "react-icons/si";
+import { CiDiscount1 } from "react-icons/ci";
+import ActionBar from "@/design-system/molecules/platform/ActionBar";
+import Button from "@/design-system/atoms/Button";
+import ListingSpecificationFields, { type ListingTemplate } from "@/design-system/molecules/platform/ListingSpecificationFields";
 
 interface AddFarmProductFormProps {
-  categories: ICategoryTree[];
   fermCode: string;
 }
 
 const AddFarmProductForm = ({
   fermCode,
-  categories,
 }: AddFarmProductFormProps) => {
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File[]>([]);
+  const [uploadVersion, setUploadVersion] = useState(0);
   const [form, setForm] = useState({
     name: "",
     description: "",
+    saleUnit: "",
     retailPrice: "",
-    wholesalePrice: "",
     DailyProductionCapacity: "",
     stock: "",
   });
   const { createProduct } = useCreateProduct();
-  const [selectedParentCategory, setSelectedParentCategory] =
-    useState<string>("");
-  const [selectedCategoryCodes, setSelectedCategoryCodes] = useState<string[]>(
-    []
-  );
+  const [selectedTemplateCode, setSelectedTemplateCode] = useState("");
+  const [specifications, setSpecifications] = useState<Record<string, string>>({});
 
-  const parentCategory = categories.find(
-    (c) => c.code === selectedParentCategory
-  );
-  const childCategoryOptions =
-    parentCategory?.subCategories?.map((child) => ({
-      label: child.name,
-      value: child.code,
-    })) ?? [];
+  const templates = useQuery({
+    queryKey: ["product-templates", "all"],
+    queryFn: () => request<ListingTemplate[]>("/AgriculturalProductTemplate"),
+  });
+  const selectedTemplate = templates.data?.find((template) => template.code === selectedTemplateCode);
+  const saleUnit = form.saleUnit || selectedTemplate?.defaultSaleUnit || "";
 
   const updateField = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
-  };
-
-  const handleSubmit = async () => {
-    if (!imageFile) {
-      toast.error("لطفا یک تصویر انتخاب کنید");
+  const handleSubmit = () => {
+    if (createProduct.isPending) return;
+    if (!selectedTemplate) {
+      toast.error("نوع محصول را انتخاب کنید.");
+      return;
+    }
+    if (
+      !form.name.trim() ||
+      !saleUnit ||
+      !form.retailPrice ||
+      !form.stock
+    ) {
+      toast.error("نام، واحد فروش، قیمت و موجودی را تکمیل کنید");
+      return;
+    }
+    if (!imageFile.length) {
+      toast.error("لطفاً یک تصویر انتخاب کنید.");
+      return;
+    }
+    if (imageFile.some(file => file.size === 0 || !/\.(jpe?g|png|webp|gif)$/i.test(file.name))) {
+      toast.error("تصویر باید سالم و با فرمت JPG، PNG، WebP یا GIF باشد.");
+      return;
+    }
+    if (Number(form.stock) > 2147483647 || Number(form.DailyProductionCapacity) > 2147483647) {
+      toast.error("موجودی و ظرفیت روزانه هرکدام حداکثر می‌توانند ۲٬۱۴۷٬۴۸۳٬۶۴۷ باشند.");
       return;
     }
 
     const payload = new FormData();
 
-    const allCategoryCodes = [
-      selectedParentCategory,
-      ...selectedCategoryCodes,
-    ].filter(Boolean);
+    if (selectedTemplate.specifications.some((field) => field.isRequired && !field.options.some(option => option.code === specifications[field.code]))) {
+      toast.error("همه مشخصات اجباری نوع محصول را انتخاب کنید");
+      return;
+    }
     payload.append("FarmCode", fermCode);
     payload.append("Name", form.name.trim());
     payload.append("Description", form.description.trim());
     payload.append("RetailPrice", form.retailPrice.toString());
-    payload.append("WholesalePrice", form.wholesalePrice.toString());
+    payload.append("SaleUnit", saleUnit);
     payload.append("Stock", form.stock.toString());
-    payload.append(
-      "DailyProductionCapacity",
-      form.DailyProductionCapacity.toString()
-    );
-    allCategoryCodes.forEach((code) => {
-      payload.append("CategoryCodes", code);
+    if (form.DailyProductionCapacity) {
+      payload.append("DailyProductionCapacity", form.DailyProductionCapacity);
+    }
+    payload.append("ProductTemplateCode", selectedTemplate.code);
+    let index = 0;
+    selectedTemplate.specifications.forEach((specification) => {
+      const optionCode = specifications[specification.code];
+      if (!specification.options.some(option => option.code === optionCode)) return;
+      payload.append(`Specifications[${index}].SpecificationCode`, specification.code);
+      payload.append(`Specifications[${index}].OptionCode`, optionCode);
+      index += 1;
     });
-    payload.append("Images", imageFile);
-    payload.append("MetaTitle", "");
-    payload.append("MetaDescription", "");
-    payload.append("MetaKeywords", "");
-    payload.append("StatusCode", "251BC4A57D");
-    payload.append("Slug", "");
+    imageFile.forEach(file => payload.append("Images", file));
 
     createProduct.mutate(payload, {
       onSuccess: () => {
@@ -93,112 +110,156 @@ const AddFarmProductForm = ({
         setForm({
           name: "",
           description: "",
+          saleUnit: "",
           retailPrice: "",
-          wholesalePrice: "",
           DailyProductionCapacity: "",
           stock: "",
         });
-        setImageFile(null);
-        setImagePreview(null);
-        setSelectedParentCategory("");
-        setSelectedCategoryCodes([]);
+        setImageFile([]);
+        setUploadVersion((v) => v + 1);
+        setSelectedTemplateCode("");
+        setSpecifications({});
       },
-      onError: (err: any) => {
-        console.error("Error creating product:", err);
-        toast.error("خطا در ثبت محصول");
-      },
+      onError: (error) => toast.error(errorMessage(error)),
     });
   };
 
   return (
-    <div className="p-5 space-y-5 max-w-md mx-auto pb-20">
-      <h1 className="text-center text-lg font-semibold">ثبت محصول جدید</h1>
-
-      {/* IMAGE */}
-      <div className="rounded-2xl overflow-hidden shadow relative">
-        {imagePreview ? (
-          <img src={imagePreview} className="w-full object-cover max-h-40" />
-        ) : (
-          <div className="h-40 bg-gray-100 flex items-center justify-center text-gray-400">
-            عکس محصول
-          </div>
-        )}
-        <label className="absolute bottom-0 left-0 right-0 bg-black/40 text-white p-2 text-sm flex items-center justify-center gap-x-2 cursor-pointer">
-          <FaUpload /> ویرایش عکس
-          <input type="file" className="hidden" onChange={handleImageUpload} />
-        </label>
-      </div>
-
-      {/* FORM FIELDS */}
-      <TextField
-        label="اسم محصول"
-        placeholder="مثال: شاخه گل لاله"
-        value={form.name}
-        onChange={(e) => updateField("name", e.target.value)}
-      />
-      <TextField
-        label="توضیحات محصول"
-        placeholder="توضیح کامل محصول..."
-        value={form.description}
-        onChange={(e) => updateField("description", e.target.value)}
-      />
-      <TextField
-        label="قیمت خرده‌فروشی"
-        placeholder="مثال: 5600000"
-        value={form.retailPrice}
-        onChange={(e) => updateField("retailPrice", e.target.value)}
-      />
-      <TextField
-        label="قیمت عمده"
-        placeholder="مثال: 4800000"
-        value={form.wholesalePrice}
-        onChange={(e) => updateField("wholesalePrice", e.target.value)}
-      />
-      <TextField
-        label="موجودی"
-        placeholder="مثال: 700"
-        value={form.stock}
-        onChange={(e) => updateField("stock", e.target.value)}
-      />
-      <TextField
-        label="ظرفیت روزانه تولید محصول"
-        placeholder="مثال: 50"
-        value={form.DailyProductionCapacity}
-        onChange={(e) => updateField("DailyProductionCapacity", e.target.value)}
-      />
-
-      <SelectBox
-        label="دسته‌بندی اصلی"
-        options={categories.map((c) => c.name)}
-        value={
-          categories.find((c) => c.code === selectedParentCategory)?.name || ""
-        }
-        onChange={(name) => {
-          const found = categories.find((c) => c.name === name);
-          setSelectedParentCategory(found?.code ?? "");
-          setSelectedCategoryCodes([]);
-        }}
-      />
-
-      <MultiSelect
-        label="دسته‌بندی فرعی"
-        options={childCategoryOptions}
-        value={selectedCategoryCodes}
-        onChange={setSelectedCategoryCodes}
-      />
-
-      <button
-        onClick={handleSubmit}
-        className="bg-green-600 text-white p-3 rounded-xl w-full mt-5"
+    <div
+      dir="rtl"
+      className="mx-auto w-full max-w-4xl space-y-6 pb-24 md:pb-10"
+    >
+      <header className="border-b border-slate-200 pb-5">
+        <h1 className="text-2xl font-bold text-slate-900">ثبت آگهی جدید</h1>
+        <p className="mt-2 text-sm leading-7 text-slate-500">
+          مشخصات محصول، قیمت هر واحد و تصاویر را تکمیل کنید. فیلدهای ستاره‌دار
+          ضروری هستند.
+        </p>
+      </header>
+      <fieldset
+        disabled={createProduct.isPending}
+        className="min-w-0 space-y-6"
       >
-        ثبت محصول
-      </button>
-
-      <button className="text-red-600 flex items-center justify-center gap-x-2 p-3 w-full border border-red-500 rounded-xl mt-3">
-        <FaTrash /> حذف محصول
-      </button>
+        <section className="space-y-5 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+          <h2 className="text-base font-bold text-emerald-800">مشخصات محصول</h2>
+          {templates.isLoading && <p role="status" className="text-sm text-slate-600">در حال دریافت نوع محصول…</p>}
+          {templates.isError && <button type="button" onClick={() => void templates.refetch()} className="text-sm font-bold text-red-700">دریافت مشخصات ناموفق بود. تلاش دوباره</button>}
+          {templates.isSuccess && !templates.data.length && <p className="text-sm text-slate-600">هنوز نوع محصول فعالی برای ثبت آگهی تعریف نشده است.</p>}
+          <ListingSpecificationFields
+            templates={templates.data ?? []}
+            templateCode={selectedTemplateCode}
+            values={specifications}
+            onTemplateChange={code => { setSelectedTemplateCode(code); setSpecifications({}); }}
+            onValueChange={(code, value) => setSpecifications(previous => ({ ...previous, [code]: value }))}
+          />
+          <div className="space-y-4">
+            {" "}
+            <TextField
+              required
+              maxLength={255}
+              label="نام محصول *"
+              placeholder="مثال: شاخه گل لاله"
+              icon={
+                <MdOutlineDriveFileRenameOutline
+                  size={24}
+                  className="text-slate-700"
+                />
+              }
+              value={form.name}
+              onChange={(e) => updateField("name", e.target.value)}
+              className="w-full"
+            />
+            <Textarea
+              placeholder="توضیحات کامل محصول..."
+              maxLength={1000}
+              className="min-h-28"
+              lable="توضیحات محصول"
+              value={form.description}
+              onChange={(e) => updateField("description", e.target.value)}
+              icon={<TbFileDescription size={24} className="text-slate-700" />}
+            />
+          </div>
+        </section>
+        <section className="space-y-5 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+          <h2 className="text-base font-bold text-emerald-800">
+            قیمت و موجودی
+          </h2>
+          <SaleUnitField
+            value={saleUnit}
+            onChange={(value) => updateField("saleUnit", value)}
+          />
+          <div className="grid min-w-0 grid-cols-1 gap-5 md:grid-cols-2">
+            {" "}
+            <TextField
+              required
+              label="قیمت هر واحد (تومان) *"
+              placeholder="مثال: 5600000"
+              icon={<IoPricetagsOutline size={24} className="text-slate-700" />}
+              inputMode="numeric"
+              dir="ltr"
+              value={formatAmount(form.retailPrice)}
+              onChange={(e) =>
+                updateField("retailPrice", amountDigits(e.target.value))
+              }
+              className="w-full"
+            />
+            <TextField
+              required
+              inputMode="numeric"
+              label="موجودی *"
+              placeholder="مثال: 700"
+              icon={<SiVirustotal size={24} className="text-slate-700" />}
+              value={form.stock}
+              onChange={(e) =>
+                updateField("stock", amountDigits(e.target.value))
+              }
+            />
+            <div>
+              <p className="mb-2 text-xs leading-6 text-slate-500">
+                مقدار تقریبی تولید این محصول در یک روز را وارد کنید.
+              </p>
+              <TextField
+                label="ظرفیت روزانه تولید محصول (اختیاری)"
+                icon={<CiDiscount1 size={24} className="text-slate-700" />}
+                placeholder="مثال: 50"
+                value={form.DailyProductionCapacity}
+                onChange={(e) =>
+                  updateField(
+                    "DailyProductionCapacity",
+                    amountDigits(e.target.value),
+                  )
+                }
+              />
+            </div>
+          </div>
+        </section>
+        <section className="space-y-5 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6">
+          <h2 className="text-base font-bold text-emerald-800">
+            تصاویر محصول *
+          </h2>
+          <p className="text-sm leading-7 text-slate-500">
+            حداقل یک تصویر واضح انتخاب کنید. هر تصویر حداکثر ۵ مگابایت.
+          </p>
+          <MultiImageUpload
+            key={uploadVersion}
+            value={imageFile}
+            maxFiles={15}
+            maxSize={5}
+            disabled={createProduct.isPending}
+            onChange={setImageFile}
+          />
+        </section>
+      </fieldset>
+      <ActionBar>
+        <Button
+          disabled={createProduct.isPending}
+          type="button"
+          onClick={handleSubmit}
+        >
+          {createProduct.isPending ? "در حال ثبت آگهی…" : "ثبت آگهی"}
+        </Button>
+      </ActionBar>
     </div>
   );
 };
-
 export default AddFarmProductForm;

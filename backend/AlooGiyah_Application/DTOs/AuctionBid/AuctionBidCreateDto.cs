@@ -5,6 +5,8 @@ namespace AlooGiyah_Application.DTOs.AuctionBid;
 
 public class AuctionBidCreateDto
 {
+    [Required]
+    [MaxLength(10)]
     public string auctionCode { get; set; } = string.Empty;
 
     [Required]

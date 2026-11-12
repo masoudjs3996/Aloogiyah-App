@@ -16,6 +16,6 @@ namespace AlooGiyah_Application.DTOs.Order
         public string? AddressCode { get; set; }  // کد آدرس اختیاری
 
         [Required]
-        public List<OrderItemUpdateDto> Items { get; set; } = new();    
+        public List<OrderItemUpdateDto> Items { get; set; } = null!;
     }
 }

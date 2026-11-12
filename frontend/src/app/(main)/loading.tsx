@@ -1,7 +1,5 @@
+import QueryState from "@/design-system/molecules/platform/QueryState";
+
 export default function Loading() {
-  return (
-    <div className="flex items-center justify-center w-screen h-screen">
-      <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
-    </div>
-  );
+  return <div className="mx-auto max-w-7xl px-4 py-8"><QueryState loading skeleton="page" /></div>;
 }

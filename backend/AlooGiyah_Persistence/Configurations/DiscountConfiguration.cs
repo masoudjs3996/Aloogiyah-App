@@ -9,6 +9,8 @@ public class DiscountConfiguration : IEntityTypeConfiguration<Discount>
     public void Configure(EntityTypeBuilder<Discount> builder)
     {
         builder.HasKey(d => d.DiscountId);
+        builder.Property(d => d.FundingSource).HasMaxLength(20);
+        builder.HasOne(d => d.IssuerSeller).WithMany().HasForeignKey(d => d.IssuerSellerId).OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(d => d.DiscountId)
             .ValueGeneratedOnAdd();
@@ -80,10 +82,10 @@ public class DiscountConfiguration : IEntityTypeConfiguration<Discount>
             .UsingEntity(j => j.ToTable("DiscountUsers")); // نام جدول واسط
 
         
-        // رابطه چند-به-چند با Product
-        builder.HasMany(d => d.Products)
-            .WithMany(p => p.Discounts)
-            .UsingEntity(j => j.ToTable("DiscountProducts"));
+        builder.HasMany(d => d.Categories).WithMany(c => c.Discounts)
+            .UsingEntity(j => j.ToTable("DiscountCategories"));
+        builder.HasOne(d => d.Farm).WithMany().HasForeignKey(d => d.FarmId)
+            .OnDelete(DeleteBehavior.Restrict);
 
     }
 }

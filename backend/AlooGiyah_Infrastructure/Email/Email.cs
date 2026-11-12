@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using MimeKit;
 using MailKit.Net.Smtp;
 using AlooGiyah_Domain.Interfaces;
@@ -30,8 +30,16 @@ public class Email : IEmail
     //}
     public async Task SendEmailAsync(string to, string subject, string body)
     {
+        var fromAddress = _configuration["EmailSettings:From"] ?? throw new InvalidOperationException("EmailSettings:From is not configured.");
+        var smtpServer = _configuration["EmailSettings:SmtpServer"] ?? throw new InvalidOperationException("EmailSettings:SmtpServer is not configured.");
+        var portValue = _configuration["EmailSettings:Port"];
+        if (!int.TryParse(portValue, out var port))
+            throw new InvalidOperationException("EmailSettings:Port must be a valid integer.");
+        var username = _configuration["EmailSettings:Username"] ?? throw new InvalidOperationException("EmailSettings:Username is not configured.");
+        var password = _configuration["EmailSettings:Password"] ?? throw new InvalidOperationException("EmailSettings:Password is not configured.");
+
         var email = new MimeMessage();
-        email.From.Add(MailboxAddress.Parse(_configuration["EmailSettings:From"]));
+        email.From.Add(MailboxAddress.Parse(fromAddress));
         email.To.Add(MailboxAddress.Parse(to));
         email.Subject = subject;
         email.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = body };
@@ -41,14 +49,14 @@ public class Email : IEmail
         {
             // اتصال با SSL (برای پورت 465)
             await smtp.ConnectAsync(
-                _configuration["EmailSettings:SmtpServer"],
-                int.Parse(_configuration["EmailSettings:Port"]),
+                smtpServer,
+                port,
                 MailKit.Security.SecureSocketOptions.SslOnConnect
             );
 
             await smtp.AuthenticateAsync(
-                _configuration["EmailSettings:Username"],
-                _configuration["EmailSettings:Password"]
+                username,
+                password
             );
 
             await smtp.SendAsync(email);

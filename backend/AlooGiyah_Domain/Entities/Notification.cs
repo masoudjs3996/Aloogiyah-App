@@ -10,8 +10,10 @@ public class Notification : BaseEntity
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int NotificationId { get; set; }
 
-    [Required]
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
+
+    /// <summary>When true, this notification is visible to authenticated guests.</summary>
+    public bool IsPublic { get; set; }
 
     [Required]
     [MaxLength(1000)]
@@ -24,6 +26,6 @@ public class Notification : BaseEntity
 
     #region Relations
     [ForeignKey(nameof(UserId))]
-    public User User { get; set; } = null!;
+    public User? User { get; set; }
     #endregion
 }

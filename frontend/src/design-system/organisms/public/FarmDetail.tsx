@@ -1,31 +1,67 @@
 "use client";
-import React, { useMemo, useState } from "react";
+
+import { useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { BookmarkIcon, StarIcon } from "@heroicons/react/24/outline";
-import { BiSearch } from "react-icons/bi";
+
 import { useMyFarm } from "@/hooks/queries/useFarm";
-import { getImageUrl } from "@/shared/utils/getImageUrl";
 import { useProducts } from "@/hooks/queries/useProduct";
+import { getImageUrl } from "@/shared/utils/getImageUrl";
 import { truncateText } from "@/shared/utils/truncateText";
-import SearchInput from "@/design-system/atoms/SearchInput";
 import useDebounce from "@/shared/hooks/useDebounce";
 import AnimatedSearchInput from "@/design-system/atoms/AnimatedSearchInput";
-type Product = {
-  id: number;
-  name: string;
-  weight: string;
-  price: number;
-  image?: string;
+import { SkeletonBlock } from "@/design-system/molecules/platform/Skeleton";
+
+import Map from "../dashbord/map/Map";
+import { locationPreviewHeight } from "../dashbord/map/mapStyles";
+import ProductPrice from "@/design-system/molecules/public/ProductPrice";
+import { publicDetailPath } from "@/shared/utils/public-detail-path";
+
+/* -------------------- Types -------------------- */
+
+type FarmDetailProps = {
+  farmId: string;
 };
+
+type ProductFilters = {
+  farmCode: string;
+  name?: string;
+  minPrice?: number;
+  minStock?: number;
+  maxStock?: number;
+};
+
+/* -------------------- Helpers -------------------- */
+
+function parseCoordinate(value: unknown): number {
+  if (
+    value == null ||
+    (typeof value !== "number" && typeof value !== "string") ||
+    String(value).trim() === ""
+  ) {
+    return NaN;
+  }
+
+  return Number(value);
+}
+
 const TABS = ["همه", "بالاترین قیمت", "بیشترین موجودی", "کمترین موجودی"];
-const FarmDetail = ({ farmId }: { farmId: string }) => {
-  const { farmDetail, farmDetailLoading,} = useMyFarm(farmId);
+
+/* -------------------- Component -------------------- */
+
+const FarmDetail = ({ farmId }: FarmDetailProps) => {
+  const { farmDetail, farmDetailLoading } = useMyFarm(farmId);
+
   const [activeTab, setActiveTab] = useState("همه");
   const [search, setSearch] = useState("");
+
   const debouncedSearch = useDebounce(search, 500);
-  const [openSearch, setOpenSearch] = useState(false);
-  const productFilters = useMemo(() => {
-    const baseFilter: any = {
+
+  /* -------------------- فیلتر محصولات -------------------- */
+
+  const productFilters = useMemo<ProductFilters>(() => {
+    const baseFilter: ProductFilters = {
       farmCode: farmId,
       ...(debouncedSearch && { name: debouncedSearch }),
     };
@@ -56,45 +92,86 @@ const FarmDetail = ({ farmId }: { farmId: string }) => {
 
   const { products, isLoading } = useProducts(productFilters);
 
-  const FarmDetail = farmDetail?.data;
-  const { name, description, capacity, minPurchase, imageUrl, address } =
-    FarmDetail || {};
+  /* -------------------- اطلاعات مزرعه -------------------- */
+
+  const farm = farmDetail?.data;
+
+  const { name, description, imageUrl, address } = farm || {};
+
+  /* -------------------- مختصات مزرعه -------------------- */
+
+  const latitude = parseCoordinate(address?.latitude);
+  const longitude = parseCoordinate(address?.longitude);
+
+  // مطابق محدوده ایران در کامپوننت Map
+  const hasLocation =
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    latitude >= 24.5 &&
+    latitude <= 40 &&
+    longitude >= 44 &&
+    longitude <= 63.5;
 
   return (
-    <div className="mx-auto max-w-md bg-white min-h-screen border">
-      <div className="p-4 flex items-center gap-3 ">
-        <BookmarkIcon className="text-gray-500 w-4 h-4" />
-        <div className="flex-1">
-          <h1 className="font-semibold text-sm">{name ?? ""} </h1>
-          <p className="text-xs text-gray-400">{description ?? ""}</p>
+    <div
+      dir="rtl"
+      className="mx-auto min-h-screen w-full max-w-2xl border-x bg-white pb-24 lg:max-w-6xl lg:rounded-2xl lg:border"
+    >
+      {/* -------------------- مشخصات مزرعه -------------------- */}
+
+      <div className="flex items-center gap-3 p-4">
+        <BookmarkIcon className="h-4 w-4 shrink-0 text-gray-500" />
+
+        <div className="min-w-0 flex-1">
+          {farmDetailLoading ? (
+            <div className="space-y-2 py-1" role="status" aria-label="در حال دریافت اطلاعات مزرعه">
+              <SkeletonBlock className="h-4 w-2/3" />
+              <SkeletonBlock className="h-3 w-full max-w-sm" />
+            </div>
+          ) : (
+            <>
+              <h1 className="truncate text-sm font-semibold">{name ?? ""}</h1>
+              <p className="mt-1 line-clamp-2 text-xs text-gray-400">{description ?? ""}</p>
+            </>
+          )}
         </div>
-        <div className="relative w-10 h-10 ">
-          {imageUrl ? (
+
+        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-gray-200">
+          {farmDetailLoading ? (
+            <SkeletonBlock className="h-full w-full rounded-full" />
+          ) : imageUrl && (
             <Image
               src={getImageUrl(imageUrl)}
-              alt={name ?? ""}
+              alt={name || "تصویر مزرعه"}
               fill
-              className="object-cover absolute"
+              sizes="40px"
+              className="object-cover"
             />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-gray-200" />
           )}
         </div>
       </div>
-      <div className="px-4 flex items-center gap-3">
-        <div className="flex items-center gap-1 text-sm ">
-          <StarIcon className="text-black w-4 h-4" />
+
+      {/* -------------------- امتیاز و جستجو -------------------- */}
+
+      <div className="flex items-center gap-3 px-4">
+        <div className="flex shrink-0 items-center gap-1 text-sm">
+          <StarIcon className="h-4 w-4 text-black" />
           <span>۴.۸</span>
           <span className="text-gray-400">(۳۸۸)</span>
         </div>
+
         <AnimatedSearchInput value={search} onChange={setSearch} />
       </div>
-      <div className="flex px-4 mt-4 gap-6 text-sm border-b">
-        {TABS?.map((tab) => (
+
+      {/* -------------------- تب‌ها -------------------- */}
+
+      <div className="mt-4 flex gap-6 overflow-x-auto border-b px-4 text-sm">
+        {TABS.map((tab) => (
           <button
             key={tab}
+            type="button"
             onClick={() => setActiveTab(tab)}
-            className={`pb-2 ${
+            className={`shrink-0 whitespace-nowrap pb-2 ${
               activeTab === tab
                 ? "border-b-2 border-black font-medium"
                 : "text-gray-400"
@@ -104,44 +181,92 @@ const FarmDetail = ({ farmId }: { farmId: string }) => {
           </button>
         ))}
       </div>
-      <div className="divide-y">
-        {products?.map((product) => (
-          <div key={product.code} className="flex p-4 gap-4">
-            <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden relative">
-              {product.name && (
-                <Image
-                  src={getImageUrl(product?.primaryImageUrl)}
-                  alt={product.name}
-                  fill
-                  className="object-cover absolute"
-                />
-              )}
-            </div>
-            <div className="flex-1">
-              <h3 className="font-medium text-sm">{product.name}</h3>
-              <p className="text-xs text-gray-400 mt-1">
-                {truncateText(product.description, 60)}
-              </p>
-              <p className="text-sm font-semibold mt-2">
-                {product.wholesalePrice} تومان
-              </p>
 
-              <button className="mt-2 text-xs bg-emerald-500 text-white px-3 py-1 rounded-full">
-                افزودن به سبد خرید
-              </button>
-            </div>
+      {/* -------------------- محصولات -------------------- */}
+
+      <div className="divide-y">
+        {isLoading ? (
+          <div className="divide-y px-3">
+            {Array.from({ length: 4 }, (_, index) => (
+              <div key={index} className="flex items-center gap-4 py-4">
+                <SkeletonBlock className="h-20 w-20 shrink-0 rounded-lg" />
+                <div className="min-w-0 flex-1 space-y-3">
+                  <SkeletonBlock className="h-4 w-2/3" />
+                  <SkeletonBlock className="h-3 w-full" />
+                  <SkeletonBlock className="h-3 w-1/3" />
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        ) : products?.length ? (
+          products.map((product) => (
+            <div key={product.code} className="flex gap-4 p-4">
+              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-200">
+                {product.primaryImageUrl && (
+                  <Image
+                    src={getImageUrl(product.primaryImageUrl)}
+                    alt={product.name || "تصویر محصول"}
+                    fill
+                    sizes="80px"
+                    className="object-cover"
+                  />
+                )}
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <h3 className="text-sm font-medium">{product.name}</h3>
+
+                <p className="mt-1 text-xs text-gray-400">
+                  {truncateText(product.description || "", 60)}
+                </p>
+
+                <div className="mt-2 text-sm">
+                  <ProductPrice retailPrice={product.retailPrice} saleUnit={product.saleUnit} compact />
+                </div>
+
+                <Link href={publicDetailPath("product", product.code, product.name)} className="mt-2 inline-flex rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white">
+                  مشاهده آگهی و هماهنگی
+                </Link>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="p-8 text-center text-sm text-gray-500">
+            محصولی پیدا نشد.
+          </div>
+        )}
       </div>
 
-      {/* Bottom Quantity Bar */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button className="w-8 h-8 rounded-full bg-gray-100">-</button>
-          <span>۱</span>
-          <button className="w-8 h-8 rounded-full bg-gray-100">+</button>
-        </div>
-        <span className="font-semibold">۹۰٬۰۰۰ تومان</span>
+      {/* -------------------- نمایش موقعیت مزرعه -------------------- */}
+
+      <div className="w-full space-y-3 bg-white p-5">
+        <h2 className="text-sm font-semibold text-slate-700">
+          موقعیت مزرعه روی نقشه
+        </h2>
+
+        {farmDetailLoading ? (
+          <SkeletonBlock className={`w-full rounded-2xl ${locationPreviewHeight}`} />
+        ) : hasLocation ? (
+          <Map
+            position={{
+              lat: latitude,
+              lng: longitude,
+            }}
+            isDetailAdvertiseView
+            pickLocation={false}
+            className={locationPreviewHeight}
+          />
+        ) : (
+          <div className="flex h-[200px] items-center justify-center rounded-2xl bg-gray-100 text-sm text-gray-500">
+            موقعیت معتبر برای مزرعه ثبت نشده است.
+          </div>
+        )}
+      </div>
+
+      {/* -------------------- نوار پایین -------------------- */}
+
+      <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-2xl border-t bg-white p-3 text-center text-xs font-medium text-slate-600 sm:p-4 lg:max-w-6xl lg:rounded-t-2xl lg:border-x">
+        برای قیمت، مقدار و نحوه تحویل با کشاورز از داخل آگهی هماهنگ کنید.
       </div>
     </div>
   );

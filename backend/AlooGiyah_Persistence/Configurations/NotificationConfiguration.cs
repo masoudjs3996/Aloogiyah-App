@@ -11,7 +11,11 @@ public class NotificationConfiguration : IEntityTypeConfiguration<Notification>
         builder.HasKey(n => n.NotificationId);
 
         builder.Property(n => n.UserId)
-            .IsRequired();
+            .IsRequired(false);
+
+        builder.Property(n => n.IsPublic)
+            .IsRequired()
+            .HasDefaultValue(false);
 
         builder.Property(n => n.Message)
             .IsRequired()

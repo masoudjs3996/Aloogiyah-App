@@ -1,4 +1,5 @@
-﻿using AlooGiyah_Application.DTOs.Article;
+﻿using AlooGiyah_Application.Interfaces.Query;
+using AlooGiyah_Application.DTOs.Article;
 using AlooGiyah_Application.Interfaces.Service;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Domain.Entities;
@@ -14,6 +15,8 @@ namespace AlooGiyah_Application.Services
 {
     public class ArticleService : IArticleService
     {
+    private readonly IArticleQuery _readQuery;
+
         #region Constructor
         private readonly IGenericRepository<Article> _articleRepository;
         private readonly IGenericRepository<Category> _categoryRepository;
@@ -21,13 +24,15 @@ namespace AlooGiyah_Application.Services
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public ArticleService(
+        public ArticleService(IArticleQuery readQuery,
+        
             IGenericRepository<Article> articleRepository,
             ICurrentUserService currentUserService,
             IGenericRepository<Category> categoryRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper)
         {
+        _readQuery = readQuery;
             _articleRepository = articleRepository;
             _categoryRepository = categoryRepository;
             _currentUserService = currentUserService;
@@ -55,18 +60,24 @@ namespace AlooGiyah_Application.Services
                 categories.Add(new Category { CategoryId = categoryId.Value });
             }
 
-            var article = _mapper.Map<Article>(categories);
+            var article = new Article
+            {
+                Title = dto.Title,
+                Content = dto.Content,
+                AuthorId = authorId,
+                Categories = categories
+            };
 
-            article.MetaTitle = dto.MetaTitle ?? SeoHelper.GenerateMetaTitle(dto.Title);
-            article.MetaDescription = dto.MetaDescription ?? SeoHelper.GenerateMetaDescription(dto.Title);
-            article.MetaKeywords = dto.MetaKeywords ?? SeoHelper.GenerateMetaKeywords(dto.Title);
+            article.MetaTitle = string.IsNullOrWhiteSpace(dto.MetaTitle) ? SeoHelper.GenerateMetaTitle(dto.Title) : dto.MetaTitle;
+            article.MetaDescription = string.IsNullOrWhiteSpace(dto.MetaDescription) ? SeoHelper.GenerateMetaDescription(dto.Title) : dto.MetaDescription;
+            article.MetaKeywords = string.IsNullOrWhiteSpace(dto.MetaKeywords) ? SeoHelper.GenerateMetaKeywords(dto.Title) : dto.MetaKeywords;
 
             // Slug (می‌توانی کنترل یونیک بودن اضافه کنی)
             string baseSlug = SeoHelper.GenerateSlug(article.MetaTitle);
             string slug = baseSlug;
             int counter = 1;
 
-            while (await _categoryRepository.ExistsAsync(c => c.Slug == slug))
+            while (await _articleRepository.ExistsAsync(c => c.Slug == slug))
             {
                 slug = $"{baseSlug}-{counter}";
                 counter++;
@@ -86,53 +97,15 @@ namespace AlooGiyah_Application.Services
         #region Get By Filter
         public async Task<PagedResult<ArticleListDto>> GetByFilterAsync(ArticleFilterDto dto)
         {
-            Expression<Func<Article, bool>> predicate = a => !a.IsDeleted;
-
-            if (!string.IsNullOrEmpty(dto.SearchTerm))
-                predicate = predicate.And(a =>
-                    a.Title.Contains(dto.SearchTerm) ||
-                    a.Content.Contains(dto.SearchTerm));
-
-            if (!string.IsNullOrEmpty(dto.AuthorCode))
-                predicate = predicate.And(a => a.Author.Code == dto.AuthorCode);
-
-            if (!string.IsNullOrEmpty(dto.CategoryCode))
-                predicate = predicate.And(a => a.Categories.Any(c => c.Code == dto.CategoryCode));
-
-            return await _articleRepository.GetPagedProjectedAsync(
-                filter: predicate,
-                selector: a => new ArticleListDto
-                {
-                    Code = a.Code,
-                    Title = a.Title,
-                    AuthorCode = a.Author.Code,
-                    CategoryCodes = a.Categories.Select(c => c.Code).ToList(),
-                    CreatedAt = a.CreatedAt
-                },
-                pageNumber: dto.PageNumber,
-                pageSize: dto.PageSize,
-                orderBy: a => a.CreatedAt
-            );
-        }
+        return await _readQuery.GetByFilterAsync(dto);
+    }
         #endregion
 
         #region Get BY Code
         public async Task<ArticleDto?> GetByCodeAsync(string code)
         {
-            var entity = await _articleRepository.GetByCodeAsync(code);
-            if (entity == null) return null;
-
-            var articleDto = _mapper.Map<ArticleDto>(entity);
-            articleDto.AuthorCode = entity.Author?.Code ?? "";
-            articleDto.CategoryCodes = entity.Categories.Select(c => c.Code).ToList();
-
-            articleDto.Slug = entity.Slug;
-            articleDto.MetaTitle = entity.MetaTitle;
-            articleDto.MetaDescription = entity.MetaDescription;
-           
-
-            return articleDto;
-        }
+        return await _readQuery.GetByCodeAsync(code);
+    }
         #endregion
 
         #region Update

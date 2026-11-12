@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 namespace AlooGiyah_Application.DTOs.AgriculturalProduct;
 
 public class AgriculturalProductCreateDto
 {
+    [System.ComponentModel.DataAnnotations.RegularExpression("^(Kilogram|Package|Piece)$")]
+    public string? SaleUnit { get; set; }
+
     [Required]
     [MaxLength(255)]
     public string Name { get; set; } = string.Empty;
@@ -24,7 +27,7 @@ public class AgriculturalProductCreateDto
 
     public int? DailyProductionCapacity { get; set; }
 
-    [Required]
+    [MaxLength(10)]
     public string StatusCode { get; set; } = string.Empty;
 
     [MaxLength(255)]

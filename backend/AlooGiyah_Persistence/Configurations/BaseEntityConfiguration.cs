@@ -10,7 +10,7 @@ public abstract class BaseEntityConfiguration<TEntity> : IEntityTypeConfiguratio
     {
         builder.Property(e => e.Code)
             .IsRequired()
-            .HasMaxLength(12);
+            .HasMaxLength(10);
 
         builder.Property(e => e.CreatedAt)
             .IsRequired();

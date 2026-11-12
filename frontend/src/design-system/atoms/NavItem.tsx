@@ -12,17 +12,21 @@ interface NavItemProps {
 
 const NavItem: FC<NavItemProps> = ({ href, icon: Icon, label }) => {
   const pathname = usePathname();
-  const isActive = pathname === href;
+  const isActive =
+    pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
 
   return (
     <Link
       href={href}
-      className={`flex flex-col items-center transition-colors  ${
-        isActive ? "text-accent_foreground" : "text-muted_foreground "
+      aria-current={isActive ? "page" : undefined}
+      className={`flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl transition-colors ${
+        isActive ? "text-emerald-700" : "text-slate-500"
       }`}
     >
       <Icon className="w-6 h-6" />
-      <span className="text-xs mt-1 text-nowrap hidden sm:block">{label}</span>
+      <span className="whitespace-nowrap text-[10px] font-bold sm:text-xs">
+        {label}
+      </span>
     </Link>
   );
 };

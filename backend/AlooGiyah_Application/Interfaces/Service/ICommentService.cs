@@ -11,5 +11,7 @@ namespace AlooGiyah_Application.Interfaces.Service
         Task<CommentDto?> GetByCodeAsync(string code);
         Task<PagedResult<CommentDto>> GetByFilterAsync(CommentFilterDto filter);
         Task<List<CommentDto>> GetTreeCommentsAsync(CommentTreeFilterDto filter);
+        Task<CommentRatingSummaryDto> GetRatingSummaryAsync(string entityCode, AlooGiyah_Domain.Enums.EntityComment entityComment);
+        Task<CommentDto?> GetMyProductReviewAsync(string entityCode, AlooGiyah_Domain.Enums.EntityComment entityComment);
     }
 }

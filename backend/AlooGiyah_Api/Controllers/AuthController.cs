@@ -1,15 +1,17 @@
-﻿using AlooGiyah_Application.Commons;
+using AlooGiyah_Application.Commons;
 using AlooGiyah_Application.DTOs.Users;
 using AlooGiyah_Application.Interfaces.Service.UserFolder;
 using AlooGiyah_Shared.Constants;
 using AlooGiyah_Shared.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace AlooGiyah_API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[EnableRateLimiting("auth")]
 public class AuthController : ControllerBase
 {
     #region Constructor
@@ -19,6 +21,56 @@ public class AuthController : ControllerBase
     {
         _userService = userService;
         _authService = authService;
+    }
+    #endregion
+
+    #region Phone OTP
+    [AllowAnonymous]
+    [HttpPost("RequestPhoneCode")]
+    public async Task<IActionResult> RequestPhoneCode([FromBody] RequestPhoneCodeDto dto)
+    {
+        var result = await _authService.RequestPhoneCodeAsync(dto);
+        return Ok(new ApiResponse<PhoneCodeResponseDto>
+        {
+            IsSuccess = true,
+            Message = "کد یک‌بارمصرف آماده شد.",
+            Data = result
+        });
+    }
+
+    [AllowAnonymous]
+    [HttpPost("VerifyPhoneCode")]
+    public async Task<IActionResult> VerifyPhoneCode([FromBody] VerifyPhoneCodeDto dto)
+    {
+        var (accessToken, refreshToken, isNewUser) = await _authService.VerifyPhoneCodeAsync(dto);
+        return Ok(new ApiResponse<object>
+        {
+            IsSuccess = true,
+            Message = isNewUser ? "ثبت‌نام و ورود با موفقیت انجام شد." : "ورود موفقیت‌آمیز بود.",
+            Data = new
+            {
+                Token = $"Bearer {accessToken}",
+                RefreshToken = refreshToken.Token,
+                refreshToken.Expires,
+                IsNewUser = isNewUser
+            }
+        });
+    }
+
+    [Authorize(Policy = "NotGuest")]
+    [HttpPatch("VerifyProfilePhone")]
+    public async Task<IActionResult> VerifyProfilePhone([FromBody] VerifyPhoneCodeDto dto)
+    {
+        await _authService.VerifyProfilePhoneAsync(dto);
+        return Ok(new ApiResponse<bool> { IsSuccess = true, Data = true });
+    }
+
+    [Authorize(Policy = "NotGuest")]
+    [HttpPost("SetPhoneCredentials")]
+    public async Task<IActionResult> SetPhoneCredentials([FromBody] SetPhoneCredentialsDto dto)
+    {
+        await _authService.SetPhoneCredentialsAsync(dto);
+        return Ok(new ApiResponse<bool> { IsSuccess = true, Data = true });
     }
     #endregion
 
@@ -48,7 +100,7 @@ public class AuthController : ControllerBase
     #endregion
 
     #region Login
-    [Authorize]
+    [AllowAnonymous]
     [HttpPost("Login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
@@ -105,7 +157,7 @@ public class AuthController : ControllerBase
                 Message = ex.Message
             });
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return BadRequest(new ApiResponse<object>
             {
@@ -144,11 +196,11 @@ public class AuthController : ControllerBase
         if (!result)
             throw new BadRequestException(ErrorMessages.PasswordChangeFailed);
 
-        return Ok(new ApiResponse<ChangePasswordDto>
+        return Ok(new ApiResponse<object>
         {
             IsSuccess = true,
             Message = "پسورد با موفقت تغییر کرد",
-            Data = PasswordDto
+            Data = null
         });
     }
     #endregion
@@ -218,11 +270,11 @@ public class AuthController : ControllerBase
         if (!result)
             throw new BadRequestException(ErrorMessages.PasswordResetFailed);
 
-        return Ok(new ApiResponse<ResetPasswordDto>
+        return Ok(new ApiResponse<object>
         {
             IsSuccess = true,
             Message = "پسورد با موفقیت تغییر کرد",
-            Data = dto
+            Data = null
         });
     }
     #endregion

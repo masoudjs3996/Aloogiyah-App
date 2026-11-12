@@ -1,8 +1,10 @@
-﻿
+
 namespace AlooGiyah_Application.DTOs.Cart
 {
     public class CartItemDto
     {
+    public string? SaleUnit { get; set; }
+
         public string Code { get; set; } = string.Empty;
 
         public string ProductCode { get; set; } = string.Empty;
@@ -15,6 +17,8 @@ namespace AlooGiyah_Application.DTOs.Cart
         public decimal TotalPrice => Quantity * UnitPrice;
 
         public int AvailableStock { get; set; }
+        public string? PrimaryImageUrl { get; set; }
+
     }
 
 

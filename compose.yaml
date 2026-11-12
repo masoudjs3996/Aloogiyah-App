@@ -1,0 +1,121 @@
+name: aloogiyah
+
+services:
+  database:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-AlooGiyahDB}
+      POSTGRES_USER: ${POSTGRES_USER:-aloogiyah}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  api:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--show-error", "--max-time", "4", "--output", "/dev/null", "http://127.0.0.1:8080/health/ready"]
+      start_period: 20s
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: Host=database;Database=${POSTGRES_DB:-AlooGiyahDB};Username=${POSTGRES_USER:-aloogiyah};Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD};GSS Encryption Mode=Disable
+      Jwt__Key: ${JWT_KEY:?Set JWT_KEY}
+      Cors__AllowedOrigins__0: ${WEB_ORIGIN:?Set WEB_ORIGIN}
+      Cors__AllowedOrigins__1: ${ADMIN_ORIGIN:?Set ADMIN_ORIGIN}
+      FileStorage__UploadPath: /app/uploads
+      FileStorage__ChatPath: /app/ChatFiles
+      FileStorage__BusinessPath: /app/BusinessDocuments
+      Hosting__UseHttpsRedirection: "false"
+      ReverseProxy__KnownProxies__0: ${TRUSTED_PROXY_IP:-}
+      EmailSettings__From: ${SMTP_FROM:-}
+      EmailSettings__SmtpServer: ${SMTP_HOST:-}
+      EmailSettings__Port: ${SMTP_PORT:-465}
+      EmailSettings__Username: ${SMTP_USER:-}
+      EmailSettings__Password: ${SMTP_PASSWORD:-}
+      AutoMapper__LicenseKey: ${AUTOMAPPER_LICENSE_KEY:-}
+      Auth__PhoneOtpEnabled: ${PHONE_OTP_ENABLED:-false}
+      Auth__ExposeOtpCodeInDevelopment: "false"
+      Sms__Melipayamak__ApiKey: ${MELIPAYAMAK_API_KEY:-}
+      Sms__Melipayamak__Username: ${MELIPAYAMAK_USERNAME:-}
+      Sms__Melipayamak__BodyId: ${MELIPAYAMAK_BODY_ID:-577303}
+      Push__Enabled: ${PUSH_ENABLED:-false}
+      Push__ExpoAccessToken: ${EXPO_PUSH_ACCESS_TOKEN:-}
+      Legal__OperatorName: ${LEGAL_OPERATOR_NAME:-}
+      Legal__PostalAddress: ${LEGAL_POSTAL_ADDRESS:-}
+      Legal__SupportEmail: ${LEGAL_SUPPORT_EMAIL:-}
+      Legal__SupportPhone: ${LEGAL_SUPPORT_PHONE:-}
+      Maps__SearchEnabled: ${MAP_SEARCH_ENABLED:-true}
+      Maps__SearchUrl: ${MAP_SEARCH_URL:-https://nominatim.openstreetmap.org/search}
+      Maps__UserAgent: ${MAP_USER_AGENT:-Aloogiyah-App/1.0}
+      Maps__TileUrl: ${MAP_TILE_URL:-}
+      Maps__Attribution: ${MAP_ATTRIBUTION:-}
+      Marketplace__Mode: ${MARKETPLACE_MODE:-Listings}
+    ports: ["127.0.0.1:${API_PORT:-5056}:8080"]
+    volumes: ["uploads:/app/uploads", "chat-files:/app/ChatFiles", "business-documents:/app/BusinessDocuments"]
+  web:
+    build:
+      context: ./frontend
+      args:
+        API_BASE_URL: http://api:8080/api
+        NEXT_PUBLIC_BASE_URL: ${API_ORIGIN:?Set API_ORIGIN}/api
+        NEXT_PUBLIC_MEDIA_BASE_URL: ${API_ORIGIN:?Set API_ORIGIN}
+        NEXT_PUBLIC_CHAT_SOCKET_URL: ${API_ORIGIN:?Set API_ORIGIN}
+        NEXT_PUBLIC_AUCTION_OPEN_STATUS_CODE: ${AUCTION_OPEN_STATUS_CODE:-}
+        NEXT_PUBLIC_DISCOUNT_PRODUCT_STATUS_CODE: ${DISCOUNT_PRODUCT_STATUS_CODE:-}
+        NEXT_PUBLIC_SERVICE_STATUS_LABELS: ${SERVICE_STATUS_LABELS:?Set SERVICE_STATUS_LABELS}
+        NEXT_PUBLIC_MARKETPLACE_MODE: ${MARKETPLACE_MODE:-Listings}
+    environment:
+      API_BASE_URL: http://api:8080/api
+      WEB_ORIGIN: ${WEB_ORIGIN:?Set WEB_ORIGIN}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/', { signal: AbortSignal.timeout(4000) }).then(response => { if (!response.ok) process.exit(1) }).catch(() => process.exit(1))"]
+      start_period: 15s
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    ports: ["127.0.0.1:${WEB_PORT:-3000}:3000"]
+  admin:
+    build:
+      context: ./admin-panel
+      args:
+        VITE_API_BASE_URL: ${API_ORIGIN:?Set API_ORIGIN}/api
+        VITE_MARKETPLACE_MODE: ${MARKETPLACE_MODE:-Listings}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/"]
+      start_period: 10s
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    ports: ["127.0.0.1:${ADMIN_PORT:-4173}:8080"]
+
+volumes:
+  database:
+  uploads:
+  chat-files:
+  business-documents:
+
+networks:
+  default:
+    name: aloogiyah-network
+    driver: bridge
+
+

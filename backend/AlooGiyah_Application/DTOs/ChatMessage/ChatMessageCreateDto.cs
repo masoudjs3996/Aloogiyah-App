@@ -10,5 +10,5 @@ public class ChatMessageCreateDto
     public string Message { get; set; } = string.Empty;
 
     [Required]
-    public string ReceiverCode { get; set; } = string.Empty;
+    public string ConversationCode { get; set; } = string.Empty;
 }

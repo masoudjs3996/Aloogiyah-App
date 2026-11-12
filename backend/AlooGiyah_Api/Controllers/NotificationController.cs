@@ -19,8 +19,34 @@ namespace AlooGiyah_Api.Controllers
             _notificationService = notificationService;
         }
 
-        // دریافت همه اعلان‌های کاربر جاری
         [Authorize(Policy = "NotGuest")]
+        [HttpGet("MyPreferences")]
+        public async Task<IActionResult> GetMyPreferences()
+        {
+            var preferences = await _notificationService.GetMyPreferencesAsync();
+            return Ok(new ApiResponse<NotificationPreferencesDto>
+            {
+                IsSuccess = true,
+                Message = "تنظیمات اعلان‌ها",
+                Data = preferences
+            });
+        }
+
+        [Authorize(Policy = "NotGuest")]
+        [HttpPut("MyPreferences")]
+        public async Task<IActionResult> UpdateMyPreferences([FromBody] NotificationPreferencesDto preferences)
+        {
+            var updated = await _notificationService.UpdateMyPreferencesAsync(preferences);
+            return Ok(new ApiResponse<NotificationPreferencesDto>
+            {
+                IsSuccess = true,
+                Message = "تنظیمات اعلان‌ها ذخیره شد.",
+                Data = updated
+            });
+        }
+
+        // دریافت همه اعلان‌های کاربر جاری
+        [Authorize]
         [HttpGet("MyNotifications")]
         public async Task<IActionResult> GetMyNotifications()
         {

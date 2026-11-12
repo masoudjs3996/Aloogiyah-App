@@ -26,6 +26,10 @@ export default {
         padding: "2rem",
       },
       colors: {
+        emerald: {
+          700: "#19915c",
+          800: "#147b4c",
+        },
         primary: {
           900: withOpacity("--color-primary-900"),
           800: withOpacity("--color-primary-800"),

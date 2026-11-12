@@ -4,9 +4,12 @@ namespace AlooGiyah_Application.DTOs.AgriculturalProduct;
 
 public class AgriculturalProductFilterDto : BaseFilterDto
 {
+    public bool? DiscountedOnly { get; set; }
     public string? Name { get; set; }
     public string? StatusCode { get; set; }
     public string? FarmCode { get; set; } 
+    public string? DeliveryPointCode { get; set; }
+    public string? DestinationPointCode { get; set; }
     public decimal? MinPrice { get; set; }
     public decimal? MaxPrice { get; set; }
     public int? MinStock { get; set; }

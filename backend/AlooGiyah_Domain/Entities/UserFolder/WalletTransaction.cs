@@ -20,6 +20,9 @@ public class WalletTransaction : BaseEntity
     public string? ReferenceId { get; set; } // مثلاً کد تراکنش درگاه پرداخت
 
     public string? Description { get; set; } // توضیحات (مثلاً "شارژ کیف پول")
+    public DateTimeOffset? CompletedAt { get; set; }
+    public string? PaymentProvider { get; set; }
+    public string? ProviderReference { get; set; }
 
     #region Relations
     [ForeignKey(nameof(WalletId))]

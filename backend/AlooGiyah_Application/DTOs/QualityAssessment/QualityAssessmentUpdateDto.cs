@@ -19,6 +19,8 @@ public class QualityAssessmentUpdateDto
     [MaxLength(50)]
     public string QualityGrade { get; set; } = string.Empty;
 
+    [Required] public QualityReportDto? Report { get; set; }
+
     public decimal? SuggestedPrice { get; set; }
 
     public DateTimeOffset? AssessmentDate { get; set; }

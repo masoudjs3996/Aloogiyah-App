@@ -1,0 +1,42 @@
+.specification-icon-picker,
+.specification-icon-results {
+  display: grid;
+  gap: 10px;
+}
+
+.specification-icon-results {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  background: #f8fbf7;
+}
+
+.specification-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+  gap: 7px;
+  max-height: 245px;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.specification-icon-choice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: white;
+  font-size: 12px;
+}
+
+.specification-icon-choice:hover,
+.specification-icon-choice[aria-pressed="true"] {
+  border-color: #5a9274;
+  background: #eaf6ee;
+}
+
+.specification-icon-choice img { flex-shrink: 0; }
